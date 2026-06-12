@@ -1,0 +1,40 @@
+医院门诊管理系统 - 分发版
+============================
+
+你只需把这个文件夹整个复制到新电脑。
+
+===== 新电脑需要安装的软件 =====
+
+1. Java 21
+   下载：https://adoptium.net
+
+2. Node.js
+   下载：https://nodejs.org
+
+3. MySQL 8.0+
+   下载：https://dev.mysql.com/downloads/mysql/
+
+===== 部署步骤 =====
+
+1. 安装好上面3个软件（全部默认安装）
+
+2. 打开命令行（cmd），依次执行：
+
+   mysql -u root -p -e "create database hospital character set utf8mb3"
+   mysql -u root -p hospital < 你的路径\hospital.sql
+   mysql -u root -p hospital < 你的路径\hospital_outpatient_migration.sql
+
+   （输入你自己mysql的密码）
+
+3. 右键编辑 start.bat，把 set DB_PASS=041306
+   改成你自己的 MySQL 密码，保存
+
+4. 双击 start.bat 启动
+
+5. 等 10 秒后浏览器打开 http://localhost:8089
+
+===== 登录账号 =====
+
+管理员：202301 / 123456
+医生：   D24001 或 李明 / 123456
+患者：   100001 / 123456
