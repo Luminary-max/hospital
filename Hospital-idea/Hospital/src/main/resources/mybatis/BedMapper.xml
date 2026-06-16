@@ -4,7 +4,7 @@
 
 <mapper namespace="com.bear.hospital.mapper.BedMapper">
     <select id="bedPeople" resultType="Integer" parameterType="String">
-        select count(b_id) from bed where b_start = #{b_start}
+        select count(b_id) from bed where b_state = 1 and DATE(b_start) = #{bStart}
     </select>
 
 

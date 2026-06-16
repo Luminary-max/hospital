@@ -49,6 +49,10 @@
                     label="供应商"
                     prop="drPublisher"
                 ></el-table-column>
+                <el-table-column label="规格" prop="drSpec" width="120"></el-table-column>
+                <el-table-column label="批准文号" prop="drApprovalNo" width="160"></el-table-column>
+                <el-table-column label="剂型" prop="drForm" width="80"></el-table-column>
+                <el-table-column label="生产厂家" prop="drManufacturer" width="160"></el-table-column>
                 <el-table-column label="操作" width="200" fixed="right">
                     <template slot-scope="scope">
                         <el-button
@@ -115,6 +119,27 @@
                     label-width="80px"
                 >
                     <el-input v-model="addForm.drPublisher"></el-input>
+                </el-form-item>
+                <el-form-item label="规格" label-width="80px">
+                    <el-input v-model="addForm.drSpec" placeholder="如：0.25g×12片"></el-input>
+                </el-form-item>
+                <el-form-item label="批准文号" label-width="80px">
+                    <el-input v-model="addForm.drApprovalNo" placeholder="如：国药准字H11020001"></el-input>
+                </el-form-item>
+                <el-form-item label="剂型" label-width="80px">
+                    <el-select v-model="addForm.drForm" placeholder="选择剂型" style="width:100%">
+                        <el-option label="片剂" value="片剂"></el-option>
+                        <el-option label="胶囊" value="胶囊"></el-option>
+                        <el-option label="注射液" value="注射液"></el-option>
+                        <el-option label="颗粒" value="颗粒"></el-option>
+                        <el-option label="口服液" value="口服液"></el-option>
+                        <el-option label="凝胶" value="凝胶"></el-option>
+                        <el-option label="丸剂" value="丸剂"></el-option>
+                        <el-option label="滴丸" value="滴丸"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="生产厂家" label-width="80px">
+                    <el-input v-model="addForm.drManufacturer"></el-input>
                 </el-form-item>
                 <el-form-item label="药品分类" prop="drType" label-width="80px">
                     <el-radio v-model="addForm.drType" :label="1">西药</el-radio>
@@ -183,6 +208,27 @@
                     label-width="80px"
                 >
                     <el-input v-model="modifyForm.drPublisher"></el-input>
+                </el-form-item>
+                <el-form-item label="规格" label-width="80px">
+                    <el-input v-model="modifyForm.drSpec" placeholder="如：0.25g×12片"></el-input>
+                </el-form-item>
+                <el-form-item label="批准文号" label-width="80px">
+                    <el-input v-model="modifyForm.drApprovalNo" placeholder="如：国药准字H11020001"></el-input>
+                </el-form-item>
+                <el-form-item label="剂型" label-width="80px">
+                    <el-select v-model="modifyForm.drForm" placeholder="选择剂型" style="width:100%">
+                        <el-option label="片剂" value="片剂"></el-option>
+                        <el-option label="胶囊" value="胶囊"></el-option>
+                        <el-option label="注射液" value="注射液"></el-option>
+                        <el-option label="颗粒" value="颗粒"></el-option>
+                        <el-option label="口服液" value="口服液"></el-option>
+                        <el-option label="凝胶" value="凝胶"></el-option>
+                        <el-option label="丸剂" value="丸剂"></el-option>
+                        <el-option label="滴丸" value="滴丸"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="生产厂家" label-width="80px">
+                    <el-input v-model="modifyForm.drManufacturer"></el-input>
                 </el-form-item>
                 <el-form-item label="药品分类" prop="drType" label-width="80px">
                     <el-radio v-model="modifyForm.drType" :label="1">西药</el-radio>
@@ -268,6 +314,10 @@ export default {
                                 drUnit: this.modifyForm.drUnit,
                                 drPublisher: this.modifyForm.drPublisher,
                                 drType: this.modifyForm.drType,
+                                drSpec: this.modifyForm.drSpec,
+                                drApprovalNo: this.modifyForm.drApprovalNo,
+                                drForm: this.modifyForm.drForm,
+                                drManufacturer: this.modifyForm.drManufacturer,
                             },
                         })
                         .then((res) => {
@@ -348,6 +398,10 @@ export default {
                                 drUnit: this.addForm.drUnit,
                                 drPublisher: this.addForm.drPublisher,
                                 drType: this.addForm.drType,
+                                drSpec: this.addForm.drSpec,
+                                drApprovalNo: this.addForm.drApprovalNo,
+                                drForm: this.addForm.drForm,
+                                drManufacturer: this.addForm.drManufacturer,
                             },
                         })
                         .then((res) => {

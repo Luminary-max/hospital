@@ -192,10 +192,10 @@ export default {
       try { const r = await request.get("doctor/findPatientById", { params: { pId: this.pId } }); if (r.data.status === 200) { const p = r.data.data || {}; this.pName = p.pName || ""; this.pGender = p.pGender || ""; this.pPhone = p.pPhone || ""; this.pAge = p.pAge || ""; } } catch(e) {}
     },
     async requestDrug() {
-      try { const r = await request.get("drug/findAllDrugs", { params: { pageNumber: this.pageNumber, size: this.size, query: this.queryDrug } }); if (r.data.status === 200) { const d = r.data.data || {}; this.drugData = d.records || d.drugs || []; this.drugTotal = d.total || 0; } } catch(e) {}
+      try { const r = await request.get("drug/findAllDrugs", { params: { pageNumber: this.pageNumber, size: this.size, query: this.queryDrug } }); if (r.data.status === 200) { const d = r.data.data || {}; this.drugData = d.drugs || d.records || []; this.drugTotal = d.total || 0; } } catch(e) {}
     },
     async requestCheck() {
-      try { const r = await request.get("check/findAllChecks", { params: { pageNumber: this.checkPageNumber, size: this.checkSize, query: this.queryCheck } }); if (r.data.status === 200) { const d = r.data.data || {}; this.checkData = d.records || d.checks || []; this.checkTotal = d.total || 0; } } catch(e) {}
+      try { const r = await request.get("check/findAllChecks", { params: { pageNumber: this.checkPageNumber, size: this.checkSize, query: this.queryCheck } }); if (r.data.status === 200) { const d = r.data.data || {}; this.checkData = d.checks || d.records || []; this.checkTotal = d.total || 0; } } catch(e) {}
     },
     drugPageChange(p) { this.pageNumber = p; this.requestDrug(); },
     checkPageChange(p) { this.checkPageNumber = p; this.requestCheck(); },

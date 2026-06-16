@@ -35,6 +35,19 @@ public class OrderController {
         return ResponseData.success("根据id设置缴费状态失败");
     }
     /**
+     * 处理收费（含支付方式、发票号、医保报销）
+     */
+    @PostMapping("processPayment")
+    @ResponseBody
+    public ResponseData processPayment(@RequestParam int oId,
+        @RequestParam String paymentMethod, @RequestParam String invoiceNo,
+        @RequestParam(required = false) Double insuranceCovered,
+        @RequestParam(required = false) Double selfPay,
+        @RequestParam(required = false) String operator) {
+        this.orderService.processPayment(oId, paymentMethod, invoiceNo, insuranceCovered, selfPay, operator);
+        return ResponseData.success("收费成功");
+    }
+    /**
      * 查找医生已完成的挂号单
      */
     @RequestMapping("findOrderFinish")
@@ -118,6 +131,36 @@ public class OrderController {
     @RequestMapping("orderSection")
     public ResponseData orderSection(){
         return ResponseData.success("统计过去20天挂号科室人数成功", this.orderService.orderSection());
+    }
+
+    /**
+     * 获取每日收入统计（药费+检查费+挂号费）
+     */
+    @RequestMapping("orderDailyIncome")
+    public ResponseData orderDailyIncome(){
+        ArrayList<Double> drugIncome = new ArrayList<>();
+        ArrayList<Double> regIncome = new ArrayList<>();
+        ArrayList<String> dateLabels = new ArrayList<>();
+        for (int i = 20; i > 0; i--) {
+            String day = TodayUtil.getPastDate(i);
+            dateLabels.add(day.substring(5));
+            double dSum = 0, rSum = 0;
+            String dayStart = day + " 00:00";
+            String dayEnd = day + " 23:59";
+            // Get orders for this day
+            java.util.List<Orders> dayOrders = this.orderService.findOrdersByDate(dayStart, dayEnd);
+            for (Orders o : dayOrders) {
+                if (o.getOTotalPrice() != null) dSum += o.getOTotalPrice();
+                if (o.getORegistrationFee() != null) rSum += o.getORegistrationFee();
+            }
+            drugIncome.add(dSum);
+            regIncome.add(rSum);
+        }
+        java.util.HashMap<String, Object> result = new java.util.HashMap<>();
+        result.put("dates", dateLabels);
+        result.put("drugIncome", drugIncome);
+        result.put("regIncome", regIncome);
+        return ResponseData.success("获取每日收入统计成功", result);
     }
 
 }

@@ -1,7 +1,72 @@
-body,html{
-    height: 100%;
+/* ===== 全局重置与基础 ===== */
+body, html { height: 100%; }
+* { margin: 0; padding: 0; }
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  background: #f0f2f5;
 }
-*{
-    margin: 0;
-    padding: 0;
+
+/* ===== 卡片统一样式 ===== */
+.el-card {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  border: none !important;
 }
+.el-card__header {
+  padding: 14px 20px !important;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0 !important;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+.el-card__header .el-button { float: right; margin-top: -3px; }
+.el-card + .el-card { margin-top: 16px; }
+
+/* ===== 表格统一样式 ===== */
+.el-card .el-table { margin-top: 16px; }
+.el-table th.el-table__cell {
+  background-color: #f5f7fa !important;
+  color: #606266;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 0;
+}
+.el-table .cell { white-space: nowrap; }
+.el-table__body-wrapper { overflow-x: auto; }
+.el-table--striped .el-table__body tr.el-table__row--striped td { background: #fafafa; }
+
+/* ===== 分页统一样式 ===== */
+.el-card .el-pagination {
+  margin-top: 16px;
+  justify-content: center;
+  display: flex;
+}
+
+/* ===== 对话框统一样式 ===== */
+.el-dialog { border-radius: 8px; }
+.el-dialog__header {
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 8px 8px 0 0;
+  padding: 14px 20px;
+}
+.el-dialog__title { font-size: 16px; font-weight: 600; }
+.el-dialog__footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 20px !important;
+  text-align: right;
+}
+.el-dialog__body { padding: 20px; }
+
+/* ===== 表单域统一样式 ===== */
+.el-form--label-top .el-form-item__label { padding-bottom: 4px; }
+
+/* ===== 空状态 ===== */
+.empty-state { text-align: center; padding: 60px 0; color: #c0c4cc; font-size: 14px; }
+
+/* ===== 搜索行 ===== */
+.search-row { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ===== 描述列表统一样式 ===== */
+.el-descriptions--small .el-descriptions__title { font-size: 14px; }

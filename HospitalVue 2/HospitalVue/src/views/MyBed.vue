@@ -1,13 +1,29 @@
 <template>
     <div>
         <el-card>
-            <el-table :data="bedData" border stripe>
-                <el-table-column label="床号" prop="bId" v-model="bedData.bId"></el-table-column>
-                <el-table-column label="用户id" prop="pId" v-model="bedData.pId"></el-table-column>
-                <el-table-column label="医生id" prop="dId" v-model="bedData.dId"></el-table-column>
-                <el-table-column label="原因" prop="bReason" v-model="bedData.bReason"></el-table-column>
-                <el-table-column label="开始时间" prop="bStart" v-model="bedData.bStart"></el-table-column>
+            <div slot="header">
+                <span><i class="el-icon-office-building"></i> 我的留观/输液记录</span>
+            </div>
+            <el-table :data="bedData" border stripe v-if="bedData.length > 0">
+                <el-table-column label="编号" prop="bId"></el-table-column>
+                <el-table-column label="类型" prop="bType">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.bType === 0 || scope.row.bType == null" type="primary">观察床</el-tag>
+                        <el-tag v-else type="success">输液椅</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="医生" prop="dName"></el-table-column>
+                <el-table-column label="原因" prop="bReason"></el-table-column>
+                <el-table-column label="开始时间" prop="bStart"></el-table-column>
+                <el-table-column label="状态" prop="bState">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.bState === 1" type="danger">使用中</el-tag>
+                        <el-tag v-else type="success">已结束</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="观察记录" prop="bObsNote" show-overflow-tooltip></el-table-column>
             </el-table>
+            <el-empty v-else description="暂无留观/输液记录"></el-empty>
         </el-card>
     </div>
 </template>
@@ -24,7 +40,7 @@ export default {
         }
     },
     methods: {
-        //请求病床信息
+        //请求留观/输液信息
         requestBed(){
             request.get("bed/findBedByPid", {
                 params: {
@@ -52,3 +68,9 @@ export default {
     }
 }
 </script>
+<style scoped lang="scss">
+.el-table {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+</style>

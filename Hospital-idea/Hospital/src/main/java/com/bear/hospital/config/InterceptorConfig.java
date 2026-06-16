@@ -10,8 +10,11 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new JwtInterceptor())
-                .addPathPatterns("/666")
-                .excludePathPatterns("/patient/pdf")
-                .excludePathPatterns("/**/login");
+                // 拦截所有API请求
+                .addPathPatterns("/**")
+                // 放行登录接口
+                .excludePathPatterns("/**/login")
+                // 放行患者PDF导出（不需要登录即可下载）
+                .excludePathPatterns("/patient/pdf");
     }
 }

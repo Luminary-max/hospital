@@ -33,7 +33,7 @@
                         >
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="160" fixed="right">
+                <el-table-column label="操作" width="200" fixed="right">
                     <template slot-scope="scope">
                         <el-button
                             type="warning"
@@ -41,7 +41,7 @@
                             style="font-size: 14px"
                             @click="BedDiag(scope.row.pId, scope.row.dId)"
                         >
-                            申请住院</el-button
+                            申请留观/输液</el-button
                         >
                     </template>
                 </el-table-column>
@@ -59,24 +59,29 @@
             >
             </el-pagination>
         </el-card>
-        <!-- 住院对话框 -->
-        <el-dialog title="申请住院" :visible.sync="BedFormVisible">
+        <!-- 留观/输液对话框 -->
+        <el-dialog title="申请留观/输液" :visible.sync="BedFormVisible">
             <el-form class="findPassword" :model="bedForm">
-                <el-form-item label="患者账号" label-width="80px" prop="pId">
+                <el-form-item label="患者账号" label-width="100px" prop="pId">
                     <el-input v-model="bedForm.pId" disabled></el-input>
                 </el-form-item>
-                <el-form-item label="医生账号" label-width="80px">
+                <el-form-item label="医生账号" label-width="100px">
                     <el-input v-model="bedForm.dId" disabled></el-input>
                 </el-form-item>
-                <el-form-item label="申请原因" label-width="80px">
+                <el-form-item label="申请理由" label-width="100px">
                     <el-input
                         v-model="bedForm.bReason"
                         type="textarea"
                         :rows="4"
                     ></el-input>
                 </el-form-item>
-
-                <el-form-item label="病床号" label-width="80px" prop="bId">
+                <el-form-item label="类型" label-width="100px" prop="bType">
+                    <el-select v-model="bedForm.bType" placeholder="请选择类型">
+                        <el-option :value="0" label="观察床"></el-option>
+                        <el-option :value="1" label="输液椅"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择编号" label-width="100px" prop="bId">
                     <el-select v-model="bedForm.bId">
                         <el-option
                             v-for="item in nullBed"
@@ -110,14 +115,14 @@ export default {
             query: "",
             total: 3,
             orderData: [],
-            //申请住院对话框
+            //申请留观/输液对话框
             BedFormVisible: false,
             bedForm: {},
             nullBed: [],
         };
     },
     methods: {
-        //点击申请床位确认按钮
+        //点击申请留观/输液确认按钮
         bedClick() {
             request
                 .get("bed/updateBed", {
@@ -126,13 +131,14 @@ export default {
                         dId: this.bedForm.dId,
                         pId: this.bedForm.pId,
                         bReason: this.bedForm.bReason,
+                        bType: this.bedForm.bType,
                     },
                 })
                 .then((res) => {
                     if (res.data.status !== 200)
-                        return this.$message.error("来晚了...该床位已被占用");
+                        return this.$message.error("来晚了...该位置已被占用");
                     this.BedFormVisible = false;
-                    this.$message.success("申请住院成功！");
+                    this.$message.success("申请留观/输液成功！");
                     this.requestOrders();
                     console.log(res);
                 });
@@ -152,7 +158,7 @@ export default {
                     console.error(err);
                 });
         },
-        //打开申请住院对话框
+        //打开申请留观/输液对话框
         BedDiag(pId, dId) {
             this.bedForm.pId = pId;
             this.bedForm.dId = dId;
@@ -185,7 +191,7 @@ export default {
                 .then((res) => {
                     if (res.data.status !== 200)
                         return this.$message.error("数据请求失败");
-                    this.orderData = res.data.data.orders;
+                    this.orderData = res.data.data.records;
                     this.total = res.data.data.total;
                 });
         },

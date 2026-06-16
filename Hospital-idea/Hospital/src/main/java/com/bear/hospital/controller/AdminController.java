@@ -2,6 +2,7 @@ package com.bear.hospital.controller;
 
 import com.bear.hospital.pojo.Admin;
 import com.bear.hospital.pojo.Doctor;
+import com.bear.hospital.pojo.Patient;
 import com.bear.hospital.service.AdminService;
 import com.bear.hospital.service.DoctorService;
 import com.bear.hospital.service.OrderService;
@@ -129,6 +130,36 @@ public class AdminController {
             return ResponseData.success("删除挂号信息成功");
         }
         return ResponseData.fail("删除挂号信息失败");
+    }
+    /**
+     * 根据id查找患者
+     */
+    @RequestMapping("findPatient")
+    public ResponseData findPatient(@RequestParam(value = "pId") int pId) {
+        return ResponseData.success("查询患者成功", this.patientService.findPatientById(pId));
+    }
+    /**
+     * 增加患者信息（admin端）
+     */
+    @RequestMapping("addPatient")
+    @ResponseBody
+    public ResponseData addPatient(Patient patient) {
+        // 密码默认123456
+        if (patient.getPPassword() == null || patient.getPPassword().isEmpty()) {
+            patient.setPPassword("123456");
+        }
+        Boolean bo = this.patientService.addPatient(patient);
+        if (bo) return ResponseData.success("增加患者成功");
+        return ResponseData.fail("增加患者失败，账号或邮箱已被占用");
+    }
+    /**
+     * 修改患者信息
+     */
+    @RequestMapping("modifyPatient")
+    @ResponseBody
+    public ResponseData modifyPatient(Patient patient) {
+        this.patientService.modifyPatient(patient);
+        return ResponseData.success("修改患者信息成功");
     }
 
 }

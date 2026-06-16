@@ -105,6 +105,20 @@ public class PatientServiceImpl implements PatientService {
         this.patientMapper.insert(patient);
         return true;
     }
+
+    /**
+     * 修改患者信息
+     */
+    @Override
+    public Boolean modifyPatient(Patient patient) {
+        if (patient.getPBirthday() != null && !patient.getPBirthday().isEmpty()) {
+            int birthYear = Integer.parseInt(patient.getPBirthday().substring(0, 4));
+            int todayYear = Integer.parseInt(TodayUtil.getTodayYmd().substring(0, 4));
+            patient.setPAge(todayYear - birthYear);
+        }
+        this.patientMapper.updateById(patient);
+        return true;
+    }
     /**
      * 统计患者男女人数
      */

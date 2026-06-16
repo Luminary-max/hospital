@@ -27,6 +27,10 @@ public interface PatientService {
      */
     Boolean addPatient(Patient patient);
     /**
+     * 修改患者信息
+     */
+    Boolean modifyPatient(Patient patient);
+    /**
      * 统计患者男女人数
      */
     List<Integer> patientAge();

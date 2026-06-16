@@ -27,6 +27,14 @@ public class DrugServiceImpl implements DrugService {
         if (typeFilter != null && typeFilter > 0) {
             wrapper.eq("dr_type", typeFilter);
         }
+        // 如果query不为空，扩展搜索到规格和厂家
+        if (query != null && !query.isEmpty()) {
+            wrapper.and(w -> w.like("dr_name", query)
+                .or().like("dr_spec", query)
+                .or().like("dr_manufacturer", query));
+        } else {
+            wrapper.like("dr_name", query);
+        }
         IPage<Drug> iPage = this.drugMapper.selectPage(page, wrapper);
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("total", iPage.getTotal());       //总条数

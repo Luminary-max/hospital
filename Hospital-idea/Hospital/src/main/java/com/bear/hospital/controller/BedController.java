@@ -34,11 +34,11 @@ public class BedController {
         return ResponseData.fail("增加床位失败！");
     }
     /**
-     * 根据pId查询住院
+     * 根据pId查询留观/输液记录
      */
     @RequestMapping("findBedByPid")
     public ResponseData findBedByPid(@RequestParam(value = "pId") int pId){
-        return ResponseData.success("根据pId查询住院成功", this.bedService.findBedByPid(pId)) ;
+        return ResponseData.success("根据pId查询留观/输液记录成功", this.bedService.findBedByPid(pId)) ;
     }
     /**
      * 分页模糊查询所有床位信息
@@ -87,11 +87,11 @@ public class BedController {
         return ResponseData.fail("清空床位信息失败");
     }
     /**
-     * 统计今天挂号人数
+     * 统计今天留观人数
      */
     @RequestMapping("bedPeople")
     public ResponseData bedPeople(){
         String bStart = TodayUtil.getTodayYmd();
-        return ResponseData.success("统计今天住院人数成功", this.bedService.bedPeople(bStart));
+        return ResponseData.success("统计今天留观人数成功", this.bedService.bedPeople(bStart));
     }
 }

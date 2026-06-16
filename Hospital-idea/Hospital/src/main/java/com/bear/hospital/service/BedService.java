@@ -15,7 +15,7 @@ public interface BedService {
      */
     Boolean updateBed(Bed bed);
     /**
-     * 根据pId查询住院信息
+     * 根据pId查询留观/输液记录
      */
     List<Bed> findBedByPid(int pId);
     /**
@@ -39,7 +39,7 @@ public interface BedService {
      */
     Boolean emptyBed(String bId);
     /**
-     * 统计今天住院人数
+     * 统计今天留观人数
      */
     int bedPeople(String bStart);
 }

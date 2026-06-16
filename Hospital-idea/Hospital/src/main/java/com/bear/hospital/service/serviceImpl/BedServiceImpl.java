@@ -32,11 +32,7 @@ public class BedServiceImpl implements BedService {
     }
 
     /**
-     * 增加床位信息
-     */
-    @Override
-    /**
-     * 更新床位信息
+     * 更新床位信息（用于留观/输液申请）
      */
     public Boolean updateBed(Bed bed){
         Bed bed1 = this.bedMapper.selectById(bed.getBId());
@@ -50,7 +46,7 @@ public class BedServiceImpl implements BedService {
         return true;
     }
     /**
-     * 根据pId查询挂号
+     * 根据pId查询留观/输液记录
      */
     public List<Bed> findBedByPid(int pId){
         QueryWrapper<Bed> wrapper = new QueryWrapper<>();

@@ -66,7 +66,8 @@
     <el-card shadow="hover" style="margin-bottom:20px;">
       <div slot="header">
         <span style="font-weight:bold; color:#E6A23C;">二、处方开立</span>
-        <span style="font-size:12px; color:#999; margin-left:10px;">用法可选：口服/注射/外用 &nbsp; 频次：qd(每日1次)/bid(每日2次)/tid(每日3次)/qid(每日4次)</span>
+        <el-tag size="mini" type="warning" style="margin-left:8px;">西药</el-tag>
+        <el-tag size="mini" type="success" style="margin-left:4px;">中药</el-tag>
       </div>
       <el-row :gutter="20">
         <el-col :span="12">
@@ -77,18 +78,30 @@
             <el-form-item>
               <el-button type="primary" @click="requestDrug">查询</el-button>
             </el-form-item>
+            <el-form-item>
+              <el-select v-model="drugTypeFilter" placeholder="全部" size="mini" style="width:90px;" @change="requestDrug">
+                <el-option label="全部" value=""></el-option>
+                <el-option label="西药" value="1"></el-option>
+                <el-option label="中药" value="2"></el-option>
+              </el-select>
+            </el-form-item>
           </el-form>
           <el-table :data="drugData" border stripe size="mini" height="250">
-            <el-table-column prop="drId" label="编号" width="80"></el-table-column>
-            <el-table-column prop="drName" label="药品名称" width="140"></el-table-column>
-            <el-table-column prop="drPrice" label="单价" width="80">
+            <el-table-column prop="drId" label="编号" width="75"></el-table-column>
+            <el-table-column prop="drName" label="药品名称" width="130"></el-table-column>
+            <el-table-column label="类型" width="55">
+              <template slot-scope="s">
+                <el-tag :type="s.row.drType === 2 ? 'success' : 'warning'" size="mini">{{ s.row.drType === 2 ? '中药' : '西药' }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="drPrice" label="单价" width="70">
               <template slot-scope="s">¥{{ s.row.drPrice }}</template>
             </el-table-column>
-            <el-table-column prop="drNumber" label="库存" width="60"></el-table-column>
-            <el-table-column prop="drUnit" label="单位" width="60"></el-table-column>
-            <el-table-column label="操作" width="80">
+            <el-table-column prop="drNumber" label="库存" width="55"></el-table-column>
+            <el-table-column prop="drUnit" label="单位" width="55"></el-table-column>
+            <el-table-column label="操作" width="65">
               <template slot-scope="s">
-                <el-button type="warning" size="mini" @click="showPrescriptionDialog(s.row)">开药</el-button>
+                <el-button :type="s.row.drType === 2 ? 'success' : 'warning'" size="mini" @click="showPrescriptionDialog(s.row)">开药</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -97,13 +110,25 @@
         <el-col :span="12">
           <el-tag type="warning" style="margin-bottom:10px;">已选药品（合计：¥{{ drugTotalPrice }}）</el-tag>
           <el-table :data="drugBuyData" border stripe size="mini" height="300">
-            <el-table-column prop="drName" label="药品名" width="100"></el-table-column>
-            <el-table-column prop="pdUsage" label="用法" width="60"></el-table-column>
-            <el-table-column prop="pdDosage" label="用量" width="60"></el-table-column>
-            <el-table-column prop="pdFrequency" label="频次" width="60"></el-table-column>
-            <el-table-column prop="pdDays" label="天数" width="50"></el-table-column>
-            <el-table-column prop="pdQuantity" label="数量" width="50"></el-table-column>
-            <el-table-column label="小计" width="80">
+            <el-table-column prop="drName" label="药品名" width="90"></el-table-column>
+            <el-table-column label="类型" width="50">
+              <template slot-scope="s">
+                <el-tag :type="s.row.drType === 2 ? 'success' : 'warning'" size="mini">{{ s.row.drType === 2 ? '中药' : '西药' }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="用法/煎法" width="80">
+              <template slot-scope="s">{{ s.row.drType === 2 ? s.row.pdNote : s.row.pdUsage }}</template>
+            </el-table-column>
+            <el-table-column label="用量/剂量" width="70">
+              <template slot-scope="s">{{ s.row.drType === 2 ? s.row.pdDosage+'g' : s.row.pdDosage }}</template>
+            </el-table-column>
+            <el-table-column label="频次" width="60">
+              <template slot-scope="s">{{ s.row.drType === 2 ? '水煎服' : s.row.pdFrequency }}</template>
+            </el-table-column>
+            <el-table-column label="剂数/天数" width="65">
+              <template slot-scope="s">{{ s.row.drType === 2 ? s.row.pdDays+'剂' : s.row.pdDays+'天' }}</template>
+            </el-table-column>
+            <el-table-column label="小计" width="70">
               <template slot-scope="s">¥{{ (s.row.pdQuantity * s.row.drPrice).toFixed(2) }}</template>
             </el-table-column>
             <el-table-column label="操作" width="50">
@@ -161,8 +186,8 @@
       </el-row>
     </el-card>
 
-    <!-- 处方明细对话框 -->
-    <el-dialog title="开立处方" :visible.sync="prescriptionDialogVisible" width="500px">
+    <!-- 西药处方明细对话框 -->
+    <el-dialog title="开立西药处方" :visible.sync="westernPrescDlg" width="500px">
       <el-form :model="prescriptionForm" label-width="80px" size="small">
         <el-form-item label="药品名称">
           <el-input v-model="prescriptionForm.drName" disabled></el-input>
@@ -209,8 +234,76 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="prescriptionDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmPrescription">确认开立</el-button>
+        <el-button @click="westernPrescDlg = false">取消</el-button>
+        <el-button type="primary" @click="confirmWesternPresc">确认开立</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 中药处方明细对话框 —— 方剂模式 -->
+    <el-dialog title="开立中药处方（方剂模式）" :visible.sync="chinesePrescDlg" width="650px">
+      <!-- 上方：选药区 -->
+      <el-card shadow="hover" style="margin-bottom:12px;">
+        <div slot="header" style="font-size:13px;"><b>选药</b> — 从上方药品列表中双击或点此添加</div>
+        <el-row :gutter="10">
+          <el-col :span="8">
+            <el-select v-model="chineseSelectDrug" filterable placeholder="搜索中药" style="width:100%" @change="onChineseDrugSelected">
+              <el-option v-for="d in chineseDrugList" :key="d.drId" :label="d.drName + ' ¥' + d.drPrice + '/' + d.drUnit" :value="d.drId"></el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-input-number v-model="chineseAddDosage" :min="1" :max="100" style="width:100%"></el-input-number>
+          </el-col>
+          <el-col :span="4"><span style="line-height:36px;color:#999;">克/剂</span></el-col>
+          <el-col :span="6">
+            <el-button type="success" size="small" @click="addToFormula">加入方剂</el-button>
+          </el-col>
+        </el-row>
+      </el-card>
+      <!-- 方剂列表 -->
+      <el-card shadow="hover" style="margin-bottom:12px;">
+        <div slot="header" style="font-size:13px;"><b>当前方剂</b>（共 <b>{{ formulaItems.length }}</b> 味药）  <el-tag size="mini" type="success">¥{{ formulaSubtotal }}</el-tag></div>
+        <el-table :data="formulaItems" border stripe size="small" max-height="200">
+          <el-table-column prop="drName" label="药品" width="130"></el-table-column>
+          <el-table-column label="剂量" width="80"><template slot-scope="s">{{ s.row.dosage }}g</template></el-table-column>
+          <el-table-column label="单价" width="60"><template slot-scope="s">¥{{ s.row.drPrice }}</template></el-table-column>
+          <el-table-column label="小计/剂" width="80"><template slot-scope="s">¥{{ (s.row.dosage * s.row.drPrice).toFixed(2) }}</template></el-table-column>
+          <el-table-column label="操作" width="50">
+            <template slot-scope="s"><el-button type="danger" size="mini" icon="el-icon-delete" circle @click="removeFromFormula(s.$index)"></el-button></template>
+          </el-table-column>
+        </el-table>
+        <div v-if="formulaItems.length===0" style="text-align:center;color:#999;padding:30px 0;">尚未添加药品，请从上方搜索加入</div>
+      </el-card>
+      <!-- 下方：方剂整体设置 -->
+      <el-card shadow="hover">
+        <div slot="header" style="font-size:13px;"><b>方剂设置</b></div>
+        <el-form :model="prescriptionForm" label-width="80px" size="small">
+          <el-row :gutter="10">
+            <el-col :span="8">
+              <el-form-item label="剂数">
+                <el-input-number v-model="prescriptionForm.pdDays" :min="1" :max="60" style="width:100%"></el-input-number>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="煎法">
+                <el-select v-model="prescriptionForm.pdUsage" placeholder="选择煎法" style="width:100%">
+                  <el-option label="水煎" value="水煎"></el-option>
+                  <el-option label="冲服" value="冲服"></el-option>
+                  <el-option label="泡服" value="泡服"></el-option>
+                  <el-option label="烊化" value="烊化"></el-option>
+                  <el-option label="另煎" value="另煎"></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8"><span style="line-height:36px;color:#999;">共 {{ formulaItems.length }} 味 × {{ prescriptionForm.pdDays }} 剂</span></el-col>
+          </el-row>
+          <el-form-item label="用法备注">
+            <el-input v-model="prescriptionForm.pdNote" placeholder="如：饭后温服、先煎后下等"></el-input>
+          </el-form-item>
+        </el-form>
+      </el-card>
+      <div slot="footer">
+        <el-button @click="chinesePrescDlg = false">取消</el-button>
+        <el-button type="success" @click="confirmChinesePresc" :disabled="formulaItems.length===0">确认开立方剂</el-button>
       </div>
     </el-dialog>
   </el-card>
@@ -237,9 +330,20 @@ export default {
       checkData: [], checkTotal: 0, checkPageNumber: 1, checkSize: 10, queryCheck: "",
       checkBuyData: [], checkTotalPrice: 0,
       // 处方对话框
-      prescriptionDialogVisible: false,
-      prescriptionForm: { drId: "", drName: "", drPrice: 0, pdUsage: "", pdDosage: "", pdFrequency: "", pdDays: 3, pdNote: "" }
+      westernPrescDlg: false,
+      chinesePrescDlg: false,
+      chineseDosage: 10,
+      chineseSelectDrug: '',
+      chineseAddDosage: 10,
+      chineseDrugList: [],
+      formulaItems: [],
+      prescriptionForm: { drId: "", drName: "", drPrice: 0, drType: 1, pdUsage: "", pdDosage: "", pdFrequency: "", pdDays: 3, pdNote: "" }
     };
+  },
+  computed: {
+    formulaSubtotal() {
+      return this.formulaItems.reduce((s, item) => s + item.dosage * item.drPrice, 0).toFixed(2);
+    }
   },
   methods: {
     nowDay() { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1).toString().padStart(2,'0')+"-"+d.getDate().toString().padStart(2,'0'); },
@@ -257,7 +361,7 @@ export default {
         const res = await request.get("drug/findAllDrugs", { params: { pageNumber: this.pageNumber, size: this.size, query: this.queryDrug, typeFilter: this.drugTypeFilter } });
         if (res.data.status === 200) {
           const d = res.data.data;
-          this.drugData = d.records || d.drugs || []; this.drugTotal = d.total || 0;
+          this.drugData = d.drugs || d.records || []; this.drugTotal = d.total || 0;
         }
       } catch(e) { console.error(e); }
     },
@@ -266,7 +370,7 @@ export default {
         const res = await request.get("check/findAllChecks", { params: { pageNumber: this.checkPageNumber, size: this.checkSize, query: this.queryCheck } });
         if (res.data.status === 200) {
           const d = res.data.data;
-          this.checkData = d.records || d.checks || []; this.checkTotal = d.total || 0;
+          this.checkData = d.checks || d.records || []; this.checkTotal = d.total || 0;
         }
       } catch(e) { console.error(e); }
     },
@@ -274,27 +378,94 @@ export default {
     checkPageChange(p) { this.checkPageNumber = p; this.requestCheck(); },
     // 处方
     showPrescriptionDialog(row) {
-      this.prescriptionForm = { drId: row.drId, drName: row.drName, drPrice: row.drPrice, pdUsage: "", pdDosage: "", pdFrequency: "", pdDays: 3, pdNote: "" };
-      this.prescriptionDialogVisible = true;
+      this.prescriptionForm = { drId: row.drId, drName: row.drName, drPrice: row.drPrice, drType: row.drType, pdUsage: "", pdDosage: "", pdFrequency: "", pdDays: 3, pdNote: "" };
+      this.chineseDosage = 10;
+      if (row.drType === 2) {
+        // 加载所有中药供方剂选择
+        request.get("drug/findAllDrugs", { params: { pageNumber:1, size:200, query:"", typeFilter:2 } }).then(res => {
+          this.chineseDrugList = res.data.data.drugs || res.data.data.records || [];
+        });
+        this.chinesePrescDlg = true;
+      } else {
+        this.westernPrescDlg = true;
+      }
     },
-    confirmPrescription() {
+    confirmWesternPresc() {
       if (!this.prescriptionForm.pdUsage || !this.prescriptionForm.pdDosage || !this.prescriptionForm.pdFrequency) {
         return this.$message.warning("请填写完整的用药信息（用法、用量、频次）");
       }
       const freqNum = { qd: 1, bid: 2, tid: 3, qid: 4, qn: 1, prn: 1 };
       const timesPerDay = freqNum[this.prescriptionForm.pdFrequency] || 1;
       const qty = timesPerDay * this.prescriptionForm.pdDays;
-      const idx = this.drugBuyData.findIndex(d => d.drId === this.prescriptionForm.drId);
+      const idx = this.drugBuyData.findIndex(d => d.drId === this.prescriptionForm.drId && d.drType !== 2);
       if (idx >= 0) {
         this.drugBuyData[idx].pdQuantity += qty;
         this.drugBuyData[idx].pdDays += this.prescriptionForm.pdDays;
       } else {
         this.prescriptionForm.pdQuantity = qty;
-        this.drugBuyData.push({ ...this.prescriptionForm });
+        this.drugBuyData.push({ ...this.prescriptionForm, drType: 1 });
       }
       this.recalcDrugTotal();
-      this.prescriptionDialogVisible = false;
-      this.$message.success("已加入处方");
+      this.westernPrescDlg = false;
+      this.$message.success("已加入西药处方");
+    },
+    // 中药方剂方法
+    onChineseDrugSelected(drId) {
+      const drug = this.chineseDrugList.find(d => d.drId === drId);
+      if (drug) {
+        this.prescriptionForm.drId = drug.drId;
+        this.prescriptionForm.drName = drug.drName;
+        this.prescriptionForm.drPrice = drug.drPrice;
+      }
+    },
+    addToFormula() {
+      if (!this.prescriptionForm.drId) return this.$message.warning("请先选择一味中药");
+      if (!this.chineseAddDosage || this.chineseAddDosage < 1) return this.$message.warning("请填写剂量");
+      const drug = this.chineseDrugList.find(d => d.drId === this.prescriptionForm.drId);
+      if (!drug) return this.$message.warning("药品不存在");
+      if (this.formulaItems.some(item => item.drId === drug.drId)) return this.$message.warning("该药品已在方剂中");
+      this.formulaItems.push({
+        drId: drug.drId, drName: drug.drName, drPrice: drug.drPrice,
+        dosage: this.chineseAddDosage
+      });
+      this.chineseSelectDrug = '';
+      this.prescriptionForm.drId = '';
+      this.$message.success("已加入：" + drug.drName + " " + this.chineseAddDosage + "g");
+    },
+    removeFromFormula(idx) {
+      this.formulaItems.splice(idx, 1);
+    },
+    confirmChinesePresc() {
+      if (this.formulaItems.length === 0) return this.$message.warning("请先加入至少一味中药");
+      if (!this.prescriptionForm.pdUsage) return this.$message.warning("请选择煎法");
+      if (!this.prescriptionForm.pdDays || this.prescriptionForm.pdDays < 1) return this.$message.warning("请填写剂数");
+      // 每味药分别加入 drugBuyData，标记为中药方剂模式
+      this.formulaItems.forEach(item => {
+        const qty = item.dosage * this.prescriptionForm.pdDays;
+        const idx = this.drugBuyData.findIndex(d => d.drId === item.drId && d.drType === 2);
+        if (idx >= 0) {
+          this.drugBuyData[idx].pdDosage = item.dosage.toString();
+          this.drugBuyData[idx].pdDays += this.prescriptionForm.pdDays;
+          this.drugBuyData[idx].pdQuantity += qty;
+        } else {
+          this.drugBuyData.push({
+            drId: item.drId, drName: item.drName, drPrice: item.drPrice,
+            drType: 2,
+            pdUsage: this.prescriptionForm.pdUsage,
+            pdDosage: item.dosage.toString(),
+            pdFrequency: '',
+            pdDays: this.prescriptionForm.pdDays,
+            pdQuantity: qty,
+            pdNote: this.prescriptionForm.pdNote || ''
+          });
+        }
+      });
+      this.recalcDrugTotal();
+      const count = this.formulaItems.length;
+      const days = this.prescriptionForm.pdDays;
+      this.formulaItems = [];
+      this.chinesePrescDlg = false;
+      this.$message.success("已加入中药方剂（共" + count + "味药×" + days + "剂）");
     },
     deleteDrug(idx) {
       this.drugBuyData.splice(idx, 1);
@@ -331,7 +502,12 @@ export default {
           await request.post("prescription/save", { oId: this.oId, details: this.drugBuyData });
         }
         // 3. 更新订单到orders表（兼容已有功能）
-        const drugStr = this.drugBuyData.map(d => `${d.drName}*${d.drPrice}*${d.pdQuantity} ${d.pdUsage} ${d.pdDosage} ${d.pdFrequency}`).join("；");
+        const drugStr = this.drugBuyData.map(d => {
+          if (d.drType === 2) {
+            return `${d.drName} ${d.pdDosage}g/剂 × ${d.pdDays}剂，${d.pdUsage}，${d.pdNote || ''}`;
+          }
+          return `${d.drName}*${d.drPrice}*${d.pdQuantity} ${d.pdUsage} ${d.pdDosage} ${d.pdFrequency}`;
+        }).join("；");
         const checkStr = this.checkBuyData.map(c => `${c.chName}*${c.chPrice}`).join("；");
         const totalPrice = this.drugTotalPrice + this.checkTotalPrice;
         await request.post("order/updateOrder", {

@@ -85,7 +85,7 @@ export default {
     }
 }
 </script>
-<style lang="scss" scope>
+<style scoped lang="scss">
 td, th {
   white-space: nowrap;
   padding: 10px;

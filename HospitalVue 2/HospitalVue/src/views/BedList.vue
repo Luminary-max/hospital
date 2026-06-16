@@ -2,7 +2,7 @@
     <div>
         <!-- 卡片 -->
         <el-card>
-            <!-- 搜索栏及增加检查 -->
+            <!-- 搜索栏及增加床位 -->
             <el-row type="flex">
                 <el-col :span="6">
                     <el-input v-model="query" placeholder="请输入患者id查询">
@@ -21,15 +21,25 @@
                         @click="addFormVisible = true"
                     >
                     <i class="el-icon-circle-plus-outline" style="font-size: 22px;"></i>
-                        增加床位</el-button
+                        增加留观椅/床</el-button
                     >
                 </el-col>
             </el-row>
             <!-- 表格 -->
             <el-table :data="bedData" stripe style="width: 100%" border>
-                <el-table-column label="床号" prop="bId"></el-table-column>
-                <el-table-column label="患者id" prop="pId"></el-table-column>
-<!--                <el-table-column label="医生id" prop="dId"></el-table-column>-->
+                <el-table-column label="编号" prop="bId"></el-table-column>
+                <el-table-column label="类型" prop="bType">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.bType === 0 || scope.row.bType == null" type="primary">观察床</el-tag>
+                        <el-tag v-else type="success">输液椅</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="患者id" prop="pId">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.pId !== -1">{{ scope.row.pId }}</span>
+                        <span v-else>-</span>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     label="开始时间"
                     prop="bStart"
@@ -44,7 +54,7 @@
                             >已占用</el-tag
                         >
                         <el-tag v-if="scope.row.bState === 0" type="success"
-                            >空</el-tag
+                            >空闲</el-tag
                         >
                     </template>
                 </el-table-column>
@@ -80,10 +90,16 @@
         </el-card>
 
         <!-- 增加床位对话框 -->
-        <el-dialog title="增加床位" :visible.sync="addFormVisible">
+        <el-dialog title="增加留观/输液位" :visible.sync="addFormVisible">
             <el-form :model="addForm" :rules="rules" ref="ruleForm">
-                <el-form-item label="床号" prop="bId" label-width="80px">
+                <el-form-item label="编号" prop="bId" label-width="100px">
                     <el-input v-model.number="addForm.bId"></el-input>
+                </el-form-item>
+                <el-form-item label="类型" prop="bType" label-width="100px">
+                    <el-select v-model="addForm.bType" placeholder="请选择类型">
+                        <el-option :value="0" label="观察床"></el-option>
+                        <el-option :value="1" label="输液椅"></el-option>
+                    </el-select>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -107,7 +123,7 @@ export default {
             bedData: [],
             total: 3,
             addFormVisible: false,
-            addForm: {},
+            addForm: { bType: 0 },
             rules: {
                 bId: [
                     { required: true, message: "请输入床号", trigger: "blur" },
@@ -198,6 +214,7 @@ export default {
                                 bId: this.addForm.bId,
                                 pId: -1,
                                 dId: -1,
+                                bType: this.addForm.bType,
                             },
                         })
                         .then((res) => {

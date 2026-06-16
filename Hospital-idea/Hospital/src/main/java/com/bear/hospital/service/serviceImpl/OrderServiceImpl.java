@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bear.hospital.mapper.BillingMapper;
 import com.bear.hospital.mapper.OrderMapper;
+import com.bear.hospital.pojo.BillingRecord;
 import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.service.OrderService;
 import com.bear.hospital.utils.RandomUtil;
@@ -23,6 +25,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private OrderMapper orderMapper;
+    @Resource
+    private BillingMapper billingMapper;
     @Autowired
     private JedisPool jedisPool;//redis连接池
     /**
@@ -131,14 +135,39 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public Boolean updatePrice(int oId){
-        /**
-         * 用QueryWrapper如果不把外键的值也传进来，会报错
-         * 用UpdateWrapper就正常
-         */
         UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
         wrapper.eq("o_id", oId).set("o_price_state", 1).set("o_total_price", 0.00);
         int i = this.orderMapper.update(null, wrapper);
         System.out.println("影响行数"+i);
+        return true;
+    }
+    /**
+     * 处理收费
+     */
+    @Override
+    public Boolean processPayment(int oId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator) {
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+        wrapper.eq("o_id", oId)
+            .set("o_payment_method", paymentMethod)
+            .set("o_invoice_no", invoiceNo)
+            .set("o_insurance_covered", insuranceCovered != null ? insuranceCovered : 0.00)
+            .set("o_self_pay", selfPay != null ? selfPay : 0.00)
+            .set("o_price_state", 1)
+            .set("o_total_price", 0.00);
+        this.orderMapper.update(null, wrapper);
+        // 插入收费记录
+        Orders order = this.orderMapper.selectById(oId);
+        if (order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
+            BillingRecord record = new BillingRecord(oId, "挂号费", order.getORegistrationFee(), paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        }
+        if (order.getOTotalPrice() != null && order.getOTotalPrice() > 0) {
+            BillingRecord record = new BillingRecord(oId, "药费+检查费", order.getOTotalPrice(), paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        } else {
+            BillingRecord record = new BillingRecord(oId, "药费+检查费", 0.00, paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        }
         return true;
     }
     /**
@@ -254,5 +283,14 @@ public class OrderServiceImpl implements OrderService {
         String startTime = TodayUtil.getPastDate(20);
         String endTime = TodayUtil.getTodayYmd();
         return this.orderMapper.orderSection(startTime, endTime);
+    }
+    /**
+     * 根据日期范围查询订单
+     */
+    @Override
+    public List<Orders> findOrdersByDate(String start, String end) {
+        QueryWrapper<Orders> wrapper = new QueryWrapper<>();
+        wrapper.ge("o_start", start).le("o_start", end);
+        return this.orderMapper.selectList(wrapper);
     }
 }

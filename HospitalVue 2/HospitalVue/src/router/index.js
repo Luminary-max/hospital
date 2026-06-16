@@ -44,6 +44,12 @@ import MyPrescription from "@/views/MyPrescription.vue";
 import MyEmr from "@/views/MyEmr.vue";
 import ObserveBedList from "@/views/ObserveBedList.vue";
 
+// 新增页面
+import PharmacyDispensingList from "@/views/PharmacyDispensingList.vue";
+import NotificationList from "@/views/NotificationList.vue";
+import TriageRecordList from "@/views/TriageRecordList.vue";
+import DrugBatchList from "@/views/DrugBatchList.vue";
+
 Vue.prototype.$echarts = echarts;//引入echarts
 Vue.use(ElementUI);
 Vue.use(VueRouter);
@@ -134,6 +140,26 @@ const routes = [
       {
         path: "/observeBedList",
         component: ObserveBedList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/pharmacyDispensingList",
+        component: PharmacyDispensingList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/notificationList",
+        component: NotificationList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/triageRecordList",
+        component: TriageRecordList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/drugBatchList",
+        component: DrugBatchList,
         meta: { requireAuth: true },
       },
     ]

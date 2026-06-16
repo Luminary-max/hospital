@@ -35,6 +35,10 @@ public interface OrderService {
      */
     Boolean updatePrice(int oId);
     /**
+     * 处理收费（更新订单+记录收费流水）
+     */
+    Boolean processPayment(int oId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator);
+    /**
      * 查找医生已完成的挂号单
      */
     HashMap<String, Object> findOrderFinish(int pageNumber, int size, String query, String dId) ;
@@ -70,5 +74,9 @@ public interface OrderService {
      * 统计过去20天挂号科室人数
      */
     List<String> orderSection();
+    /**
+     * 根据日期范围查询订单
+     */
+    List<Orders> findOrdersByDate(String start, String end);
 
 }

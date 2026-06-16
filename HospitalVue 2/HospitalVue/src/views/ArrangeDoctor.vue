@@ -162,7 +162,7 @@ export default {
     },
 };
 </script>
-<style scope lang="scss">
+<style scoped lang="scss">
 .el-breadcrumb {
     margin-bottom: 10px;
 }

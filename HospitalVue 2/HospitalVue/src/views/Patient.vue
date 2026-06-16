@@ -1,297 +1,61 @@
 <template>
-  <el-container>
-    <!-- 头部 -->
-    <el-header>
-      <!--      <div class="words">-->
-
-      <!--        <span @click="menuClick('adminLayout')">-->
-
-      <!--          <i class="el-icon-s-home" style="font-size: 26px;"> 医院管理系统</i>-->
-      <!--        </span>-->
-      <!--      </div>-->
-      <div class="head-bar">
-        <div class="header-ico">
-          <!--      <i class="el-icon-s-home"></i>-->
-          <img src="@/assets/img/1.png" style="width: 55px;
-    height: 55px;
-    margin-left: -25px;
-    margin-top: 5px;">
-        </div>
-        <div class="logo">&nbsp;医院门诊管理系统</div>
-        <div class="head-right">
-          <div class="head-user-con">
-
-
-            <div class="user-avatar">
-              <img src="../assets/11.jpg" />
-            </div>
-
-            <el-dropdown @command="handleCommand" class="user-name" trigger="click">
-          <span class="el-dropdown-link">
-           <span>欢迎您，<b>{{ userName }}</b>&nbsp;患者&nbsp;</span>
-            <i class="el-icon-caret-bottom"></i>
-          </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
-        </div>
+  <el-container class="layout-container">
+    <el-header class="layout-header">
+      <div class="header-left">
+        <img src="@/assets/img/1.png" class="header-logo" />
+        <span class="header-title">医院门诊管理系统</span>
       </div>
-
+      <div class="header-right">
+        <div class="user-avatar"><img src="../assets/11.jpg" /></div>
+        <el-dropdown @command="handleCommand" trigger="click">
+          <span class="el-dropdown-link">欢迎您，<b>{{ userName }}</b>&nbsp;<i class="el-icon-caret-bottom"></i></span>
+          <el-dropdown-menu slot="dropdown"><el-dropdown-item command="logout">退出登录</el-dropdown-item></el-dropdown-menu>
+        </el-dropdown>
+      </div>
     </el-header>
-    <el-container>
-      <!-- 侧边栏 -->
-      <el-aside width="200px">
-        <!-- 导航菜单 -->
-        <el-menu
-            background-color="#353744"
-            text-color="#fff"
-            active-text-color="#ffd04b"
-            :default-active="activePath"
-            style="font-size: 18px"
-        >
-          <el-menu-item
-              index="patientLayout"
-              @click="menuClick('patientLayout')"
-          >
-            <i class="el-icon-s-home" style="font-size: 18px">
-              首页</i
-            >
-          </el-menu-item>
-          <el-menu-item
-              index="orderOperate"
-              @click="menuClick('orderOperate')"
-          >
-            <i class="el-icon-monitor" style="font-size: 18px">
-              门诊预约</i
-            >
-          </el-menu-item>
-          <el-menu-item index="myOrder" @click="menuClick('myOrder')">
-            <i class="el-icon-postcard" style="font-size: 18px">
-              我的挂号</i
-            >
-          </el-menu-item>
-          <el-menu-item index="queueStatus" @click="menuClick('queueStatus')">
-            <i class="el-icon-s-order" style="font-size: 18px">
-              排队状态</i
-            >
-          </el-menu-item>
-          <el-menu-item index="myBed" @click="menuClick('myBed')">
-            <i class="el-icon-news" style="font-size: 18px">
-              门诊观察</i
-            >
-          </el-menu-item>
-          <el-menu-item index="myPrescription" @click="menuClick('myPrescription')">
-            <i class="el-icon-document" style="font-size: 18px">
-              我的处方</i
-            >
-          </el-menu-item>
-          <el-menu-item index="myEmr" @click="menuClick('myEmr')">
-            <i class="el-icon-reading" style="font-size: 18px">
-              我的病历</i
-            >
-          </el-menu-item>
-          <el-menu-item
-              index="patientCard"
-              @click="menuClick('patientCard')"
-          >
-            <i class="el-icon-user" style="font-size: 18px"> 个人信息</i>
-          </el-menu-item>
+    <el-container class="layout-body">
+      <el-aside width="200px" class="layout-aside">
+        <el-menu :default-active="activePath" background-color="#304156" text-color="#b8c7ce" active-text-color="#409EFF" router>
+          <el-menu-item index="patientLayout" @click="menuClick('patientLayout')"><i class="el-icon-s-home"></i><span>首页</span></el-menu-item>
+          <el-menu-item index="orderOperate" @click="menuClick('orderOperate')"><i class="el-icon-plus"></i><span>在线挂号</span></el-menu-item>
+          <el-menu-item index="myOrder" @click="menuClick('myOrder')"><i class="el-icon-postcard"></i><span>我的挂号</span></el-menu-item>
+          <el-menu-item index="myPrescription" @click="menuClick('myPrescription')"><i class="el-icon-medicine-edit"></i><span>我的处方</span></el-menu-item>
+          <el-menu-item index="myEmr" @click="menuClick('myEmr')"><i class="el-icon-reading"></i><span>我的病历</span></el-menu-item>
+          <el-menu-item index="myBed" @click="menuClick('myBed')"><i class="el-icon-office-building"></i><span>我的床位</span></el-menu-item>
+          <el-menu-item index="queueStatus" @click="menuClick('queueStatus')"><i class="el-icon-s-order"></i><span>排队状态</span></el-menu-item>
+          <el-menu-item index="sectionMessage" @click="menuClick('sectionMessage')"><i class="el-icon-menu"></i><span>科室信息</span></el-menu-item>
+          <el-menu-item index="patientCard" @click="menuClick('patientCard')"><i class="el-icon-user"></i><span>个人信息</span></el-menu-item>
         </el-menu>
       </el-aside>
-      <el-main>
-        <!-- 子路由入口 -->
-        <router-view></router-view>
-      </el-main>
+      <el-main class="layout-main"><router-view></router-view></el-main>
     </el-container>
   </el-container>
 </template>
 <script>
 import jwtDecode from "jwt-decode";
-import {
-  getToken,
-  clearToken,
-  getActivePath,
-  setActivePath,
-} from "@/utils/storage.js";
+import { getToken, clearToken, getActivePath, setActivePath} from "@/utils/storage.js";
 export default {
   name: "Patient",
-  data() {
-    return {
-      userName: "",
-      activePath: "",
-    };
-  },
+  data() { return { userName: "", activePath:"" }; },
   methods: {
-    handleCommand(command) {
-      if (command === "logout") {
-        this.$confirm("此操作将退出登录, 是否继续?", "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        })
-            .then(() => {
-              clearToken();
-              this.$message({
-                type: "success",
-                message: "退出登录成功!",
-              });
-              this.$router.push("login");
-            })
-            .catch(() => {
-              this.$message({
-                type: "info",
-                message: "已取消",
-              });
-            });
-
-      }
-    },
-    //token解码
-    tokenDecode(token) {
-      if (token !== null) return jwtDecode(token);
-    },
-    //导航栏点击事件
-    menuClick(path) {
-      this.activePath = path;
-      setActivePath(path);
-      if (this.$route.path !== "/" + path) this.$router.push(path);
-      console.log(path);
-    },
-    //退出登录
-    logout() {
-      this.$confirm("此操作将退出登录, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-          .then(() => {
-            clearToken();
-            this.$message({
-              type: "success",
-              message: "退出登录成功!",
-            });
-            this.$router.push("login");
-          })
-          .catch(() => {
-            this.$message({
-              type: "info",
-              message: "已取消",
-            });
-          });
-    },
+    handleCommand(c) { if(c==="logout"){clearToken();this.$message.success("退出成功");this.$router.push("login");} },
+    tokenDecode(t){if(t!==null)return jwtDecode(t);},
+    menuClick(p){this.activePath=p;setActivePath(p);if(this.$route.path!=="/"+p)this.$router.push(p);}
   },
-  created() {
-    //  获取激活路径
-    this.activePath = getActivePath();
-    // 解码token
-    this.userName = this.tokenDecode(getToken()).pName;
-  },
+  created() { this.activePath=getActivePath(); var d=this.tokenDecode(getToken());this.userName=d?d.pName||"":""; }
 };
 </script>
-<style scoped lang="scss">
-.title{
-  cursor: pointer;
-}
-.el-header {
-  background-color: #427cb3;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  .words {
-    text-align: center;
-    span {
-      color: black;
-    }
-  }
-
-  //border-bottom: 1px solid lightgrey;
-}
-.el-container{
-  height: 100%;
-}
-.el-aside{
-  background-color:#353744;
-  border-right: 1px solid lightgrey;
-}
-.el-menu{
-  border: 0;
-}
-.head-bar {
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  height: 70px;
-  font-size: 18px;
-  color: #fff;
-
-}
-
-.header-ico {
-  float: left;
-  padding: 0 21px;
-  line-height: 70px;
-}
-
-.head-bar .logo {
-  float: left;
-  width: 250px;
-  line-height: 70px;
-  margin-left: -25px;
-}
-
-.head-right {
-  float: right;
-  padding-right: 50px;
-}
-
-.head-user-con {
-  display: flex;
-  height: 70px;
-  align-items: center;
-}
-
-.btn-fullscreen {
-  transform: rotate(45deg);
-  margin-right: 5px;
-  font-size: 24px;
-}
-
-.btn-fullscreen {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  text-align: center;
-  border-radius: 15px;
-  cursor: pointer;
-}
-
-.btn-bell .el-icon-bell {
-  color: #fff;
-}
-
-.user-name {
-  margin-left: 10px;
-}
-
-.user-avatar {
-  margin-left: 20px;
-}
-
-.user-avatar img {
-  display: block;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.el-dropdown-link {
-  color: #fff;
-  cursor: pointer;
-}
-
-.el-dropdown-menu__item {
-  text-align: center;
-}
+<style scoped>
+.layout-container,.layout-body{height:100%;}
+.layout-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#304156,#1d2b3a);color:#fff;padding:0 20px;height:60px!important;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-logo{width:36px;height:36px;}
+.header-title{font-size:18px;font-weight:600;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.user-avatar img{width:36px;height:36px;border-radius:50%;display:block;}
+.el-dropdown-link{color:#fff;cursor:pointer;font-size:14px;}
+.layout-aside{background:#304156;overflow-y:auto;}
+.layout-aside .el-menu{background:#304156;border-right:none;}
+.layout-aside .el-menu-item{height:44px;line-height:44px;}
+.layout-main{background:#f0f2f5;padding:16px;overflow-y:auto;}
 </style>
