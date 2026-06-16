@@ -19,18 +19,24 @@ public class Drug {
     private String drUnit;
     @JsonProperty("drPublisher")
     private String drPublisher;
+    @JsonProperty("drType")
+    private Integer drType;
 
     public Drug() {
     }
 
-    public Drug(String drId, String drName, double drPrice, int drNumber, String drUnit, String drPublisher) {
+    public Drug(String drId, String drName, double drPrice, int drNumber, String drUnit, String drPublisher, Integer drType) {
         this.drId = drId;
         this.drName = drName;
         this.drPrice = drPrice;
         this.drNumber = drNumber;
         this.drUnit = drUnit;
         this.drPublisher = drPublisher;
+        this.drType = drType;
     }
+
+    public Integer getDrType() { return drType; }
+    public void setDrType(Integer drType) { this.drType = drType; }
 
     public String getDrId() {
         return drId;

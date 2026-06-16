@@ -13,7 +13,14 @@
                         ></el-button>
                     </el-input>
                 </el-col>
-                <el-col :span="6"></el-col>
+                <el-col :span="4">
+                    <el-select v-model="typeFilter" placeholder="药品分类" style="margin-left:10px;" @change="requestDrugs">
+                        <el-option label="全部药品" value=""></el-option>
+                        <el-option label="西药" value="1"></el-option>
+                        <el-option label="中药" value="2"></el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="4"></el-col>
                 <el-col :span="6">
                     <el-button
                         type="primary"
@@ -29,10 +36,13 @@
             <el-table :data="drugData" stripe style="width: 100%" border>
                 <el-table-column label="编号" prop="drId"></el-table-column>
                 <el-table-column label="名称" prop="drName"></el-table-column>
-                <el-table-column
-                    label="剩余数量"
-                    prop="drNumber"
-                ></el-table-column>
+                <el-table-column label="分类" width="80">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.drType === 2" type="success" size="mini">中药</el-tag>
+                        <el-tag v-else type="primary" size="mini">西药</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="剩余数量" prop="drNumber"></el-table-column>
                 <el-table-column label="单位" prop="drUnit"></el-table-column>
                 <el-table-column label="单价" prop="drPrice"></el-table-column>
                 <el-table-column
@@ -106,6 +116,10 @@
                 >
                     <el-input v-model="addForm.drPublisher"></el-input>
                 </el-form-item>
+                <el-form-item label="药品分类" prop="drType" label-width="80px">
+                    <el-radio v-model="addForm.drType" :label="1">西药</el-radio>
+                    <el-radio v-model="addForm.drType" :label="2">中药</el-radio>
+                </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="addFormVisible = false" style="font-size: 18px;"><i class="el-icon-close" style="font-size: 20px;"></i> 取 消</el-button>
@@ -170,6 +184,10 @@
                 >
                     <el-input v-model="modifyForm.drPublisher"></el-input>
                 </el-form-item>
+                <el-form-item label="药品分类" prop="drType" label-width="80px">
+                    <el-radio v-model="modifyForm.drType" :label="1">西药</el-radio>
+                    <el-radio v-model="modifyForm.drType" :label="2">中药</el-radio>
+                </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="modifyFormVisible = false" style="font-size: 18px;"><i class="el-icon-close" style="font-size: 20px;"></i> 取 消</el-button>
@@ -189,6 +207,7 @@ export default {
             pageNumber: 1,
             size: 8,
             query: "",
+            typeFilter: "",
             drugData: [],
             total: 3,
             addFormVisible: false,
@@ -248,6 +267,7 @@ export default {
                                 drPrice: this.modifyForm.drPrice,
                                 drUnit: this.modifyForm.drUnit,
                                 drPublisher: this.modifyForm.drPublisher,
+                                drType: this.modifyForm.drType,
                             },
                         })
                         .then((res) => {
@@ -327,6 +347,7 @@ export default {
                                 drPrice: this.addForm.drPrice,
                                 drUnit: this.addForm.drUnit,
                                 drPublisher: this.addForm.drPublisher,
+                                drType: this.addForm.drType,
                             },
                         })
                         .then((res) => {
@@ -364,6 +385,7 @@ export default {
                         pageNumber: this.pageNumber,
                         size: this.size,
                         query: this.query,
+                        typeFilter: this.typeFilter,
                     },
                 })
                 .then((res) => {

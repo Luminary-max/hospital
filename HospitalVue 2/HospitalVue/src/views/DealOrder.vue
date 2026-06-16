@@ -232,6 +232,7 @@ export default {
       // 药品目录
       drugData: [], drugTotal: 0, pageNumber: 1, size: 10, queryDrug: "",
       drugBuyData: [], drugTotalPrice: 0,
+      drugTypeFilter: '',
       // 检查项目
       checkData: [], checkTotal: 0, checkPageNumber: 1, checkSize: 10, queryCheck: "",
       checkBuyData: [], checkTotalPrice: 0,
@@ -253,7 +254,7 @@ export default {
     },
     async requestDrug() {
       try {
-        const res = await request.get("drug/findAllDrugs", { params: { pageNumber: this.pageNumber, size: this.size, query: this.queryDrug } });
+        const res = await request.get("drug/findAllDrugs", { params: { pageNumber: this.pageNumber, size: this.size, query: this.queryDrug, typeFilter: this.drugTypeFilter } });
         if (res.data.status === 200) {
           const d = res.data.data;
           this.drugData = d.records || d.drugs || []; this.drugTotal = d.total || 0;
@@ -365,3 +366,4 @@ export default {
   }
 };
 </script>
+

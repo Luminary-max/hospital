@@ -18,8 +18,8 @@ public class DrugController {
      * 分页模糊查询所有药物信息
      */
     @RequestMapping("findAllDrugs")
-    public ResponseData findAllDrugs(int pageNumber, int size, String query){
-        return ResponseData.success("返回所有药物信息成功", this.drugService.findAllDrugs(pageNumber, size, query));
+    public ResponseData findAllDrugs(int pageNumber, int size, String query, Integer typeFilter){
+        return ResponseData.success("返回所有药物信息成功", this.drugService.findAllDrugs(pageNumber, size, query, typeFilter));
     }
     /**
      * 根据id查找药物

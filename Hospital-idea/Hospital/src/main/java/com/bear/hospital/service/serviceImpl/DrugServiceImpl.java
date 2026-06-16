@@ -20,10 +20,13 @@ public class DrugServiceImpl implements DrugService {
      * 分页模糊查询所有药物信息
      */
     @Override
-    public HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query){
+    public HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query, Integer typeFilter){
         Page<Drug> page = new Page<>(pageNumber, size);
         QueryWrapper<Drug> wrapper = new QueryWrapper<>();
         wrapper.like("dr_name", query);
+        if (typeFilter != null && typeFilter > 0) {
+            wrapper.eq("dr_type", typeFilter);
+        }
         IPage<Drug> iPage = this.drugMapper.selectPage(page, wrapper);
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("total", iPage.getTotal());       //总条数

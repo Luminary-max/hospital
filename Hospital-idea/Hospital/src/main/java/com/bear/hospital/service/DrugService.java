@@ -8,7 +8,7 @@ public interface DrugService {
     /**
      * 分页模糊查询所有药物信息
      */
-    HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query);
+    HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query, Integer typeFilter);
     /**
      * 根据id查找药物
      */
