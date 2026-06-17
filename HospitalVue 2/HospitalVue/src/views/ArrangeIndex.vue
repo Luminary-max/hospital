@@ -87,26 +87,26 @@ export default {
       this.loadArrange();
     },
     loadArrange() {
-      var m=String(this.currentMonth).padStart(2,"0");
-      var start=this.currentYear+"-"+m+"-01";
-      var end=this.currentYear+"-"+m+"-"+new Date(this.currentYear,this.currentMonth,0).getDate().toString().padStart(2,"0")+" 23:59";
       var map={};
-      request.get("admin/findAllOrders",{params:{pageNumber:1,size:500,query:""}}).then(r=>{
-        if(r.data.status===200&&r.data.data.records){
-          r.data.data.records.forEach(function(o){
-            if(o.oStart && o.oStart.indexOf(m)>0){
-              var k=o.oStart.substring(0,10);
-              if(!map[k]) map[k]={count:0,doctors:{}};
-              map[k].count++;
-              map[k].doctors[o.dId]=true;
+      var days= new Date(this.currentYear,this.currentMonth,0).getDate();
+      var completed=0; var self=this;
+      for(var d=1;d<=days;d++){
+        var dateStr=this.currentYear+"-"+String(this.currentMonth).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+        (function(dateKey, cb){
+          request.get("/arrange/findByTime",{params:{arTime:dateKey,dSection:""}}).then(function(r){
+            if(r.data.status===200&&r.data.data){
+              var docs=r.data.data.filter(function(item){return item.doctor;});
+              if(docs&&docs.length>0){
+                map[dateKey]={count:docs.length,doctors:docs.length};
+              }
             }
+            cb();
           });
-        }
-        // 同时也从arrange表获取排班数据
-        for(var k in map){ map[k].doctors=Object.keys(map[k].doctors).length; }
-        this.arrangeMap=map;
-      });
-      // 额外从admin/findAllDoctors获取医生总数做参考
+        })(dateStr, function(){
+          completed++;
+          if(completed>=days){ self.arrangeMap=JSON.parse(JSON.stringify(map)); }
+        });
+      }
     },
     dateClick(day) {
       var dateStr=this.currentYear+"-"+String(this.currentMonth).padStart(2,"0")+"-"+String(day).padStart(2,"0");
