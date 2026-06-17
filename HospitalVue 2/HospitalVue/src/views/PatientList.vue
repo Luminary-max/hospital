@@ -9,6 +9,7 @@
       </div>
       <div class="toolbar-right">
         <el-tag class="total-tag">共 {{ total }} 条</el-tag>
+        <el-button size="small" type="success" @click="exportExcel">导出</el-button>
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加患者</el-button>
       </div>
     </div>
@@ -114,6 +115,12 @@ export default {
   },
   methods: {
     requestPatients() { request.get("admin/findAllPatients",{params:{pageNumber:this.pageNumber,size:this.size,query:this.query}}).then(r=>{this.patientData=r.data.data.patients||[];this.total=r.data.data.total||0;}); },
+    exportExcel() {
+      if (!this.patientData||!this.patientData.length) return this.$message.warning("暂无数据");
+      var csv="﻿账号,姓名,性别,年龄,证件号,手机号,医保号,医保类型,民族,婚姻,血型,地址\n";
+      this.patientData.forEach(function(d){csv+=d.pId+","+d.pName+","+d.pGender+","+d.pAge+","+d.pCard+","+d.pPhone+","+(d.pInsuranceId||"")+","+(d.pInsuranceType||"")+","+(d.pNation||"")+","+(d.pMaritalStatus||"")+","+(d.pBloodType||"")+","+(d.pAddress||"")+"\n";});
+      var b=new Blob([csv],{type:"text/csv;charset=utf-8"}); var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="患者列表.csv"; a.click();
+    },
     addPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("admin/addPatient",{params:this.addForm}).then(r=>{if(r.data.status!==200)return this.$message.error("账号已存在");this.addFormVisible=false;this.requestPatients();this.$message.success("增加成功");});}); },
     modifyDialog(id) { request.get("admin/findPatient",{params:{pId:id}}).then(r=>{this.modifyForm=r.data.data;this.modifyFormVisible=true;}); },
     modifyPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("admin/modifyPatient",{params:this.modifyForm}).then(r=>{this.modifyFormVisible=false;this.requestPatients();this.$message.success("修改成功");});}); },

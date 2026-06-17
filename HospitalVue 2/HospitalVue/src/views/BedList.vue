@@ -9,6 +9,7 @@
       </div>
       <div class="toolbar-right">
         <el-tag class="total-tag">共 {{ total }} 条</el-tag>
+        <el-button size="small" type="success" @click="exportExcel">导出</el-button>
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加床位</el-button>
       </div>
     </div>
@@ -52,6 +53,12 @@ export default {
   },
   methods: {
     requestBeds() { request.get("bed/findAllBeds",{params:{pageNumber:this.pageNumber,size:this.size,query:this.query}}).then(r=>{this.bedData=r.data.data.beds||[];this.total=r.data.data.total||0;}); },
+    exportExcel() {
+      if (!this.bedData||!this.bedData.length) return this.$message.warning("暂无数据");
+      var csv="﻿编号,类型,患者,开始时间,申请理由,状态\n";
+      this.bedData.forEach(function(d){csv+=d.bId+","+(d.bType===1?"输液椅":"观察床")+","+(d.pId!==-1?d.pId:"-")+","+(d.bStart||"")+","+(d.bReason||"")+","+(d.bState===1?"占用":"空闲")+"\n";});
+      var b=new Blob([csv],{type:"text/csv;charset=utf-8"}); var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="床位列表.csv"; a.click();
+    },
     addBed(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("bed/addBed",{params:{bId:this.addForm.bId,pId:-1,dId:-1,bType:this.addForm.bType}}).then(r=>{if(r.data.status!==200)return this.$message.error("编号已占用");this.addFormVisible=false;this.requestBeds();this.$message.success("增加成功");});}); },
     emptyBed(id){request.get("bed/emptyBed",{params:{bId:id}}).then(()=>this.requestBeds());},
     emptyDialog(id){this.$confirm("确定清空?","提示",{type:"warning"}).then(()=>{this.emptyBed(id);this.$message.success("清空成功");}).catch(()=>{});},
