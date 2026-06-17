@@ -33,7 +33,7 @@
       </table>
 
       <div style="margin-top:16px;">
-        <el-button @click="goSectionIndex">查看详细排班</el-button>
+        <el-button type="primary" @click="goSectionIndex"><i class="el-icon-view"></i> 查看详细排班</el-button>
       </div>
     </el-card>
   </div>
@@ -111,13 +111,9 @@ export default {
     dateClick(day) {
       var dateStr=this.currentYear+"-"+String(this.currentMonth).padStart(2,"0")+"-"+String(day).padStart(2,"0");
       sessionStorage.setItem(ARRANGEDATE,dateStr);
-      this.activePath="sectionIndex";
-      setActivePath("sectionIndex");
       if(this.$route.path!=="/sectionIndex") this.$router.push("sectionIndex");
     },
     goSectionIndex() {
-      this.activePath="sectionIndex";
-      setActivePath("sectionIndex");
       if(this.$route.path!=="/sectionIndex") this.$router.push("sectionIndex");
     }
   },
