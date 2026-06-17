@@ -1,23 +1,33 @@
 import axios from "axios"
-import {getToken} from "@/utils/storage.js";
+import {getToken, clearToken} from "@/utils/storage.js";
 
-//全局定义一个单例的axios对象
 const request = axios.create({
   baseURL: "",
   timeout: 8000
 });
-//全局拦截器，所有请求都会先执行这个
+
 request.interceptors.request.use(config => {
-  // Do something before request is sent
   const token = getToken();
   if(token !== null){
-      //在请求的头部加入token
       config.headers["token"] = token;
   }
   return config;
   },error => {
-  // Do something with request error
   return Promise.reject(error);
-  });
-// 导出axios对象
+});
+
+// 全局响应拦截 - token 过期自动跳转登录
+request.interceptors.response.use(
+  response => {
+    if (response.data && response.data.state === false && response.data.msg && response.data.msg.indexOf("token") >= 0) {
+      clearToken();
+      window.location.href = "/login";
+    }
+    return response;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
 export default request;
