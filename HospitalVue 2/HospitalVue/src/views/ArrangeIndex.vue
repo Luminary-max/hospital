@@ -121,10 +121,10 @@ export default {
     dateClick(day) {
       var dateStr=this.currentYear+"-"+String(this.currentMonth).padStart(2,"0")+"-"+String(day).padStart(2,"0");
       sessionStorage.setItem(ARRANGEDATE,dateStr);
-      if(this.$route.path!=="/sectionIndex") this.$router.push("sectionIndex");
+      this.$router.push("/sectionIndex");
     },
     goSectionIndex() {
-      if(this.$route.path!=="/sectionIndex") this.$router.push("sectionIndex");
+      this.$router.push("/sectionIndex");
     }
   },
   created() { var d=new Date(); this.currentYear=d.getFullYear(); this.currentMonth=d.getMonth()+1; this.renderCalendar(); }
