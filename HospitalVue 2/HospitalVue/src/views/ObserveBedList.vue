@@ -88,7 +88,7 @@ export default {
       this.loadData();
     },
     async deleteBed(row) {
-      this.$confirm("确认删除?", "提示", { type: "warning" }).then(async () => {
+      this.$confirm("确认删除该床位? 此操作不可恢复。", "删除确认", { confirmButtonText:"确定删除", cancelButtonText:"取消", type:"warning" }).then(async () => {
         await request.get("bed/deleteBed", { params: { bId: row.bId } });
         this.$message.success("删除成功");
         this.loadData();
