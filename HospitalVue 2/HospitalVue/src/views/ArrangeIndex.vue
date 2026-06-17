@@ -36,6 +36,9 @@
         <el-button type="primary" @click="goSectionIndex"><i class="el-icon-view"></i> 查看详细排班</el-button>
       </div>
     </el-card>
+    <div style="margin-top:16px;">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 <script>
