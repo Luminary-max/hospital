@@ -124,7 +124,7 @@ export default {
     dateClick(day) {
       var dateStr=this.currentYear+"-"+String(this.currentMonth).padStart(2,"0")+"-"+String(day).padStart(2,"0");
       sessionStorage.setItem(ARRANGEDATE,dateStr);
-      this.$router.push("/sectionIndex");
+      this.$router.push("/sectionIndex").catch(function(){});
     },
     goSectionIndex() {
       this.$router.push("/sectionIndex");
