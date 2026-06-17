@@ -61,6 +61,18 @@ import { getToken, clearToken, getActivePath, setActivePath} from "@/utils/stora
 export default {
   name: "Admin",
   data() { return { userName: "", activePath:"" }; },
+  watch: {
+    $route: {
+      immediate: true,
+      handler(to) {
+        var path = to.path.replace("/", "");
+        // 子路由映射到父级菜单index
+        var parentMap = { sectionIndex:"arrangeIndex", arrangeDoctor:"arrangeIndex" };
+        this.activePath = parentMap[path] || path;
+        setActivePath(this.activePath);
+      }
+    }
+  },
   methods: {
     handleCommand(command) {
       if (command==="logout") {
@@ -73,7 +85,6 @@ export default {
     menuClick(path){ this.activePath=path; setActivePath(path); if(this.$route.path!=="/"+path) this.$router.push(path); }
   },
   created() {
-    this.activePath=getActivePath();
     var _t=this.tokenDecode(getToken());this.userName=_t?_t.aName||"":"";
   }
 };

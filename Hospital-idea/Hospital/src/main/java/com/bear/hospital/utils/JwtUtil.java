@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JwtUtil {
@@ -30,5 +31,32 @@ public class JwtUtil {
 
     public static DecodedJWT verify(String token){
         return JWT.require(Algorithm.HMAC256(SIGNAL)).build().verify(token);
+    }
+
+    /**
+     * 刷新token：如果旧token有效且剩余有效期少于7天，则颁发新token
+     */
+    public static String refreshToken(String token) {
+        DecodedJWT jwt;
+        try {
+            jwt = verify(token);
+        } catch (Exception e) {
+            return null;
+        }
+        long expiresAt = jwt.getExpiresAt().getTime();
+        long now = System.currentTimeMillis();
+        long remaining = expiresAt - now;
+        long sevenDaysMs = 7L * 24 * 60 * 60 * 1000;
+        if (remaining < sevenDaysMs) {
+            Map<String, String> claims = new HashMap<>();
+            jwt.getClaims().forEach((k, v) -> {
+                String val = v.asString();
+                if (val != null) {
+                    claims.put(k, val);
+                }
+            });
+            return getToken(claims);
+        }
+        return token;
     }
 }

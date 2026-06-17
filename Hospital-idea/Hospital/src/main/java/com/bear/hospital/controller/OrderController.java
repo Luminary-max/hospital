@@ -134,6 +134,14 @@ public class OrderController {
     }
 
     /**
+     * 统计待缴费订单数量（已就诊但未缴费）
+     */
+    @RequestMapping("pendingPaymentCount")
+    public ResponseData pendingPaymentCount(){
+        return ResponseData.success("查询成功", this.orderService.pendingPaymentCount());
+    }
+
+    /**
      * 获取每日收入统计（药费+检查费+挂号费）
      */
     @RequestMapping("orderDailyIncome")

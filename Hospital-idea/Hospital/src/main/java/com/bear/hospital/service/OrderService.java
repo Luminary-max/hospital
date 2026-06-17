@@ -78,5 +78,9 @@ public interface OrderService {
      * 根据日期范围查询订单
      */
     List<Orders> findOrdersByDate(String start, String end);
+    /**
+     * 统计待缴费订单数
+     */
+    int pendingPaymentCount();
 
 }

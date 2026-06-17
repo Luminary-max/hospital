@@ -293,4 +293,14 @@ public class OrderServiceImpl implements OrderService {
         wrapper.ge("o_start", start).le("o_start", end);
         return this.orderMapper.selectList(wrapper);
     }
+
+    /**
+     * 统计待缴费订单数（已就诊但未缴费）
+     */
+    @Override
+    public int pendingPaymentCount() {
+        QueryWrapper<Orders> wrapper = new QueryWrapper<>();
+        wrapper.eq("o_state", 1).eq("o_price_state", 0);
+        return this.orderMapper.selectCount(wrapper);
+    }
 }

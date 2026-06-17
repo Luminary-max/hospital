@@ -121,7 +121,7 @@ export default {
       this.patientData.forEach(function(d){csv+=d.pId+","+d.pName+","+d.pGender+","+d.pAge+","+d.pCard+","+d.pPhone+","+(d.pInsuranceId||"")+","+(d.pInsuranceType||"")+","+(d.pNation||"")+","+(d.pMaritalStatus||"")+","+(d.pBloodType||"")+","+(d.pAddress||"")+"\n";});
       var b=new Blob([csv],{type:"text/csv;charset=utf-8"}); var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="患者列表.csv"; a.click();
     },
-    addPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("admin/addPatient",{params:this.addForm}).then(r=>{if(r.data.status!==200)return this.$message.error("账号已存在");this.addFormVisible=false;this.requestPatients();this.$message.success("增加成功");});}); },
+    addPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("patient/addPatient",{params:this.addForm}).then(r=>{if(r.data.status!==200)return this.$message.error("账号已存在");this.addFormVisible=false;this.requestPatients();this.$message.success("增加成功");});}); },
     modifyDialog(id) { request.get("admin/findPatient",{params:{pId:id}}).then(r=>{this.modifyForm=r.data.data;this.modifyFormVisible=true;}); },
     modifyPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("admin/modifyPatient",{params:this.modifyForm}).then(r=>{this.modifyFormVisible=false;this.requestPatients();this.$message.success("修改成功");});}); },
     deletePatient(id){request.get("admin/deletePatient",{params:{pId:id}}).then(()=>this.requestPatients());},

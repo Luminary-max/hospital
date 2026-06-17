@@ -76,6 +76,9 @@ body {
 
 /* ===== 空状态 ===== */
 .empty-state { text-align: center; padding: 60px 0; color: #c0c4cc; font-size: 14px; }
+/* 全局表格空数据提示 */
+.el-table__empty-text { color: #c0c4cc; font-size: 14px; }
+.el-table .el-table__body .el-table__empty-block { min-height: 120px; }
 
 /* ===== 搜索行 ===== */
 .search-row { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

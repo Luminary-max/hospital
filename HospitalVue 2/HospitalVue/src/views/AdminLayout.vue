@@ -72,8 +72,13 @@ export default {
         if(r.data.status===200){ var d=r.data.data; this.todayIncome=d.drugIncome?d.drugIncome[d.drugIncome.length-1]||0:0; }
       });
       request.get("pharmacy/findAll",{params:{pageNumber:1,size:1,status:0}}).then(r=>{if(r.data.status===200)this.pendingDrug=r.data.data.total||0;});
-      request.get("admin/findAllOrders",{params:{pageNumber:1,size:1000,query:""}}).then(r=>{
-        if(r.data.status===200){ var list=r.data.data.records||[]; this.pendingPayment=list.filter(o=>o.oPriceState===0&&o.oState===1).length; }
+      // 使用专用计数接口代替加载全部订单
+      request.get("order/pendingPaymentCount").then(r=>{if(r.data.status===200)this.pendingPayment=r.data.data||0;}).catch(()=>{
+        // 降级：通过小数据量查询
+        request.get("admin/findAllOrders",{params:{pageNumber:1,size:100,query:""}}).then(r=>{
+          if(r.data.status===200){ var list=r.data.data.records||[]; this.pendingPayment=list.filter(o=>o.oPriceState===0&&o.oState===1).length; }
+        });
+      }).then(()=>{
         this.pendingCount=this.pendingDrug+this.pendingPayment;
         this.todoList=[
           {label:"待发药",count:this.pendingDrug,link:()=>{this.$router.push("/pharmacyDispensingList");}},

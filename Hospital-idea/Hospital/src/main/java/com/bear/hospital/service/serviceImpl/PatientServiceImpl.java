@@ -95,6 +95,10 @@ public class PatientServiceImpl implements PatientService {
                 return false;
             }
         }
+        //默认密码123456
+        if (patient.getPPassword() == null || patient.getPPassword().isEmpty()) {
+            patient.setPPassword("123456");
+        }
         int yourYear = Integer.parseInt(patient.getPBirthday().substring(0, 4));
         int todayYear = Integer.parseInt(TodayUtil.getTodayYmd().substring(0,4));
         //密码md5加密

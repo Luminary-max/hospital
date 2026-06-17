@@ -589,11 +589,11 @@ DROP TABLE IF EXISTS `prescribe`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `prescribe` (
-  `dr_id` char(6) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
+  `dr_id` char(6) NOT NULL,
   `o_id` int DEFAULT NULL,
   `dosage` decimal(10,2) DEFAULT NULL,
-  PRIMARY KEY (`dr_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC;
+  PRIMARY KEY (`dr_id`,`o_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
