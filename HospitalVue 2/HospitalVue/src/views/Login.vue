@@ -74,7 +74,7 @@ export default {
       else callback();
     };
     return {
-      loginForm: { id: "202301", password: "123456" },
+      loginForm: { id: "202601", password: "123456" },
       loginRules: {
         id: [{required:true,message:'请输入账号/姓名',trigger:'blur'}],
         password: [{required:true,message:'请输入密码',trigger:'blur'}]
