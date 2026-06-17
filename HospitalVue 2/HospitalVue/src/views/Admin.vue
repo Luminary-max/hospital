@@ -46,6 +46,7 @@
           </el-submenu>
           <el-menu-item index="notificationList" @click="menuClick('notificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
           <el-menu-item index="dataExpore" @click="menuClick('dataExpore')"><i class="el-icon-s-data"></i><span>数据统计</span></el-menu-item>
+          <el-menu-item index="auditLogList" @click="menuClick('auditLogList')"><i class="el-icon-document"></i><span>审计日志</span></el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="layout-main">

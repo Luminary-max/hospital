@@ -21,10 +21,10 @@
 2. 打开命令行（cmd），依次执行：
 
    mysql -u root -p -e "create database hospital character set utf8mb3"
-   mysql -u root -p hospital < 你的路径\hospital.sql
-   mysql -u root -p hospital < 你的路径\hospital_outpatient_migration.sql
+   mysql -u root -p hospital < 你的路径\hospital_complete.sql
 
    （输入你自己mysql的密码）
+   （一个SQL文件即可完成所有建表和数据导入，无需其他脚本）
 
 3. 右键编辑 start.bat，把 set DB_PASS=041306
    改成你自己的 MySQL 密码，保存
@@ -35,5 +35,6 @@
 
 ===== 登录账号 =====
 
+管理员： 202601 / 123456
 医生：   D24001 或 李明 / 123456
 患者：   100001 / 123456

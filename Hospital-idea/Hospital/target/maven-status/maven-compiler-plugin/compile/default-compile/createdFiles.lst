@@ -27,6 +27,7 @@ com\bear\hospital\controller\DrugBatchController.class
 com\bear\hospital\pojo\Patient.class
 com\bear\hospital\pojo\Checks.class
 com\bear\hospital\pojo\Drug.class
+com\bear\hospital\pojo\AuditLog.class
 com\bear\hospital\service\OrderService.class
 com\bear\hospital\utils\PdfUtil.class
 com\bear\hospital\controller\AdminController.class
@@ -38,6 +39,7 @@ com\bear\hospital\pojo\Arrange.class
 com\bear\hospital\pojo\Notification.class
 com\bear\hospital\service\serviceImpl\NotificationServiceImpl.class
 com\bear\hospital\controller\PharmacyDispensingController.class
+com\bear\hospital\controller\AuditLogController.class
 com\bear\hospital\mapper\NotificationMapper.class
 com\bear\hospital\service\serviceImpl\QueueServiceImpl.class
 com\bear\hospital\mapper\TriageRecordMapper.class
@@ -52,6 +54,7 @@ com\bear\hospital\pojo\PrescriptionDetail.class
 com\bear\hospital\controller\CheckController.class
 com\bear\hospital\pojo\Orders.class
 com\bear\hospital\config\JedisConfig.class
+com\bear\hospital\service\AuditLogService.class
 com\bear\hospital\service\serviceImpl\BillingServiceImpl.class
 com\bear\hospital\service\serviceImpl\PharmacyDispensingServiceImpl.class
 com\bear\hospital\service\DoctorService.class
@@ -65,6 +68,7 @@ com\bear\hospital\service\serviceImpl\CheckServiceImpl.class
 com\bear\hospital\controller\QueueController.class
 com\bear\hospital\controller\TriageRecordController.class
 com\bear\hospital\service\QueueService.class
+com\bear\hospital\service\serviceImpl\AuditLogServiceImpl.class
 com\bear\hospital\controller\NotificationController.class
 com\bear\hospital\service\PatientService.class
 com\bear\hospital\service\serviceImpl\DoctorServiceImpl.class
@@ -76,6 +80,7 @@ com\bear\hospital\utils\Md5Util.class
 com\bear\hospital\pojo\BillingRecord.class
 com\bear\hospital\service\EmrService.class
 com\bear\hospital\service\serviceImpl\EmrServiceImpl.class
+com\bear\hospital\mapper\AuditLogMapper.class
 com\bear\hospital\service\serviceImpl\OrderServiceImpl.class
 com\bear\hospital\controller\PatientController.class
 com\bear\hospital\service\BillingService.class

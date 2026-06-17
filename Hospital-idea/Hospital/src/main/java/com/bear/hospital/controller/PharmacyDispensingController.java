@@ -1,5 +1,6 @@
 package com.bear.hospital.controller;
 
+import com.bear.hospital.service.DrugService;
 import com.bear.hospital.service.PharmacyDispensingService;
 import com.bear.hospital.utils.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,8 @@ public class PharmacyDispensingController {
 
     @Autowired
     private PharmacyDispensingService pharmacyDispensingService;
+    @Autowired
+    private DrugService drugService;
 
     @RequestMapping("findAll")
     public ResponseData findAll(@RequestParam int pageNumber, @RequestParam int size,
@@ -22,8 +25,9 @@ public class PharmacyDispensingController {
 
     @RequestMapping("dispense")
     public ResponseData dispense(@RequestParam int pdId, @RequestParam String dispenseBy) {
-        if (this.pharmacyDispensingService.dispense(pdId, dispenseBy))
+        // 发药同时扣减库存
+        if (this.pharmacyDispensingService.dispense(pdId, dispenseBy, drugService))
             return ResponseData.success("发药成功");
-        return ResponseData.fail("发药失败");
+        return ResponseData.fail("发药失败，库存不足");
     }
 }

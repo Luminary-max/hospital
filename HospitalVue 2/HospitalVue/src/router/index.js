@@ -44,6 +44,8 @@ import MyPrescription from "@/views/MyPrescription.vue";
 import MyEmr from "@/views/MyEmr.vue";
 import ObserveBedList from "@/views/ObserveBedList.vue";
 
+import AuditLogList from "@/views/AuditLogList.vue";
+
 // 新增页面
 import PharmacyDispensingList from "@/views/PharmacyDispensingList.vue";
 import NotificationList from "@/views/NotificationList.vue";
@@ -160,6 +162,11 @@ const routes = [
       {
         path: "/drugBatchList",
         component: DrugBatchList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/auditLogList",
+        component: AuditLogList,
         meta: { requireAuth: true },
       },
     ]

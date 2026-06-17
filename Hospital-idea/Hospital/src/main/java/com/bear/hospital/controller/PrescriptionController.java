@@ -1,6 +1,9 @@
 package com.bear.hospital.controller;
 
+import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.pojo.PrescriptionDetail;
+import com.bear.hospital.service.OrderService;
+import com.bear.hospital.service.PharmacyDispensingService;
 import com.bear.hospital.service.PrescriptionService;
 import com.bear.hospital.utils.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,10 @@ import java.util.Map;
 public class PrescriptionController {
     @Autowired
     private PrescriptionService prescriptionService;
+    @Autowired
+    private PharmacyDispensingService pharmacyDispensingService;
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/findByOrder")
     public ResponseData findByOrder(@RequestParam int oId) {
@@ -41,6 +48,10 @@ public class PrescriptionController {
             details.add(d);
         }
         prescriptionService.savePrescriptions(oId, details);
+        // 自动生成发药记录
+        for (PrescriptionDetail d : details) {
+            pharmacyDispensingService.createDispensing(oId, d.getDrId(), d.getPdQuantity());
+        }
         return ResponseData.success("保存成功");
     }
 }
