@@ -67,7 +67,7 @@ export default {
       try {
         const res = await request.get("bed/findAllBeds", { params: { pageNumber: this.pageNumber, size: this.size, query: "" } });
         if (res.data.status === 200) { this.bedList = res.data.data.beds || []; this.total = res.data.data.total || 0; }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     handleSizeChange(val) { this.size = val; this.loadData(); },
     handleCurrentChange(val) { this.pageNumber = val; this.loadData(); },
@@ -98,3 +98,4 @@ export default {
   created() { this.loadData(); }
 };
 </script>
+

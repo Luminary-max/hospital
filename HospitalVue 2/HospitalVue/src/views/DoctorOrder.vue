@@ -160,13 +160,13 @@ export default {
         },
         //页面大小改变时触发
         handleSizeChange(size) {
-            console.log(size);
+            
             this.size = size;
             this.requestOrders();
         },
         //   页码改变时触发
         handleCurrentChange(num) {
-            console.log(num);
+            
             this.pageNumber = num;
             this.requestOrders();
         },
@@ -199,7 +199,7 @@ export default {
         //this.orderData.pName = this.tokenDecode(getToken()).pName;
         //this.orderData.pCard = this.tokenDecode(getToken()).pCard;
         this.userId = this.tokenDecode(getToken()).dId;
-        console.log(this.orderData.pName);
+        
         //this.orderData.pName = "dasda"
         this.requestOrders();
     },

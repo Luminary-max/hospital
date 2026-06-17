@@ -66,7 +66,7 @@ export default {
           this.currentPatient = data.find(p => p.q_state === 1) || null;
           this.waitingList = data.filter(p => p.q_state === 0 || p.q_state === 2);
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     async callNext() {
       try {
@@ -75,7 +75,7 @@ export default {
           this.$message.success("呼叫成功！");
           this.loadQueue();
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     startConsult() {
       if (this.currentPatient) {
@@ -90,7 +90,7 @@ export default {
           this.$message.warning("已标记为过号");
           this.loadQueue();
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     async reQueue(row) {
       try {
@@ -99,7 +99,7 @@ export default {
           this.$message.success("已重新排入队列");
           this.loadQueue();
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     }
   },
   created() {
@@ -112,3 +112,4 @@ export default {
   }
 };
 </script>
+

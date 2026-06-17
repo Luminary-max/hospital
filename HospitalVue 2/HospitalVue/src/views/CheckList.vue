@@ -9,6 +9,7 @@
       </div>
       <div class="toolbar-right">
         <el-tag class="total-tag">共 {{ total }} 条</el-tag>
+        <el-button size="small" type="success" @click="exportExcel">导出</el-button>
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加项目</el-button>
       </div>
     </div>
@@ -60,6 +61,12 @@ export default {
   },
   methods: {
     requestChecks() { request.get("check/findAllChecks",{params:{pageNumber:this.pageNumber,size:this.size,query:this.query}}).then(r=>{this.checkData=r.data.data.checks||[];this.total=r.data.data.total||0;}); },
+    exportExcel() {
+      if (!this.checkData||!this.checkData.length) return this.$message.warning("暂无数据");
+      var csv="﻿编号,项目名称,价格(元)\n";
+      this.checkData.forEach(function(d){csv+=d.chId+","+d.chName+","+d.chPrice+"\n";});
+      var b=new Blob([csv],{type:"text/csv;charset=utf-8"}); var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="检查项目列表.csv"; a.click();
+    },
     addCheck(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("check/addCheck",{params:this.addForm}).then(r=>{if(r.data.status!==200)return this.$message.error("编号已占用");this.addFormVisible=false;this.requestChecks();this.$message.success("增加成功");});}); },
     modifyDialog(id) { request.get("check/findCheck",{params:{chId:id}}).then(r=>{this.modifyForm=r.data.data;this.modifyFormVisible=true;}); },
     modifyCheck(fn){this.$refs[fn].validate(v=>{if(!v)return;request.get("check/modifyCheck",{params:this.modifyForm}).then(r=>{this.modifyFormVisible=false;this.requestChecks();this.$message.success("修改成功");});});},

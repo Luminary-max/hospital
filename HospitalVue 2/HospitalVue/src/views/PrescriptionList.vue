@@ -89,7 +89,7 @@ export default {
           this.prescriptionData = res.data.data.records || [];
           this.total = res.data.data.total || 0;
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     handleSizeChange(val) { this.size = val; this.loadData(); },
     handleCurrentChange(val) { this.pageNumber = val; this.loadData(); },
@@ -99,7 +99,7 @@ export default {
       try {
         const res = await request.get("prescription/findByOrder", { params: { oId: row.oId } });
         if (res.data.status === 200) this.prescDetails = res.data.data || [];
-      } catch(e) { console.error(e); }
+      } catch(e) {}
       this.detailVisible = true;
     },
     async printPrescription(row) {
@@ -136,3 +136,4 @@ export default {
   }
 };
 </script>
+

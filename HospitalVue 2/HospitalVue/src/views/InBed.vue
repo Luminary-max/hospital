@@ -140,7 +140,7 @@ export default {
                     this.BedFormVisible = false;
                     this.$message.success("申请留观/输液成功！");
                     this.requestOrders();
-                    console.log(res);
+                    
                 });
         },
 
@@ -152,10 +152,10 @@ export default {
                     if (res.data.status !== 200)
                         return this.$message.error("数据请求失败");
                     this.nullBed = res.data.data;
-                    console.log(res.data.data);
+                    
                 })
                 .catch((err) => {
-                    console.error(err);
+                    
                 });
         },
         //打开申请留观/输液对话框
@@ -167,13 +167,13 @@ export default {
         },
         //页面大小改变时触发
         handleSizeChange(size) {
-            console.log(size);
+            
             this.size = size;
             this.requestOrders();
         },
         //   页码改变时触发
         handleCurrentChange(num) {
-            console.log(num);
+            
             this.pageNumber = num;
             this.requestOrders();
         },
@@ -204,8 +204,8 @@ export default {
         //解码token信息
         this.userId = this.tokenDecode(getToken()).dId;
         this.userName = this.tokenDecode(getToken()).dName;
-        console.log(this.userId);
-        console.log(this.userName);
+        
+        
         //获取订单信息
         this.requestOrders();
     },

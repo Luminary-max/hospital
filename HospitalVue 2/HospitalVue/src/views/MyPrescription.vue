@@ -67,7 +67,7 @@ export default {
       try {
         const res = await request.get("patient/findOrderByPid", { params: { pId: this.pId } });
         if (res.data.status === 200) this.prescriptionList = (res.data.data || []).filter(o => o.oDrug || o.oTotalPrice > 0);
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     viewDetail(row) { this.detailData = row; this.detailVisible = true; }
   },
@@ -81,3 +81,4 @@ export default {
 <style scoped>
 .el-table { width: 100% !important; }
 </style>
+

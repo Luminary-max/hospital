@@ -354,7 +354,7 @@ export default {
           const p = res.data.data;
           this.pName = p.pName; this.pGender = p.pGender; this.pPhone = p.pPhone; this.pAge = p.pAge;
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     async requestDrug() {
       try {
@@ -363,7 +363,7 @@ export default {
           const d = res.data.data;
           this.drugData = d.drugs || d.records || []; this.drugTotal = d.total || 0;
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     async requestCheck() {
       try {
@@ -372,7 +372,7 @@ export default {
           const d = res.data.data;
           this.checkData = d.checks || d.records || []; this.checkTotal = d.total || 0;
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     drugPageChange(p) { this.pageNumber = p; this.requestDrug(); },
     checkPageChange(p) { this.checkPageNumber = p; this.requestCheck(); },
@@ -521,7 +521,7 @@ export default {
         this.$message.success("病历提交成功！请通知患者登录系统自助缴费！");
         this.$router.push("/orderToday");
       } catch(e) {
-        console.error(e);
+        
         this.$message.error("提交失败，请重试");
       }
       this.submitting = false;
@@ -542,4 +542,6 @@ export default {
   }
 };
 </script>
+
+
 

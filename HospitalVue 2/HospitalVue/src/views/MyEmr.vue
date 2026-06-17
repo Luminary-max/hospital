@@ -41,7 +41,7 @@
         </el-descriptions>
       </el-card>
       <el-card shadow="hover" style="margin-top:15px;" v-if="prescDetails.length > 0">
-        <div slot="header"><span style="font-weight:bold;color:#67C23A;">处方记录</span></div>
+        <div slot="header"><span style="font-weight:bold;color:#67C23A;">处方记录（共 {{ prescDetails.length }} 项）</span></div>
         <el-table :data="prescDetails" border stripe size="small">
           <el-table-column prop="drName" label="药品" width="140"></el-table-column>
           <el-table-column prop="pdUsage" label="用法" width="60"></el-table-column>
@@ -70,7 +70,7 @@ export default {
       try {
         const res = await request.get("emr/findByPatient", { params: { pId: this.pId } });
         if (res.data.status === 200) this.emrList = res.data.data || [];
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     },
     handlePageChange(p) {},
     async viewDetail(row) {
@@ -79,7 +79,7 @@ export default {
       try {
         const res = await request.get("prescription/findByOrder", { params: { oId: row.oId || row.o_id } });
         if (res.data.status === 200) this.prescDetails = res.data.data || [];
-      } catch(e) { console.error(e); }
+      } catch(e) {}
       this.detailVisible = true;
     }
   },
@@ -93,3 +93,4 @@ export default {
 <style scoped>
 .el-table { width: 100% !important; }
 </style>
+

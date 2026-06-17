@@ -49,7 +49,7 @@ export default {
     methods: {
         //日历点击
         dateClick(monthDay) {
-            console.log(monthDay);
+            
 
             const nowDate = new Date();
             let year = nowDate.getFullYear();

@@ -45,7 +45,7 @@ export default {
           const list = res.data.data || [];
           this.queueInfo = list.length > 0 ? list[0] : null;
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
     }
   },
   created() {
@@ -58,3 +58,4 @@ export default {
   }
 };
 </script>
+

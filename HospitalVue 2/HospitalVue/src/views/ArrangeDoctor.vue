@@ -132,7 +132,7 @@ export default {
         },
         //   页码改变时触发
         handleCurrentChange(num) {
-            console.log(num);
+            
             this.pageNumber = num;
             this.requestDoctors();
         },
@@ -149,7 +149,7 @@ export default {
                     },
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    
                     if (res.data.status !== 200)
                         return this.$message.error("数据请求失败");
                     this.doctorData = res.data.data.doctors;

@@ -58,7 +58,7 @@ export default {
             finished: Math.max(0, (item.countSection || 0) - 3)
           }));
         }
-      } catch(e) { console.error(e); }
+      } catch(e) {}
       this.waitingTotal = this.deptQueueData.reduce((s, r) => s + r.waiting, 0);
       this.finishedTotal = this.deptQueueData.reduce((s, r) => s + r.finished, 0);
     }
@@ -66,3 +66,4 @@ export default {
   created() { this.loadData(); }
 };
 </script>
+

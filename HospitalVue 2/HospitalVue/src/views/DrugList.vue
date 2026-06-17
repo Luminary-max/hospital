@@ -14,6 +14,7 @@
       </div>
       <div class="toolbar-right">
         <el-tag class="total-tag">共 {{ total }} 条</el-tag>
+        <el-button size="small" type="success" @click="exportExcel">导出</el-button>
         <el-button type="primary" size="small" @click="addFormVisible = true">
           <i class="el-icon-plus"></i> 增加药物
         </el-button>
@@ -91,6 +92,12 @@ export default {
   },
   methods: {
     requestDrugs() { request.get("drug/findAllDrugs",{params:{pageNumber:this.pageNumber,size:this.size,query:this.query,typeFilter:this.typeFilter}}).then(r=>{this.drugData=r.data.data.drugs||[];this.total=r.data.data.total||0;}); },
+    exportExcel() {
+      if (!this.drugData||!this.drugData.length) return this.$message.warning("暂无数据");
+      var csv="﻿编号,名称,分类,库存,单位,单价,供应商,规格,批准文号,剂型,生产厂家\n";
+      this.drugData.forEach(function(d){csv+=d.drId+","+d.drName+","+(d.drType===2?"中药":"西药")+","+d.drNumber+","+d.drUnit+","+d.drPrice+","+d.drPublisher+","+(d.drSpec||"")+","+(d.drApprovalNo||"")+","+(d.drForm||"")+","+(d.drManufacturer||"")+"\n";});
+      var b=new Blob([csv],{type:"text/csv;charset=utf-8"}); var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download="药品列表.csv"; a.click();
+    },
     addDrug(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("drug/addDrug",{params:this.addForm}).then(r=>{if(r.data.status!==200)return this.$message.error("编号已占用");this.addFormVisible=false;this.requestDrugs();this.$message.success("增加成功");});}); },
     modifyDialog(id) { request.get("drug/findDrug",{params:{drId:id}}).then(r=>{this.modifyForm=r.data.data;this.modifyFormVisible=true;}); },
     modifyDrug(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("drug/modifyDrug",{params:this.modifyForm}).then(r=>{this.modifyFormVisible=false;this.requestDrugs();this.$message.success("修改成功");});}); },
