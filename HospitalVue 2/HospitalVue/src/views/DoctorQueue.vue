@@ -28,21 +28,15 @@
     <!-- 候诊列表 -->
     <h4>候诊列表（{{ waitingList.length }} 人等待）</h4>
     <el-table :data="waitingList" border stripe style="width:100%">
-      <el-table-column type="index" label="序号" width="60"></el-table-column>
-      <el-table-column prop="q_number" label="排队号码" width="120"></el-table-column>
-      <el-table-column prop="p_name" label="患者姓名" width="120"></el-table-column>
-      <el-table-column prop="q_create_time" label="取号时间" width="180"></el-table-column>
-      <el-table-column label="状态" width="120">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.q_state === 0" type="warning">等待中</el-tag>
-          <el-tag v-else-if="scope.row.q_state === 2" type="danger">已过号</el-tag>
-          <el-tag v-else type="success">已就诊</el-tag>
-        </template>
+      <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
+      <el-table-column prop="q_number" label="排队号码" width="100" align="center"></el-table-column>
+      <el-table-column prop="p_name" label="患者姓名" width="90" align="center"></el-table-column>
+      <el-table-column prop="q_create_time" label="取号时间" min-width="180"></el-table-column>
+      <el-table-column label="状态" width="90" align="center">
+        <template slot-scope="s"><el-tag :type="s.row.q_state===0?'warning':s.row.q_state===2?'danger':'success'" size="mini">{{ s.row.q_state===0?'等待中':s.row.q_state===2?'已过号':'已就诊' }}</el-tag></template>
       </el-table-column>
-      <el-table-column label="操作" width="200">
-        <template slot-scope="scope">
-          <el-button v-if="scope.row.q_state === 2" type="primary" size="mini" @click="reQueue(scope.row)">重新排入</el-button>
-        </template>
+      <el-table-column label="操作" width="120" align="center">
+        <template slot-scope="s"><el-button v-if="s.row.q_state===2" type="primary" size="mini" @click="reQueue(s.row)">重新排入</el-button></template>
       </el-table-column>
     </el-table>
   </el-card>

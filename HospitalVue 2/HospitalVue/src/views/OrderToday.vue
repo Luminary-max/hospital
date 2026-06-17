@@ -4,32 +4,22 @@
             <span><i class="el-icon-news"></i> 门诊接诊 — 今日待诊列表</span>
             <el-button type="primary" size="small" style="float:right;" @click="refreshList" icon="el-icon-refresh">刷新</el-button>
         </div>
-        <el-table :data="orderData" stripe border>
-            <el-table-column label="序号" type="index" width="60"></el-table-column>
-            <el-table-column label="排队号码" prop="oQueueNumber" width="120">
-                <template slot-scope="scope">
-                    <el-tag type="warning" v-if="scope.row.oQueueNumber">{{ scope.row.oQueueNumber }}</el-tag>
-                    <span v-else>---</span>
-                </template>
+        <el-table :data="orderData" stripe border style="width:100%">
+            <el-table-column label="序号" type="index" width="60" align="center"></el-table-column>
+            <el-table-column label="排队号码" prop="oQueueNumber" width="100" align="center">
+                <template slot-scope="s"><el-tag v-if="s.row.oQueueNumber" type="warning">{{ s.row.oQueueNumber }}</el-tag><span v-else>---</span></template>
             </el-table-column>
-            <el-table-column label="挂号单号" prop="oId" width="100"></el-table-column>
-            <el-table-column label="患者姓名" prop="pName" width="120"></el-table-column>
-            <el-table-column label="医生姓名" prop="dName" width="120"></el-table-column>
-            <el-table-column label="挂号时间" prop="oStart" width="200"></el-table-column>
-            <el-table-column label="状态" width="100">
-                <template slot-scope="scope">
-                    <el-tag type="warning" v-if="scope.row.oState === 0">待接诊</el-tag>
-                    <el-tag type="success" v-else>已完成</el-tag>
-                </template>
+            <el-table-column label="单号" prop="oId" width="80" align="center"></el-table-column>
+            <el-table-column label="患者" prop="pName" width="90" align="center"></el-table-column>
+            <el-table-column label="医生" prop="dName" width="90" align="center"></el-table-column>
+            <el-table-column label="挂号时间" prop="oStart" min-width="180"></el-table-column>
+            <el-table-column label="状态" width="80" align="center">
+                <template slot-scope="s"><el-tag :type="s.row.oState===0?'warning':'success'" size="mini">{{ s.row.oState===0?'待接诊':'已完成' }}</el-tag></template>
             </el-table-column>
-            <el-table-column label="操作" width="200">
-                <template slot-scope="scope">
-                    <el-button type="warning" @click="dealClick(scope.row.oId, scope.row.pId)">
-                        <i class="el-icon-monitor"></i> 处理
-                    </el-button>
-                    <el-button type="success" @click="dealAgainClick(scope.row.oId, scope.row.pId)" size="mini">
-                        复诊
-                    </el-button>
+            <el-table-column label="操作" width="160" align="center">
+                <template slot-scope="s">
+                    <el-button type="warning" size="mini" @click="dealClick(s.row.oId,s.row.pId)"><i class="el-icon-monitor"></i> 处理</el-button>
+                    <el-button type="success" size="mini" @click="dealAgainClick(s.row.oId,s.row.pId)">复诊</el-button>
                 </template>
             </el-table-column>
         </el-table>

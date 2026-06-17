@@ -24,7 +24,8 @@ body {
 .el-card + .el-card { margin-top: 16px; }
 
 /* ===== 表格统一样式 ===== */
-.el-card .el-table { margin-top: 16px; }
+.el-card .el-table { margin-top: 16px; width: 100%; }
+.el-table { width: 100% !important; }
 .el-table th.el-table__cell {
   background-color: #f5f7fa !important;
   color: #606266;
@@ -32,9 +33,9 @@ body {
   font-size: 13px;
   padding: 8px 0;
 }
-.el-table .cell { white-space: nowrap; }
-.el-table__body-wrapper { overflow-x: auto; }
 .el-table--striped .el-table__body tr.el-table__row--striped td { background: #fafafa; }
+/* 表格内文字不换行 */
+.el-table .cell { white-space: nowrap; }
 
 /* ===== 分页统一样式 ===== */
 .el-card .el-pagination {
@@ -58,6 +59,17 @@ body {
   text-align: right;
 }
 .el-dialog__body { padding: 20px; }
+
+/* ===== 按钮统一样式 ===== */
+/* 所有按钮统一字体大小 */
+.el-button { font-size: 13px !important; }
+.el-button--small { font-size: 12px !important; padding: 7px 12px !important; }
+.el-button--mini { font-size: 12px !important; padding: 5px 8px !important; }
+.el-button--mini.is-circle { padding: 5px !important; }
+/* 按钮内图标大小跟随按钮文字 */
+.el-button i { font-size: inherit !important; }
+/* 卡片头部按钮靠右 */
+.el-card__header .el-button { float: right; }
 
 /* ===== 表单域统一样式 ===== */
 .el-form--label-top .el-form-item__label { padding-bottom: 4px; }

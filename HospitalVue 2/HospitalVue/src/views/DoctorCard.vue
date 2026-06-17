@@ -1,152 +1,32 @@
 <template>
-    <div style="width: 100%;margin-top: -10px">
-        <el-card shadow="hover">
-            <table>
-                <tr>
-                    <td style="">姓名：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dName"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>账号：</td>
-                    <td>
-                        <el-input disabled v-model="doctorData.dId"></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>性别：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dGender"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>手机号：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dPhone"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>身份证号：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dCard"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>邮箱：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dEmail"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>职位：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dPost"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>所属科室：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dSection"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>挂号价格：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dPrice"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>评分：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dAvgStar"
-                        ></el-input>
-                    </td>
-                </tr>
-                <tr>
-                    <td>简介：</td>
-                    <td>
-                        <el-input
-                            disabled
-                            v-model="doctorData.dIntroduction"
-                            type="textarea"
-                            :rows="1"
-                        ></el-input>
-                    </td>
-                </tr>
-            </table>
-        </el-card>
-    </div>
+  <el-card>
+    <div slot="header"><i class="el-icon-user"></i> 个人信息</div>
+    <el-descriptions :column="2" border size="small">
+      <el-descriptions-item label="姓名">{{ doctorData.dName || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="账号">{{ doctorData.dId || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="性别">{{ doctorData.dGender || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="手机号">{{ doctorData.dPhone || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="证件号">{{ doctorData.dCard || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="邮箱">{{ doctorData.dEmail || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="职位">{{ doctorData.dPost || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="所属科室">{{ doctorData.dSection || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="挂号费">{{ doctorData.dPrice || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="评分">{{ doctorData.dAvgStar || '---' }}</el-descriptions-item>
+      <el-descriptions-item label="简介" :span="2">{{ doctorData.dIntroduction || '---' }}</el-descriptions-item>
+    </el-descriptions>
+  </el-card>
 </template>
 <script>
 import jwtDecode from "jwt-decode";
 import { getToken } from "@/utils/storage.js";
 import request from "@/utils/request.js";
 export default {
-    name: "DoctorCard",
-    data() {
-        return {
-            userId: "",
-            doctorData: {},
-        };
-    },
-    methods: {
-        //请求医生信息
-        requestDoctor() {
-            request
-                .get("admin/findDoctor", {
-                    params: {
-                        dId: this.userId,
-                    },
-                })
-                .then((res) => {
-                    if (res.data.status != 200)
-                        return this.$message.error("获取数据失败");
-                    this.doctorData = res.data.data;
-                });
-        },
-        //token解码
-        tokenDecode(token) {
-            if (token !== null) return jwtDecode(token);
-        },
-    },
-    created() {
-        //解码token信息
-        this.userId = this.tokenDecode(getToken()).dId;
-        this.requestDoctor();
-        console.log(this.userId);
-    },
+  name: "DoctorCard",
+  data() { return { userId:"", doctorData:{} } },
+  methods: {
+    requestDoctor(){ request.get("admin/findDoctor",{params:{dId:this.userId}}).then(r=>{if(r.data.status===200)this.doctorData=r.data.data;}); },
+    tokenDecode(t){if(t)return jwtDecode(t);}
+  },
+  created(){ this.userId=this.tokenDecode(getToken()).dId; this.requestDoctor(); }
 };
 </script>
-<style scoped lang="scss">
-td, th {
-  white-space: nowrap;
-  padding: 10px;
-}
-</style>

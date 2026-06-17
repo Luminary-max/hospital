@@ -19,11 +19,10 @@
           <el-menu-item index="patientLayout" @click="menuClick('patientLayout')"><i class="el-icon-s-home"></i><span>首页</span></el-menu-item>
           <el-menu-item index="orderOperate" @click="menuClick('orderOperate')"><i class="el-icon-plus"></i><span>在线挂号</span></el-menu-item>
           <el-menu-item index="myOrder" @click="menuClick('myOrder')"><i class="el-icon-postcard"></i><span>我的挂号</span></el-menu-item>
-          <el-menu-item index="myPrescription" @click="menuClick('myPrescription')"><i class="el-icon-medicine-edit"></i><span>我的处方</span></el-menu-item>
+          <el-menu-item index="myPrescription" @click="menuClick('myPrescription')"><i class="el-icon-document"></i><span>我的处方</span></el-menu-item>
           <el-menu-item index="myEmr" @click="menuClick('myEmr')"><i class="el-icon-reading"></i><span>我的病历</span></el-menu-item>
           <el-menu-item index="myBed" @click="menuClick('myBed')"><i class="el-icon-office-building"></i><span>我的床位</span></el-menu-item>
           <el-menu-item index="queueStatus" @click="menuClick('queueStatus')"><i class="el-icon-s-order"></i><span>排队状态</span></el-menu-item>
-          <el-menu-item index="sectionMessage" @click="menuClick('sectionMessage')"><i class="el-icon-menu"></i><span>科室信息</span></el-menu-item>
           <el-menu-item index="patientCard" @click="menuClick('patientCard')"><i class="el-icon-user"></i><span>个人信息</span></el-menu-item>
         </el-menu>
       </el-aside>

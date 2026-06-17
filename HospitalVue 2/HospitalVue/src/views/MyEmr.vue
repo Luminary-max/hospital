@@ -5,13 +5,13 @@
     </div>
     <el-table :data="emrList" border stripe style="width:100%">
       <el-table-column prop="oId" label="就诊编号" width="100"></el-table-column>
-      <el-table-column prop="dName" label="医生" width="100"></el-table-column>
-      <el-table-column prop="createTime" label="就诊日期" width="160"></el-table-column>
-      <el-table-column prop="chiefComplaint" label="主诉" width="180" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="diagnosis" label="诊断" width="160" show-overflow-tooltip></el-table-column>
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column prop="dName" label="医生" width="90"></el-table-column>
+      <el-table-column prop="createTime" label="就诊日期" width="150"></el-table-column>
+      <el-table-column prop="chiefComplaint" label="主诉" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="diagnosis" label="诊断" show-overflow-tooltip></el-table-column>
+      <el-table-column label="操作" width="1%">
         <template slot-scope="s">
-          <el-button type="primary" size="mini" @click="viewDetail(s.row)">查看详情</el-button>
+          <el-button type="primary" size="mini" @click="viewDetail(s.row)" style="white-space:nowrap;">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -90,3 +90,6 @@ export default {
   }
 };
 </script>
+<style scoped>
+.el-table { width: 100% !important; }
+</style>

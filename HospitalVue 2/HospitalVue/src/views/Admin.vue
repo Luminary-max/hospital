@@ -35,9 +35,9 @@
             <el-menu-item index="triageRecordList" @click="menuClick('triageRecordList')">分诊记录</el-menu-item>
           </el-submenu>
           <el-submenu index="3">
-            <template slot="title"><i class="el-icon-medicine"></i><span>药房管理</span></template>
-            <el-menu-item index="pharmacyDispensingList" @click="menuClick('pharmacyDispensingList')">发药管理</el-menu-item>
-            <el-menu-item index="drugBatchList" @click="menuClick('drugBatchList')">药品批次</el-menu-item>
+            <template slot="title"><i class="el-icon-first-aid-kit"></i><span>药房管理</span></template>
+            <el-menu-item index="pharmacyDispensingList" @click="menuClick('pharmacyDispensingList')"><span>发药管理</span></el-menu-item>
+            <el-menu-item index="drugBatchList" @click="menuClick('drugBatchList')"><span>药品批次</span></el-menu-item>
           </el-submenu>
           <el-submenu index="4">
             <template slot="title"><i class="el-icon-office-building"></i><span>床位管理</span></template>

@@ -3,21 +3,21 @@
     <div slot="header"><span><i class="el-icon-document"></i> 处方管理</span></div>
     <el-table :data="prescriptionData" border stripe style="width:100%">
       <el-table-column prop="oId" label="订单编号" width="100"></el-table-column>
-      <el-table-column prop="pName" label="患者姓名" width="100"></el-table-column>
-      <el-table-column prop="oStart" label="就诊日期" width="160"></el-table-column>
-      <el-table-column label="诊断" width="160" show-overflow-tooltip>
+      <el-table-column prop="pName" label="患者姓名" width="90"></el-table-column>
+      <el-table-column prop="oStart" label="就诊日期" min-width="160"></el-table-column>
+      <el-table-column label="诊断" min-width="160" show-overflow-tooltip>
         <template slot-scope="s">{{ s.row.oRecord || '---' }}</template>
       </el-table-column>
-      <el-table-column prop="oTotalPrice" label="总价(元)" width="80">
+      <el-table-column prop="oTotalPrice" label="总价(元)" width="80" align="center">
         <template slot-scope="s"><span v-if="s.row.oTotalPrice">¥{{ s.row.oTotalPrice }}</span><span v-else>---</span></template>
       </el-table-column>
-      <el-table-column label="缴费" width="80">
+      <el-table-column label="缴费" width="80" align="center">
         <template slot-scope="s">
           <el-tag v-if="s.row.oPriceState === 0" type="danger">未缴费</el-tag>
           <el-tag v-else type="success">已缴费</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column label="操作" width="160">
         <template slot-scope="s">
           <el-button type="primary" size="mini" @click="viewDetail(s.row)">查看详情</el-button>
           <el-button type="success" size="mini" @click="printPrescription(s.row)">打印</el-button>

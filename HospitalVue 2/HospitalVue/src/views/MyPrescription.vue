@@ -5,17 +5,17 @@
     </div>
     <el-table :data="prescriptionList" border stripe style="width:100%">
       <el-table-column prop="oId" label="订单编号" width="110"></el-table-column>
-      <el-table-column prop="dName" label="医生" width="100"></el-table-column>
-      <el-table-column prop="oStart" label="就诊日期" width="160"></el-table-column>
-      <el-table-column prop="oDrug" label="药品" width="200" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="oTotalPrice" label="总价(元)" width="80"></el-table-column>
-      <el-table-column label="缴费" width="80">
+      <el-table-column prop="dName" label="医生" width="90"></el-table-column>
+      <el-table-column prop="oStart" label="就诊日期" width="150"></el-table-column>
+      <el-table-column prop="oDrug" label="药品" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="oTotalPrice" label="总价" width="70" align="center"></el-table-column>
+      <el-table-column label="缴费" width="80" align="center">
         <template slot-scope="s">
           <el-tag v-if="s.row.oPriceState === 0" type="danger">未缴费</el-tag>
           <el-tag v-else type="success">已缴费</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column label="操作" width="90">
         <template slot-scope="s">
           <el-button type="primary" size="mini" @click="viewDetail(s.row)">查看详情</el-button>
         </template>
@@ -71,6 +71,13 @@ export default {
     },
     viewDetail(row) { this.detailData = row; this.detailVisible = true; }
   },
-  created() { const t = getToken(); if (t) { const d = jwtDecode(t); this.pId = d.pId || d.sub; } this.loadData(); }
+  created() {
+    const t = getToken();
+    if (t) { const d = jwtDecode(t); this.pId = d.pId || d.sub; }
+    this.loadData();
+  }
 };
 </script>
+<style scoped>
+.el-table { width: 100% !important; }
+</style>

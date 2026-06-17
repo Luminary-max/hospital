@@ -19,11 +19,11 @@
     </div>
     <el-table :data="deptQueueData" border stripe style="width:100%">
       <el-table-column prop="deptName" label="科室" width="150"></el-table-column>
-      <el-table-column prop="todayTotal" label="今日挂号" width="120"></el-table-column>
-      <el-table-column prop="waiting" label="候诊人数" width="120"></el-table-column>
-      <el-table-column prop="calling" label="当前叫号" width="120"></el-table-column>
-      <el-table-column prop="finished" label="已完成" width="120"></el-table-column>
-      <el-table-column label="状态" width="150">
+      <el-table-column prop="todayTotal" label="今日挂号" width="100" align="center"></el-table-column>
+      <el-table-column prop="waiting" label="候诊人数" width="100" align="center"></el-table-column>
+      <el-table-column prop="calling" label="当前叫号" width="100" align="center"></el-table-column>
+      <el-table-column prop="finished" label="已完成" width="100" align="center"></el-table-column>
+      <el-table-column label="状态" align="center">
         <template slot-scope="s">
           <el-tag v-if="s.row.waiting > 0" type="warning">排队中</el-tag>
           <el-tag v-else type="success">空闲</el-tag>

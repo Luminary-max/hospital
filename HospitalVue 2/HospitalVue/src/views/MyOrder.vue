@@ -1,126 +1,44 @@
 <template>
-    <div>
-        <el-card>
-            <el-table :data="orderData" stripe style="width: 100%" border>
-                <el-table-column
-                    prop="oId"
-                    label="挂号单号"
-                    width="75px"
-                ></el-table-column>
-                <el-table-column
-                    prop="pId"
-                    label="本人id"
-                    width="75px"
-                ></el-table-column>
-                <el-table-column
-                    prop="pName"
-                    label="姓名"
-                    width="75px"
-                ></el-table-column>
-                <el-table-column
-                    prop="dId"
-                    label="医生id"
-                    width="75px"
-                ></el-table-column>
-                <el-table-column
-                    prop="dName"
-                    label="医生姓名"
-                    width="75px"
-                ></el-table-column>
-
-                <el-table-column
-                    prop="oStart"
-                    label="挂号时间"
-                    width="195px"
-                ></el-table-column>
-                <el-table-column
-                    prop="oEnd"
-                    label="结束时间"
-                    width="185px"
-                ></el-table-column>
-                <el-table-column
-                    prop="oTotalPrice"
-                    label="需交费用/元"
-                    width="80px"
-                ></el-table-column>
-                <el-table-column
-                    prop="oPriceState"
-                    label="缴费状态"
-                    width="150"
-                >
-                    <template slot-scope="scope">
-                        <el-tag
-                            type="success"
-                            v-if="scope.row.oPriceState === 1"
-                            >已缴费</el-tag
-                        >
-                        <!-- <el-tag type="danger" v-if="scope.row.oPriceState === 0 && scope.row.oState === 1">未缴费</el-tag> -->
-                        <el-button
-                            type="warning"
-                            icon="iconfont icon-r-mark1"
-                            style="font-size: 14px"
-                            v-if="
-                                scope.row.oPriceState === 0 &&
-                                scope.row.oState === 1
-                            "
-                            @click="priceClick(scope.row.oId, scope.row.dId)"
-                        >
-                            点击缴费</el-button
-                        >
-                    </template>
-                </el-table-column>
-                <el-table-column prop="oState" label="挂号状态" width="100px">
-                    <template slot-scope="scope">
-                        <el-tag
-                            type="success"
-                            v-if="
-                                scope.row.oState === 1 &&
-                                scope.row.oPriceState === 1
-                            "
-                            >已完成</el-tag
-                        >
-                        <el-tag
-                            type="danger"
-                            v-if="
-                                scope.row.oPriceState === 0 && scope.row.oState === 0
-                            "
-                            >未完成</el-tag
-                        >
-                    </template>
-                </el-table-column>
-                <el-table-column label="报告单">
-                    <template slot-scope="scope">
-                        <el-button
-                            type="success"
-                            icon="el-icon-search"
-                            style="font-size: 14px"
-                            @click="seeReport(scope.row.oId)"
-                            v-if="
-                                scope.row.oState === 1 &&
-                                scope.row.oPriceState === 1
-                            "
-                            > 查看</el-button
-                        >
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-card>
-        <!-- 评价对话框 -->
-        <el-dialog title="用户评价" :visible.sync="starVisible">
-            <div>
-                <h3>
-                    请对工号：{{ dId }}&nbsp;医生：{{ dName }}&nbsp;进行评价
-                </h3>
-            </div>
-            <div>
-                <el-rate v-model="star" show-text> </el-rate>
-            </div>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="starVisible = false" style="font-size: 18px;"><i class="el-icon-close" style="font-size: 20px;"></i> 取 消</el-button>
-                <el-button type="primary" @click="starClick"style="font-size: 18px;"><i class="el-icon-check" style="font-size: 20px;"></i> 确 定</el-button>
-            </div>
-        </el-dialog>
-    </div>
+  <div>
+    <el-card>
+      <el-table :data="orderData" stripe border style="width:100%">
+        <el-table-column prop="oId" label="单号" width="80" align="center"></el-table-column>
+        <el-table-column prop="pName" label="姓名" width="70" align="center"></el-table-column>
+        <el-table-column prop="dName" label="医生" width="80" align="center"></el-table-column>
+        <el-table-column prop="oStart" label="挂号时间" min-width="160"></el-table-column>
+        <el-table-column prop="oEnd" label="结束时间" min-width="140"></el-table-column>
+        <el-table-column prop="oTotalPrice" label="费用" width="80" align="center"></el-table-column>
+        <el-table-column label="缴费" width="100" align="center">
+          <template slot-scope="s">
+            <el-tag v-if="s.row.oPriceState===1" type="success">已缴费</el-tag>
+            <el-button v-else-if="s.row.oState===1" type="warning" size="mini" @click="priceClick(s.row.oId,s.row.dId)">点击缴费</el-button>
+            <span v-else style="color:#ccc;">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="80" align="center">
+          <template slot-scope="s">
+            <el-tag v-if="s.row.oState===1&&s.row.oPriceState===1" type="success">已完成</el-tag>
+            <el-tag v-else-if="s.row.oPriceState===0&&s.row.oState===0" type="danger">未完成</el-tag>
+            <el-tag v-else type="warning">待缴费</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="报告单" width="90" align="center">
+          <template slot-scope="s">
+            <el-button v-if="s.row.oState===1&&s.row.oPriceState===1" type="success" size="mini" @click="seeReport(s.row.oId)">查看</el-button>
+            <span v-else style="color:#ccc;">-</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+    <el-dialog title="用户评价" :visible.sync="starVisible" width="400px">
+      <div style="text-align:center;padding:10px;">
+        <h4>请对医生 {{ dName }} 进行评价</h4>
+        <el-rate v-model="star" style="margin-top:15px;"></el-rate>
+      </div>
+      <div slot="footer"><el-button @click="starVisible=false">取消</el-button><el-button type="primary" @click="starClick">确定</el-button></div>
+    </el-dialog>
+  </div>
+</template>
 </template>
 <script>
 import request from "@/utils/request.js";
