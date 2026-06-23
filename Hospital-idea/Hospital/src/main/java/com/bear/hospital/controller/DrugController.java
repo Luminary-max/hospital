@@ -14,59 +14,56 @@ import org.springframework.web.bind.annotation.RestController;
 public class DrugController {
     @Autowired
     private DrugService drugService;
-    /**
-     * 分页模糊查询所有药物信息
-     */
+
     @RequestMapping("findAllDrugs")
     public ResponseData findAllDrugs(int pageNumber, int size, String query, Integer typeFilter){
         return ResponseData.success("返回所有药物信息成功", this.drugService.findAllDrugs(pageNumber, size, query, typeFilter));
     }
-    /**
-     * 根据id查找药物
-     */
     @RequestMapping("findDrug")
     public ResponseData findDrug(String drId){
         return ResponseData.success("根据id查找药物成功", this.drugService.findDrug(drId));
     }
-    /**
-     * 根据id删除药物数量
-     */
     @RequestMapping("reduceDrugNumber")
     public ResponseData reduceDrugNumber(String drId,int usedNumber){
         if (this.drugService.reduceDrugNumber(drId, usedNumber))
             return ResponseData.success("根据id删除药物数量成功");
         return ResponseData.fail("根据id删除药物数量失败");
     }
-    /**
-     * 增加药物信息
-     */
     @RequestMapping("addDrug")
     @ResponseBody
     public ResponseData addDrug(Drug drug) {
         Boolean bo = this.drugService.addDrug(drug);
-        if (bo) {
-            return ResponseData.success("增加药物信息成功");
-        }
+        if (bo) return ResponseData.success("增加药物信息成功");
         return ResponseData.fail("增加药物信息失败！账号或已被占用");
     }
-    /**
-     * 删除药物信息
-     */
     @RequestMapping("deleteDrug")
     public ResponseData deleteDrug(@RequestParam(value = "drId") String drId) {
         Boolean bo = this.drugService.deleteDrug(drId);
-        if (bo){
-            return ResponseData.success("删除药物信息成功");
-        }
+        if (bo) return ResponseData.success("删除药物信息成功");
         return ResponseData.fail("删除药物信息失败");
     }
-    /**
-     * 修改药物信息
-     */
     @RequestMapping("modifyDrug")
     @ResponseBody
     public ResponseData modifyDrug(Drug drug) {
         this.drugService.modifyDrug(drug);
         return ResponseData.success("修改药物信息成功");
+    }
+    @RequestMapping("findPriceLogs")
+    public ResponseData findPriceLogs(@RequestParam(required = false) String drId) {
+        return ResponseData.success("查询成功", this.drugService.findPriceLogs(drId));
+    }
+    @RequestMapping("toggleDisabled")
+    public ResponseData toggleDisabled(@RequestParam String drId) {
+        if (this.drugService.toggleDisabled(drId)) return ResponseData.success("操作成功");
+        return ResponseData.fail("操作失败");
+    }
+    @RequestMapping("uploadImage")
+    @ResponseBody
+    public ResponseData uploadImage(@RequestParam String drId, @RequestParam String drImage) {
+        Drug drug = drugService.findDrug(drId);
+        if (drug == null) return ResponseData.fail("药品不存在");
+        drug.setDrImage(drImage);
+        drugService.modifyDrug(drug);
+        return ResponseData.success("上传成功");
     }
 }

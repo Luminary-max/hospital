@@ -32,7 +32,7 @@ public class OrderController {
     public ResponseData updatePrice(int oId){
         if (this.orderService.updatePrice(oId))
         return ResponseData.success("根据id设置缴费状态成功");
-        return ResponseData.success("根据id设置缴费状态失败");
+        return ResponseData.fail("根据id设置缴费状态失败");
     }
     /**
      * 处理收费（含支付方式、发票号、医保报销）
@@ -171,4 +171,78 @@ public class OrderController {
         return ResponseData.success("获取每日收入统计成功", result);
     }
 
+    /**
+     * 更新订单状态（状态机）
+     */
+    @RequestMapping("updateOrderState")
+    public ResponseData updateOrderState(@RequestParam int oId, @RequestParam int newState) {
+        if (this.orderService.updateOrderState(oId, newState))
+            return ResponseData.success("更新状态成功");
+        return ResponseData.fail("更新状态失败，状态转换不合法");
+    }
+
+    /**
+     * Feature 1: 取消挂号
+     */
+    @RequestMapping("cancelOrder")
+    public ResponseData cancelOrder(@RequestParam int oId, @RequestParam String reason) {
+        if (this.orderService.cancelOrder(oId, reason))
+            return ResponseData.success("取消挂号成功");
+        return ResponseData.fail("取消挂号失败");
+    }
+
+    /**
+     * Feature 2: 复诊挂号
+     */
+    @RequestMapping("reRegister")
+    public ResponseData reRegister(@RequestParam int oId) {
+        if (this.orderService.reRegister(oId))
+            return ResponseData.success("复诊挂号成功");
+        return ResponseData.fail("复诊挂号失败");
+    }
+
+    /**
+     * Feature 3: 标记爽约
+     */
+    @RequestMapping("markMissed")
+    public ResponseData markMissed(@RequestParam int oId) {
+        if (this.orderService.markMissed(oId))
+            return ResponseData.success("标记爽约成功");
+        return ResponseData.fail("标记爽约失败");
+    }
+
+    /**
+     * Feature 3: 查询患者爽约次数
+     */
+    @RequestMapping("countMissed")
+    public ResponseData countMissed(@RequestParam int pId) {
+        int count = this.orderService.countMissed(pId);
+        return ResponseData.success("查询成功", count);
+    }
+
+    /**
+     * Feature 4: 医生换诊/代诊
+     */
+    @RequestMapping("substitute")
+    public ResponseData substituteDoctor(@RequestParam String oldDid, @RequestParam String newDid, @RequestParam String date) {
+        if (this.orderService.substituteDoctor(oldDid, newDid, date))
+            return ResponseData.success("换诊成功");
+        return ResponseData.fail("换诊失败");
+    }
+
+    /**
+     * Feature 10: 患者费用明细
+     */
+    @RequestMapping("patientBillingDetail")
+    public ResponseData patientBillingDetail(@RequestParam int pId) {
+        return ResponseData.success("查询成功", this.orderService.patientBillingDetail(pId));
+    }
+
+    /**
+     * Feature 5: 复诊提醒列表
+     */
+    @RequestMapping("findOrdersNeedingFollowUp")
+    public ResponseData findOrdersNeedingFollowUp() {
+        return ResponseData.success("查询成功", this.orderService.findOrdersNeedingFollowUp());
+    }
 }

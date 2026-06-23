@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +25,10 @@ public class DrugBatch {
     @JsonProperty("dbCreateTime")
     private String dbCreateTime;
 
+    @TableField(exist = false)
+    @JsonProperty("dbDrugName")
+    private String dbDrugName;
+
     public DrugBatch() {}
 
     public Integer getDbId() { return dbId; }
@@ -42,4 +47,6 @@ public class DrugBatch {
     public void setDbSupplier(String dbSupplier) { this.dbSupplier = dbSupplier; }
     public String getDbCreateTime() { return dbCreateTime; }
     public void setDbCreateTime(String dbCreateTime) { this.dbCreateTime = dbCreateTime; }
+    public String getDbDrugName() { return dbDrugName; }
+    public void setDbDrugName(String dbDrugName) { this.dbDrugName = dbDrugName; }
 }

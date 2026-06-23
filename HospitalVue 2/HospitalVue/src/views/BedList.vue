@@ -13,7 +13,7 @@
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加床位</el-button>
       </div>
     </div>
-    <el-table :data="bedData" stripe border>
+    <el-table :data="bedData" stripe border style="width:100%">
       <el-table-column label="编号" prop="bId" width="90"></el-table-column>
       <el-table-column label="类型" width="80"><template slot-scope="s"><el-tag :type="s.row.bType===1?'success':'primary'" size="mini">{{ s.row.bType===1?'输液椅':'观察床' }}</el-tag></template></el-table-column>
       <el-table-column label="患者" prop="pId" width="80"><template slot-scope="s"><span v-if="s.row.pId!==-1">{{ s.row.pId }}</span><span v-else>-</span></template></el-table-column>

@@ -47,7 +47,7 @@
       </el-card>
       <el-card shadow="hover" style="margin-bottom:15px;">
         <div slot="header"><span style="font-weight:bold;color:#E6A23C;">药品明细</span></div>
-        <el-table :data="prescDetails" border stripe size="small" v-if="prescDetails.length > 0">
+        <el-table :data="prescDetails" border stripe size="small" v-if="prescDetails.length > 0" style="width:100%">
           <el-table-column prop="drName" label="药品名" width="140"></el-table-column>
           <el-table-column prop="pdUsage" label="用法" width="60"></el-table-column>
           <el-table-column prop="pdDosage" label="用量" width="60"></el-table-column>
@@ -136,4 +136,6 @@ export default {
   }
 };
 </script>
+
+
 

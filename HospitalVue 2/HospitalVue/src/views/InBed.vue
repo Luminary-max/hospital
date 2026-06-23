@@ -13,7 +13,7 @@
                     </el-input>
                 </el-col>
             </el-row>
-            <el-table :data="orderData" stripe border>
+            <el-table :data="orderData" stripe border style="width:100%">
                 <el-table-column label="挂号单号" prop="oId"></el-table-column>
                 <el-table-column label="患者id" prop="pId"></el-table-column>
                 <el-table-column label="医生id" prop="dId"></el-table-column>

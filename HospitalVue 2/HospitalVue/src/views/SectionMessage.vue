@@ -13,7 +13,7 @@
           <el-button v-for="d in monthDays" :key="d" size="mini" :type="selectedDate===d?'primary':'default'" @click="dateClick(d)" style="margin:2px;">{{ d }}</el-button>
         </div>
       </div>
-      <el-table :data="sectionData" stripe border>
+      <el-table :data="sectionData" stripe border style="width:100%">
         <el-table-column type="index" label="序号" width="60"></el-table-column>
         <el-table-column prop="dId" label="工号" width="80"></el-table-column>
         <el-table-column prop="dName" label="姓名" width="80"></el-table-column>
@@ -115,3 +115,4 @@ export default {
 <style scoped>
 .head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
 </style>
+

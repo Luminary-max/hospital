@@ -58,5 +58,9 @@ public interface DoctorService {
      */
     List<Doctor> findAll();
 
+    /**
+     * 设置医生每日最大接诊量
+     */
+    Boolean setMaxDaily(String dId, int maxDaily);
 
 }

@@ -33,11 +33,28 @@
             <el-menu-item index="arrangeIndex" @click="menuClick('arrangeIndex')">排班管理</el-menu-item>
             <el-menu-item index="queueManage" @click="menuClick('queueManage')">排队叫号</el-menu-item>
             <el-menu-item index="triageRecordList" @click="menuClick('triageRecordList')">分诊记录</el-menu-item>
+<el-menu-item index="publicQueue" @click="menuClick('publicQueue')"><i class="el-icon-video-camera"></i>大屏叫号</el-menu-item>
+            <el-menu-item index="prescriptionTemplateList" @click="menuClick('prescriptionTemplateList')">处方模板</el-menu-item>
+            <el-menu-item index="diagnosisDictList" @click="menuClick('diagnosisDictList')">诊断词库</el-menu-item>
+            <el-menu-item index="emrTemplateList" @click="menuClick('emrTemplateList')">病历模板</el-menu-item>
           </el-submenu>
           <el-submenu index="3">
             <template slot="title"><i class="el-icon-first-aid-kit"></i><span>药房管理</span></template>
             <el-menu-item index="pharmacyDispensingList" @click="menuClick('pharmacyDispensingList')"><span>发药管理</span></el-menu-item>
+            <el-menu-item index="drugCategoryList" @click="menuClick('drugCategoryList')"><span>药品分类</span></el-menu-item>
             <el-menu-item index="drugBatchList" @click="menuClick('drugBatchList')"><span>药品批次</span></el-menu-item>
+            <el-menu-item index="inventoryCenter" @click="menuClick('inventoryCenter')"><span>库存中心</span></el-menu-item>
+          </el-submenu>
+          <el-submenu index="5">
+            <template slot="title"><i class="el-icon-monitor"></i><span>检查检验</span></template>
+            <el-menu-item index="checkResultList" @click="menuClick('checkResultList')"><span>检查结果管理</span></el-menu-item>
+          </el-submenu>
+          <el-submenu index="6">
+            <template slot="title"><i class="el-icon-s-finance"></i><span>收费管理</span></template>
+            <el-menu-item index="rechargeList" @click="menuClick('rechargeList')"><span>收费管理</span></el-menu-item>
+            <el-menu-item index="cashierSettlement" @click="menuClick('cashierSettlement')"><span>收银结算</span></el-menu-item>
+            <el-menu-item index="refundApproval" @click="menuClick('refundApproval')"><span>退费审批</span></el-menu-item>
+            <el-menu-item index="invoiceManage" @click="menuClick('invoiceManage')"><span>发票管理</span></el-menu-item>
           </el-submenu>
           <el-submenu index="4">
             <template slot="title"><i class="el-icon-office-building"></i><span>床位管理</span></template>
@@ -45,7 +62,11 @@
             <el-menu-item index="observeBedList" @click="menuClick('observeBedList')">观察区</el-menu-item>
           </el-submenu>
           <el-menu-item index="notificationList" @click="menuClick('notificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
-          <el-menu-item index="dataExpore" @click="menuClick('dataExpore')"><i class="el-icon-s-data"></i><span>数据统计</span></el-menu-item>
+          <el-submenu index="7">
+            <template slot="title"><i class="el-icon-s-data"></i><span>数据统计</span></template>
+            <el-menu-item index="dataExpore" @click="menuClick('dataExpore')">门诊统计</el-menu-item>
+            <el-menu-item index="doctorStatsPanel" @click="menuClick('doctorStatsPanel')">医生统计</el-menu-item>
+          </el-submenu>
           <el-menu-item index="auditLogList" @click="menuClick('auditLogList')"><i class="el-icon-document"></i><span>审计日志</span></el-menu-item>
         </el-menu>
       </el-aside>

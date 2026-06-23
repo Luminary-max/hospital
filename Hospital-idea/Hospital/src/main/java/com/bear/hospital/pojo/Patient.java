@@ -45,11 +45,15 @@ public class Patient {
     private String pMaritalStatus;
     @JsonProperty("pBloodType")
     private String pBloodType;
+    @JsonProperty("pBlacklisted")
+    private Integer pBlacklisted;
+    @JsonProperty("pTags")
+    private String pTags;
 
     public Patient() {
     }
 
-    public Patient(int pId, String pPassword, String pName, String pGender, String pCard, String pEmail, String pPhone, Integer pState, String pBirthday, Integer pAge, String pInsuranceId, String pInsuranceType, String pContactPerson, String pContactPhone, String pAddress, String pNation, String pMaritalStatus, String pBloodType) {
+    public Patient(int pId, String pPassword, String pName, String pGender, String pCard, String pEmail, String pPhone, Integer pState, String pBirthday, Integer pAge, String pInsuranceId, String pInsuranceType, String pContactPerson, String pContactPhone, String pAddress, String pNation, String pMaritalStatus, String pBloodType, Integer pBlacklisted, String pTags) {
         this.pId = pId;
         this.pPassword = pPassword;
         this.pName = pName;
@@ -68,6 +72,8 @@ public class Patient {
         this.pNation = pNation;
         this.pMaritalStatus = pMaritalStatus;
         this.pBloodType = pBloodType;
+        this.pBlacklisted = pBlacklisted;
+        this.pTags = pTags;
     }
 
     public int getPId() { return pId; }
@@ -108,6 +114,11 @@ public class Patient {
     public String getPBloodType() { return pBloodType; }
     public void setPBloodType(String pBloodType) { this.pBloodType = pBloodType; }
 
+    public Integer getPBlacklisted() { return pBlacklisted; }
+    public void setPBlacklisted(Integer pBlacklisted) { this.pBlacklisted = pBlacklisted; }
+    public String getPTags() { return pTags; }
+    public void setPTags(String pTags) { this.pTags = pTags; }
+
     @Override
     public String toString() {
         return "Patient{" +
@@ -126,6 +137,8 @@ public class Patient {
                 ", pNation='" + pNation + '\'' +
                 ", pMaritalStatus='" + pMaritalStatus + '\'' +
                 ", pBloodType='" + pBloodType + '\'' +
+                ", pBlacklisted=" + pBlacklisted +
+                ", pTags='" + pTags + '\'' +
                 '}';
     }
 }

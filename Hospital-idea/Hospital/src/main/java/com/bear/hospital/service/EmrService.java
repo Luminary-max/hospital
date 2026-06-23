@@ -8,4 +8,5 @@ public interface EmrService {
     OutpatientEmr findByOrderId(int oId);
     List<OutpatientEmr> findByPatientId(int pId);
     boolean updateEmr(OutpatientEmr emr);
+    OutpatientEmr copyFromHistory(int emrId, int newOId);
 }

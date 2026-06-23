@@ -89,12 +89,11 @@ public class DoctorServiceImpl implements DoctorService {
      */
     @Override
     public Boolean addDoctor(Doctor doctor) {
-        //如果账号已存在则返回false
-        List<Doctor> doctors = this.doctorMapper.selectList(null);
-        for (Doctor doctor1 : doctors) {
-            if (doctor.getdId() == doctor1.getdId()) {
-                return false;
-            }
+        //如果账号已存在则返回false (使用count避免全表扫描)
+        QueryWrapper<Doctor> existCheck = new QueryWrapper<>();
+        existCheck.eq("d_id", doctor.getdId());
+        if (this.doctorMapper.selectCount(existCheck) > 0) {
+            return false;
         }
         //密码加密
         String password = Md5Util.getMD5(doctor.getdPassword());
@@ -217,5 +216,15 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public List<Doctor> findAll(){
         return this.doctorMapper.selectList(null);
+    }
+
+    /**
+     * 设置医生每日最大接诊量
+     */
+    @Override
+    public Boolean setMaxDaily(String dId, int maxDaily) {
+        UpdateWrapper<Doctor> wrapper = new UpdateWrapper<>();
+        wrapper.eq("d_id", dId).set("d_max_daily", maxDaily);
+        return this.doctorMapper.update(null, wrapper) > 0;
     }
 }

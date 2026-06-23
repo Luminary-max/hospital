@@ -1,8 +1,11 @@
 package com.bear.hospital.service;
 
 import com.bear.hospital.pojo.Checks;
+import com.bear.hospital.pojo.OrderCheck;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public interface CheckService {
     /**
@@ -25,4 +28,31 @@ public interface CheckService {
      * 修改检查信息
      */
     Boolean modifyCheck(Checks checks);
+
+    // ========== Order Check operations ==========
+
+    /**
+     * 分页查询检查开单
+     */
+    HashMap<String, Object> findOrderChecks(int pageNumber, int size, Integer oId, Integer status);
+
+    /**
+     * 医生开检查单
+     */
+    Boolean createOrderCheck(int oId, String chId, String chName, Double chPrice);
+
+    /**
+     * 批量开检查单
+     */
+    Boolean batchCreateOrderChecks(int oId, List<Map<String, Object>> items);
+
+    /**
+     * 录入检查结果
+     */
+    Boolean updateCheckResult(Integer ocId, String result, String attachment, String operator);
+
+    /**
+     * 更新检查状态
+     */
+    Boolean updateCheckStatus(Integer ocId, Integer status);
 }

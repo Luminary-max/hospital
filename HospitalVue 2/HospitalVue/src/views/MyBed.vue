@@ -4,7 +4,7 @@
             <div slot="header">
                 <span><i class="el-icon-office-building"></i> 我的留观/输液记录</span>
             </div>
-            <el-table :data="bedData" border stripe v-if="bedData.length > 0">
+            <el-table :data="bedData" border stripe v-if="bedData.length > 0" style="width:100%">
                 <el-table-column label="编号" prop="bId"></el-table-column>
                 <el-table-column label="类型" prop="bType">
                     <template slot-scope="scope">

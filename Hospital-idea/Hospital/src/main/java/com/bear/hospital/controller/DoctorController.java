@@ -96,4 +96,14 @@ public class DoctorController {
         return ResponseData.success("Excel导出数据成功");
         return ResponseData.fail("Excel导出数据失败");
     }
+
+    /**
+     * Feature 6: 设置医生每日最大接诊量
+     */
+    @RequestMapping("setMaxDaily")
+    public ResponseData setMaxDaily(@RequestParam String dId, @RequestParam int maxDaily) {
+        if (this.doctorService.setMaxDaily(dId, maxDaily))
+            return ResponseData.success("设置最大接诊量成功");
+        return ResponseData.fail("设置最大接诊量失败");
+    }
 }

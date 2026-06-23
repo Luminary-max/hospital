@@ -13,6 +13,8 @@ public class PharmacyDispensing {
     private Integer oId;
     @JsonProperty("drId")
     private String drId;
+    @JsonProperty("dbId")
+    private Integer dbId;
     @JsonProperty("pdQuantity")
     private Integer pdQuantity;
     @JsonProperty("pdStatus")
@@ -23,6 +25,14 @@ public class PharmacyDispensing {
     private String pdDispenseTime;
     @JsonProperty("pdDispenseBy")
     private String pdDispenseBy;
+    @JsonProperty("pdReviewBy")
+    private String pdReviewBy;
+    @JsonProperty("pdReviewTime")
+    private String pdReviewTime;
+    @JsonProperty("pdReturnTime")
+    private String pdReturnTime;
+    @JsonProperty("pdReturnBy")
+    private String pdReturnBy;
     @JsonProperty("pdNote")
     private String pdNote;
 
@@ -34,6 +44,8 @@ public class PharmacyDispensing {
     public void setOId(Integer oId) { this.oId = oId; }
     public String getDrId() { return drId; }
     public void setDrId(String drId) { this.drId = drId; }
+    public Integer getDbId() { return dbId; }
+    public void setDbId(Integer dbId) { this.dbId = dbId; }
     public Integer getPdQuantity() { return pdQuantity; }
     public void setPdQuantity(Integer pdQuantity) { this.pdQuantity = pdQuantity; }
     public Integer getPdStatus() { return pdStatus; }
@@ -44,6 +56,14 @@ public class PharmacyDispensing {
     public void setPdDispenseTime(String pdDispenseTime) { this.pdDispenseTime = pdDispenseTime; }
     public String getPdDispenseBy() { return pdDispenseBy; }
     public void setPdDispenseBy(String pdDispenseBy) { this.pdDispenseBy = pdDispenseBy; }
+    public String getPdReviewBy() { return pdReviewBy; }
+    public void setPdReviewBy(String pdReviewBy) { this.pdReviewBy = pdReviewBy; }
+    public String getPdReviewTime() { return pdReviewTime; }
+    public void setPdReviewTime(String pdReviewTime) { this.pdReviewTime = pdReviewTime; }
+    public String getPdReturnTime() { return pdReturnTime; }
+    public void setPdReturnTime(String pdReturnTime) { this.pdReturnTime = pdReturnTime; }
+    public String getPdReturnBy() { return pdReturnBy; }
+    public void setPdReturnBy(String pdReturnBy) { this.pdReturnBy = pdReturnBy; }
     public String getPdNote() { return pdNote; }
     public void setPdNote(String pdNote) { this.pdNote = pdNote; }
 }

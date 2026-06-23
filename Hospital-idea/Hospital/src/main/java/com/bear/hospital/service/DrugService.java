@@ -1,32 +1,17 @@
 package com.bear.hospital.service;
 
 import com.bear.hospital.pojo.Drug;
-
+import com.bear.hospital.pojo.DrugPriceLog;
 import java.util.HashMap;
+import java.util.List;
 
 public interface DrugService {
-    /**
-     * 分页模糊查询所有药物信息
-     */
     HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query, Integer typeFilter);
-    /**
-     * 根据id查找药物
-     */
     Drug findDrug(String drId);
-    /**
-     * 根据id删除药物数量
-     */
     Boolean reduceDrugNumber(String drId,int usedNumber);
-    /**
-     * 增加药物信息
-     */
     Boolean addDrug(Drug drug);
-    /**
-     * 删除药物信息
-     */
     Boolean deleteDrug(String drId);
-    /**
-     * 修改药物信息
-     */
     Boolean modifyDrug(Drug drug);
+    List<DrugPriceLog> findPriceLogs(String drId);
+    Boolean toggleDisabled(String drId);
 }

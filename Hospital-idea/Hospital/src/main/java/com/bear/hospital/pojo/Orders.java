@@ -7,6 +7,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("orders")
 public class Orders {
+    // Order state constants for visit flow
+    public static final int STATE_REGISTERED = 0;      // 已挂号
+    public static final int STATE_TRIAGED = 1;          // 已分诊
+    public static final int STATE_IN_CONSULTATION = 2;  // 就诊中
+    public static final int STATE_ORDERED = 3;          // 已开处方/检查
+    public static final int STATE_PENDING_PAYMENT = 4;  // 待缴费
+    public static final int STATE_PAID = 5;             // 已缴费
+    public static final int STATE_DISPENSED = 6;        // 已发药/检查完成
+    public static final int STATE_COMPLETED = 7;        // 就诊完成
+
     @TableId(value = "o_id")
     @JsonProperty("oId")
     private int oId;
@@ -51,6 +61,12 @@ public class Orders {
     private Double oInsuranceCovered;
     @JsonProperty("oSelfPay")
     private Double oSelfPay;
+    @JsonProperty("oRegType")
+    private String oRegType;
+    @JsonProperty("oCancelReason")
+    private String oCancelReason;
+    @JsonProperty("oMissed")
+    private Integer oMissed;
 
     //多表查询用
     @TableField(exist = false)
@@ -138,6 +154,13 @@ public class Orders {
     public Double getOSelfPay() { return oSelfPay; }
     public void setOSelfPay(Double oSelfPay) { this.oSelfPay = oSelfPay; }
 
+    public String getORegType() { return oRegType; }
+    public void setORegType(String oRegType) { this.oRegType = oRegType; }
+    public String getOCancelReason() { return oCancelReason; }
+    public void setOCancelReason(String oCancelReason) { this.oCancelReason = oCancelReason; }
+    public Integer getOMissed() { return oMissed; }
+    public void setOMissed(Integer oMissed) { this.oMissed = oMissed; }
+
     public Doctor getDoctor() { return doctor; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }
     public Patient getPatient() { return patient; }
@@ -167,6 +190,9 @@ public class Orders {
                 ", oInvoiceNo='" + oInvoiceNo + '\'' +
                 ", oInsuranceCovered=" + oInsuranceCovered +
                 ", oSelfPay=" + oSelfPay +
+                ", oRegType='" + oRegType + '\'' +
+                ", oCancelReason='" + oCancelReason + '\'' +
+                ", oMissed=" + oMissed +
                 '}';
     }
 }

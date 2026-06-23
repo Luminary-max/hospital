@@ -5,9 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bear.hospital.mapper.BillingMapper;
+import com.bear.hospital.mapper.DoctorMapper;
+import com.bear.hospital.mapper.InvoiceRecordMapper;
 import com.bear.hospital.mapper.OrderMapper;
+import com.bear.hospital.mapper.PatientMapper;
 import com.bear.hospital.pojo.BillingRecord;
+import com.bear.hospital.pojo.Doctor;
+import com.bear.hospital.pojo.InvoiceRecord;
 import com.bear.hospital.pojo.Orders;
+import com.bear.hospital.pojo.Patient;
 import com.bear.hospital.service.OrderService;
 import com.bear.hospital.utils.RandomUtil;
 import com.bear.hospital.utils.TodayUtil;
@@ -27,6 +33,14 @@ public class OrderServiceImpl implements OrderService {
     private OrderMapper orderMapper;
     @Resource
     private BillingMapper billingMapper;
+    @Resource
+    private DoctorMapper doctorMapper;
+    @Resource
+    private PatientMapper patientMapper;
+    @Resource
+    private InvoiceRecordMapper invoiceRecordMapper;
+    @Resource
+    private com.bear.hospital.mapper.AuditLogMapper auditLogMapper;
     @Autowired
     private JedisPool jedisPool;//redis连接池
     /**
@@ -56,43 +70,70 @@ public class OrderServiceImpl implements OrderService {
     }
     /**
      * 增加挂号信息
+     * Feature 5: Auto-calc registration fee based on doctor title
+     * Feature 6: Check doctor max daily patients
      */
     @Override
     public Boolean addOrder(Orders order, String arId){
-        //redis开始
-        Jedis jedis = jedisPool.getResource();
-        String time = order.getOStart().substring(11, 22);
-        synchronized (this) {
-            if (time.equals("08:30-09:30")) {
-                if (jedis.hget(arId, "eTOn").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "eTOn", -1);
+        // Feature 6: Check doctor daily max
+        String today = TodayUtil.getTodayYmd();
+        Doctor doctor = this.doctorMapper.selectById(order.getdId());
+        if (doctor != null && doctor.getdMaxDaily() != null && doctor.getdMaxDaily() > 0) {
+            int todayCount = this.orderMapper.orderPeopleByDid(today, order.getdId());
+            if (todayCount >= doctor.getdMaxDaily()) {
+                return false; // exceeded daily limit
             }
+        }
 
-            if (time.equals("09:30-10:30")) {
-                if (jedis.hget(arId, "nTOt").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "nTOt", -1);
+        // Feature 5: Auto-calc registration fee based on dPost
+        if (order.getORegistrationFee() == null || order.getORegistrationFee() == 0) {
+            if (doctor != null && doctor.getdPost() != null) {
+                switch (doctor.getdPost()) {
+                    case "主任医师":
+                        order.setORegistrationFee(50.00);
+                        break;
+                    case "副主任医师":
+                        order.setORegistrationFee(30.00);
+                        break;
+                    case "主治医师":
+                        order.setORegistrationFee(20.00);
+                        break;
+                    case "医师":
+                        order.setORegistrationFee(10.00);
+                        break;
+                    default:
+                        order.setORegistrationFee(doctor.getdPrice() != null ? doctor.getdPrice() : 10.00);
+                }
+            } else {
+                order.setORegistrationFee(10.00);
             }
-            if (time.equals("10:30-11:30")) {
-                if (jedis.hget(arId, "tTOe").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "tTOe", -1);
+        }
+
+        //redis开始 — 使用Lua脚本保证跨实例原子性
+        Jedis jedis = jedisPool.getResource();
+        String oStart = order.getOStart();
+        String time = (oStart != null && oStart.length() >= 22) ? oStart.substring(11, 22) : "";
+        String timeField = null;
+        java.util.Map<String, String> slotMap = new java.util.LinkedHashMap<>();
+        slotMap.put("08:30-09:30", "eTOn");
+        slotMap.put("09:30-10:30", "nTOt");
+        slotMap.put("10:30-11:30", "tTOe");
+        slotMap.put("14:30-15:30", "fTOf");
+        slotMap.put("15:30-16:30", "fTOs");
+        slotMap.put("16:30-17:30", "sTOs");
+        for (java.util.Map.Entry<String, String> entry : slotMap.entrySet()) {
+            if (entry.getKey().equals(time)) {
+                timeField = entry.getValue();
+                break;
             }
-            if (time.equals("14:30-15:30")) {
-                if (jedis.hget(arId, "fTOf").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "fTOf", -1);
-            }
-            if (time.equals("15:30-16:30")) {
-                if (jedis.hget(arId, "fTOs").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "fTOs", -1);
-            }
-            if (time.equals("16:30-17:30")) {
-                if (jedis.hget(arId, "sTOs").equals("0"))
-                    return false;
-                jedis.hincrBy(arId, "sTOs", -1);
+        }
+        if (timeField != null) {
+            // Lua: atomic check-and-decrement. Returns 1 on success, 0 if already 0
+            String lua = "if redis.call('hget', KEYS[1], ARGV[1]) == false or tonumber(redis.call('hget', KEYS[1], ARGV[1])) <= 0 then return 0 else redis.call('hincrby', KEYS[1], ARGV[1], -1) return 1 end";
+            Object result = jedis.eval(lua, java.util.Collections.singletonList(arId), java.util.Collections.singletonList(timeField));
+            if ("0".equals(String.valueOf(result))) {
+                jedis.close();
+                return false;
             }
         }
         jedis.close();
@@ -100,7 +141,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOId(RandomUtil.randomOid(order.getPId()));
         order.setOState(0);
         order.setOPriceState(0);
-        order.setOStart(order.getOStart().substring(0,22));
+        order.setOStart(oStart != null && oStart.length() >= 22 ? oStart.substring(0,22) : oStart);
         this.orderMapper.insert(order);
         return true;
     }
@@ -123,7 +164,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public Boolean updateOrder(Orders orders) {
-        orders.setOState(1);
+        // 不强制修改 o_state，保留现有状态
         orders.setOEnd(TodayUtil.getToday());
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.eq("o_id", orders.getOId());
@@ -143,32 +184,55 @@ public class OrderServiceImpl implements OrderService {
     }
     /**
      * 处理收费
+     * Feature 8: Auto invoice generation if invoiceNo is empty
      */
     @Override
     public Boolean processPayment(int oId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator) {
+        // Feature 8: Auto-generate invoice number
+        if (invoiceNo == null || invoiceNo.isEmpty()) {
+            invoiceNo = generateInvoiceNo();
+        }
+        String finalInvoiceNo = invoiceNo;
+        // 先查订单获取费用，再更新（避免清零后查不到原金额）
+        Orders order = this.orderMapper.selectById(oId);
+        // 插入收费记录（使用原始费用，非清零后的值）
+        if (order != null && order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
+            BillingRecord record = new BillingRecord(oId, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        }
+        if (order != null && order.getOTotalPrice() != null && order.getOTotalPrice() > 0) {
+            BillingRecord record = new BillingRecord(oId, "药费+检查费", order.getOTotalPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        } else if (order != null) {
+            BillingRecord record = new BillingRecord(oId, "药费+检查费", 0.00, paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(record);
+        }
+        // 再更新订单状态
         UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
         wrapper.eq("o_id", oId)
             .set("o_payment_method", paymentMethod)
-            .set("o_invoice_no", invoiceNo)
+            .set("o_invoice_no", finalInvoiceNo)
             .set("o_insurance_covered", insuranceCovered != null ? insuranceCovered : 0.00)
             .set("o_self_pay", selfPay != null ? selfPay : 0.00)
             .set("o_price_state", 1)
             .set("o_total_price", 0.00);
         this.orderMapper.update(null, wrapper);
-        // 插入收费记录
-        Orders order = this.orderMapper.selectById(oId);
-        if (order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
-            BillingRecord record = new BillingRecord(oId, "挂号费", order.getORegistrationFee(), paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
-        }
-        if (order.getOTotalPrice() != null && order.getOTotalPrice() > 0) {
-            BillingRecord record = new BillingRecord(oId, "药费+检查费", order.getOTotalPrice(), paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
-        } else {
-            BillingRecord record = new BillingRecord(oId, "药费+检查费", 0.00, paymentMethod, invoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
-        }
+        // Feature 8: Write to invoice_record table
+        double totalAmount = (order != null && order.getORegistrationFee() != null ? order.getORegistrationFee() : 0.00)
+                + (order != null && order.getOTotalPrice() != null ? order.getOTotalPrice() : 0.00);
+        InvoiceRecord invRecord = new InvoiceRecord(oId, finalInvoiceNo, totalAmount, TodayUtil.getToday(), operator);
+        this.invoiceRecordMapper.insert(invRecord);
         return true;
+    }
+
+    /**
+     * Generate invoice number: INV-YYYYMMDD-XXXX (with retry for uniqueness)
+     */
+    private String generateInvoiceNo() {
+        String datePart = TodayUtil.getTodayYmd().replace("-", "");
+        // Use timestamp millis to avoid concurrency collision
+        String seq = String.format("%04d", (int)(Math.random() * 10000));
+        return "INV-" + datePart + "-" + seq;
     }
     /**
      * 查找医生已完成的挂号单
@@ -302,5 +366,156 @@ public class OrderServiceImpl implements OrderService {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.eq("o_state", 1).eq("o_price_state", 0);
         return this.orderMapper.selectCount(wrapper);
+    }
+
+    /**
+     * 更新订单状态（带状态机验证）
+     */
+    @Override
+    public Boolean updateOrderState(int oId, int newState) {
+        Orders order = this.orderMapper.selectById(oId);
+        if (order == null) return false;
+        int currentState = order.getOState() != null ? order.getOState() : 0;
+
+        // Validate state transition: only allow forward progression
+        if (newState <= currentState) {
+            return false;
+        }
+        // Before payment (state < 5), limit skip to at most 2 steps
+        // After payment, allow any forward jump (e.g., 5->7, 6->7)
+        if (currentState < 5 && newState > currentState + 2) {
+            return false;
+        }
+
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+        wrapper.eq("o_id", oId).set("o_state", newState);
+        // Set oEnd when completing
+        if (newState >= Orders.STATE_COMPLETED) {
+            wrapper.set("o_end", TodayUtil.getToday());
+        }
+        boolean success = this.orderMapper.update(null, wrapper) > 0;
+        if (success) {
+            // Write audit log for state transition
+            com.bear.hospital.pojo.AuditLog auditLog = new com.bear.hospital.pojo.AuditLog();
+            auditLog.setAlUserId(String.valueOf(order.getPId()));
+            auditLog.setAlUserRole("patient");
+            auditLog.setAlAction("ORDER_STATE_CHANGE");
+            auditLog.setAlTarget("o_id=" + oId);
+            auditLog.setAlDetail("State: " + currentState + " -> " + newState);
+            auditLog.setAlCreateTime(TodayUtil.getToday());
+            auditLogMapper.insert(auditLog);
+        }
+        return success;
+    }
+
+    // ========== Feature 1: Cancel Appointment ==========
+    @Override
+    public Boolean cancelOrder(int oId, String reason) {
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+        wrapper.eq("o_id", oId)
+                .set("o_state", -1)
+                .set("o_cancel_reason", reason);
+        return this.orderMapper.update(null, wrapper) > 0;
+    }
+
+    // ========== Feature 2: Re-registration ==========
+    @Override
+    public Boolean reRegister(int oId) {
+        Orders original = this.orderMapper.selectById(oId);
+        if (original == null) return false;
+        Orders newOrder = new Orders();
+        newOrder.setPId(original.getPId());
+        newOrder.setdId(original.getdId());
+        newOrder.setORegType(original.getORegType());
+        newOrder.setORegistrationFee(original.getORegistrationFee());
+        // Default new order start time to now
+        String today = TodayUtil.getTodayYmd();
+        newOrder.setOStart(today + " " + TodayUtil.getToday().substring(11, 16) + ":00");
+        newOrder.setOId(RandomUtil.randomOid(original.getPId()));
+        newOrder.setOState(0);
+        newOrder.setOPriceState(0);
+        return this.orderMapper.insert(newOrder) > 0;
+    }
+
+    // ========== Feature 3: Missed appointment & blacklist ==========
+    @Override
+    public Boolean markMissed(int oId) {
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+        wrapper.eq("o_id", oId).set("o_missed", 1).set("o_state", -1);
+        return this.orderMapper.update(null, wrapper) > 0;
+    }
+
+    @Override
+    public int countMissed(int pId) {
+        QueryWrapper<Orders> wrapper = new QueryWrapper<>();
+        wrapper.eq("p_id", pId).eq("o_missed", 1);
+        return this.orderMapper.selectCount(wrapper);
+    }
+
+    // ========== Feature 4: Doctor substitution ==========
+    @Override
+    public Boolean substituteDoctor(String oldDid, String newDid, String date) {
+        UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
+        wrapper.eq("d_id", oldDid)
+                .like("o_start", date)
+                .set("d_id", newDid);
+        return this.orderMapper.update(null, wrapper) >= 0;
+    }
+
+    // ========== Feature 10: Patient billing detail ==========
+    @Override
+    public HashMap<String, Object> patientBillingDetail(int pId) {
+        HashMap<String, Object> result = new HashMap<>();
+        // Find all orders for this patient
+        List<Orders> orders = this.orderMapper.findOrderByPid(pId);
+        java.util.ArrayList<HashMap<String, Object>> orderBills = new java.util.ArrayList<>();
+        double totalAmount = 0;
+        for (Orders order : orders) {
+            HashMap<String, Object> orderBill = new HashMap<>();
+            orderBill.put("oId", order.getOId());
+            orderBill.put("oStart", order.getOStart());
+            orderBill.put("oEnd", order.getOEnd());
+            orderBill.put("oState", order.getOState());
+            orderBill.put("dId", order.getdId());
+            orderBill.put("dName", order.getdName());
+            orderBill.put("registrationFee", order.getORegistrationFee());
+            orderBill.put("totalPrice", order.getOTotalPrice());
+            orderBill.put("paymentMethod", order.getOPaymentMethod());
+            orderBill.put("invoiceNo", order.getOInvoiceNo());
+            orderBill.put("insuranceCovered", order.getOInsuranceCovered());
+            orderBill.put("selfPay", order.getOSelfPay());
+            orderBill.put("oRegType", order.getORegType());
+            // Get billing records for this order
+            QueryWrapper<BillingRecord> bw = new QueryWrapper<>();
+            bw.eq("o_id", order.getOId());
+            List<BillingRecord> billingRecords = this.billingMapper.selectList(bw);
+            orderBill.put("billingRecords", billingRecords);
+            double orderTotal = 0;
+            for (BillingRecord br : billingRecords) {
+                orderTotal += br.getBrAmount() != null ? br.getBrAmount() : 0;
+            }
+            orderBill.put("orderPaid", orderTotal);
+            totalAmount += orderTotal;
+            orderBills.add(orderBill);
+        }
+        result.put("orders", orderBills);
+        result.put("totalAmount", totalAmount);
+        result.put("pId", pId);
+        return result;
+    }
+    // ========== Feature 5: Follow-up reminder (复诊提醒) ==========
+    @Override
+    public List<Orders> findOrdersNeedingFollowUp() {
+        List<Orders> result = new java.util.ArrayList<>();
+        int[] intervals = {7, 14, 30};
+        for (int interval : intervals) {
+            String pastDate = TodayUtil.getPastDate(interval);
+            QueryWrapper<Orders> wrapper = new QueryWrapper<>();
+            wrapper.like("o_start", pastDate)
+                .like("o_advice", "复诊")
+                .orderByDesc("o_id");
+            result.addAll(this.orderMapper.selectList(wrapper));
+        }
+        return result;
     }
 }

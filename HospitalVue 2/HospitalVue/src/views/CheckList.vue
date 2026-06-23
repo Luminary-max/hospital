@@ -13,11 +13,11 @@
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加项目</el-button>
       </div>
     </div>
-    <el-table :data="checkData" stripe border>
-      <el-table-column label="编号" prop="chId" width="100"></el-table-column>
-      <el-table-column label="项目名称" prop="chName" min-width="200"></el-table-column>
-      <el-table-column label="价格(元)" prop="chPrice" width="100"></el-table-column>
-      <el-table-column label="操作" width="95" fixed="right" align="center">
+    <el-table :data="checkData" stripe border style="width:100%">
+      <el-table-column label="编 号"   prop="chId"   width="100" ></el-table-column>
+      <el-table-column label="项 目 名 称"   prop="chName"   min-width="200" ></el-table-column>
+      <el-table-column label="价 格 ( 元 )"   prop="chPrice"   width="100" ></el-table-column>
+      <el-table-column label="操 作"   width="95"   fixed="right"   align="center" >
         <template slot-scope="s">
           <el-button type="success" size="mini" icon="el-icon-edit" circle @click="modifyDialog(s.row.chId)" title="编辑"></el-button>
           <el-button type="danger" size="mini" icon="el-icon-delete" circle @click="deleteDialog(s.row.chId)" title="删除"></el-button>
@@ -78,3 +78,13 @@ export default {
   created(){this.requestChecks();}
 };
 </script>
+
+
+
+
+
+
+
+
+
+

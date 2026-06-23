@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +25,25 @@ public class TriageRecord {
     @JsonProperty("tCreateTime")
     private String tCreateTime;
 
+    // Vital signs fields
+    @JsonProperty("tChiefComplaint")
+    private String tChiefComplaint;   // 主诉
+    @JsonProperty("tTemperature")
+    private String tTemperature;      // 体温
+    @JsonProperty("tBloodPressure")
+    private String tBloodPressure;    // 血压
+    @JsonProperty("tHeartRate")
+    private Integer tHeartRate;       // 心率
+    @JsonProperty("tWeight")
+    private String tWeight;           // 体重
+
+    @TableField(exist = false)
+    @JsonProperty("pName")
+    private String pName;
+    @TableField(exist = false)
+    @JsonProperty("dName")
+    private String dName;
+
     public TriageRecord() {}
 
     public Integer getTId() { return tId; }
@@ -42,4 +62,19 @@ public class TriageRecord {
     public void setTNote(String tNote) { this.tNote = tNote; }
     public String getTCreateTime() { return tCreateTime; }
     public void setTCreateTime(String tCreateTime) { this.tCreateTime = tCreateTime; }
+
+    public String getTChiefComplaint() { return tChiefComplaint; }
+    public void setTChiefComplaint(String tChiefComplaint) { this.tChiefComplaint = tChiefComplaint; }
+    public String getTTemperature() { return tTemperature; }
+    public void setTTemperature(String tTemperature) { this.tTemperature = tTemperature; }
+    public String getTBloodPressure() { return tBloodPressure; }
+    public void setTBloodPressure(String tBloodPressure) { this.tBloodPressure = tBloodPressure; }
+    public Integer getTHeartRate() { return tHeartRate; }
+    public void setTHeartRate(Integer tHeartRate) { this.tHeartRate = tHeartRate; }
+    public String getTWeight() { return tWeight; }
+    public void setTWeight(String tWeight) { this.tWeight = tWeight; }
+    public String getPName() { return pName; }
+    public void setPName(String pName) { this.pName = pName; }
+    public String getDName() { return dName; }
+    public void setDName(String dName) { this.dName = dName; }
 }

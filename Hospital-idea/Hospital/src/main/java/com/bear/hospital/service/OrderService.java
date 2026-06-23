@@ -83,4 +83,32 @@ public interface OrderService {
      */
     int pendingPaymentCount();
 
+    /**
+     * 更新订单状态（带状态机验证）
+     */
+    Boolean updateOrderState(int oId, int newState);
+
+    // -------- Feature 1: Cancel Appointment (取消挂号) --------
+    Boolean cancelOrder(int oId, String reason);
+
+    // -------- Feature 2: Re-registration (复诊挂号) --------
+    Boolean reRegister(int oId);
+
+    // -------- Feature 3: Missed appointment (爽约记录) --------
+    Boolean markMissed(int oId);
+    int countMissed(int pId);
+
+    // -------- Feature 4: Doctor substitution (换诊/代诊) --------
+    Boolean substituteDoctor(String oldDid, String newDid, String date);
+
+    // -------- Feature 5: Registration type & fee auto-calc --------
+    // (handled inside addOrder)
+
+    // -------- Feature 10: Patient billing detail --------
+    HashMap<String, Object> patientBillingDetail(int pId);
+
+    /**
+     * 查找需要复诊提醒的订单（7/14/30天前的含"复诊"处方）
+     */
+    List<Orders> findOrdersNeedingFollowUp();
 }

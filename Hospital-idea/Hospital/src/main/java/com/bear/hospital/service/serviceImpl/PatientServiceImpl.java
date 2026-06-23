@@ -85,13 +85,16 @@ public class PatientServiceImpl implements PatientService {
      */
     @Override
     public Boolean addPatient(Patient patient) {
-        //如果账号已存在则返回false
-        List<Patient> patients = this.patientMapper.selectList(null);
-        for (Patient patient1 : patients) {
-            if (patient.getPId() == patient1.getPId()) {
-                return false;
-            }
-            if ((patient.getPEmail()).equals(patient1.getPEmail()) ){
+        //如果账号已存在则返回false (使用count避免全表扫描)
+        QueryWrapper<Patient> idCheck = new QueryWrapper<>();
+        idCheck.eq("p_id", patient.getPId());
+        if (this.patientMapper.selectCount(idCheck) > 0) {
+            return false;
+        }
+        if (patient.getPEmail() != null && !patient.getPEmail().isEmpty()) {
+            QueryWrapper<Patient> emailCheck = new QueryWrapper<>();
+            emailCheck.eq("p_email", patient.getPEmail());
+            if (this.patientMapper.selectCount(emailCheck) > 0) {
                 return false;
             }
         }
@@ -99,12 +102,15 @@ public class PatientServiceImpl implements PatientService {
         if (patient.getPPassword() == null || patient.getPPassword().isEmpty()) {
             patient.setPPassword("123456");
         }
-        int yourYear = Integer.parseInt(patient.getPBirthday().substring(0, 4));
-        int todayYear = Integer.parseInt(TodayUtil.getTodayYmd().substring(0,4));
+        // 生日为空时跳过年龄计算，避免 NPE
+        if (patient.getPBirthday() != null && patient.getPBirthday().length() >= 4) {
+            int yourYear = Integer.parseInt(patient.getPBirthday().substring(0, 4));
+            int todayYear = Integer.parseInt(TodayUtil.getTodayYmd().substring(0,4));
+            patient.setPAge(todayYear-yourYear);
+        }
         //密码md5加密
         String password = Md5Util.getMD5(patient.getPPassword());
         patient.setPPassword(password);
-        patient.setPAge(todayYear-yourYear);
         patient.setPState(1);
         this.patientMapper.insert(patient);
         return true;
@@ -124,8 +130,9 @@ public class PatientServiceImpl implements PatientService {
         return true;
     }
     /**
-     * 统计患者男女人数
+     * 统计患者年龄分布
      */
+    @Override
     public List<Integer> patientAge(){
         List<Integer> ageList = new ArrayList<>();
         Integer age1 = this.patientMapper.patientAge(0, 9);
@@ -149,10 +156,30 @@ public class PatientServiceImpl implements PatientService {
         ageList.add(age9);
         ageList.add(age10);
         return ageList;
+    }
 
+    /**
+     * 设置黑名单状态
+     */
+    @Override
+    public Boolean setBlacklist(int pId, boolean blacklisted) {
+        UpdateWrapper<Patient> wrapper = new UpdateWrapper<>();
+        wrapper.eq("p_id", pId).set("p_blacklisted", blacklisted ? 1 : 0);
+        return this.patientMapper.update(null, wrapper) > 0;
+    }
+
+    /**
+     * 根据标签查询患者
+     */
+    @Override
+    public List<Patient> findByTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return this.patientMapper.selectList(null);
+        }
+        QueryWrapper<Patient> wrapper = new QueryWrapper<>();
+        wrapper.like("p_tags", tag);
+        return this.patientMapper.selectList(wrapper);
     }
 
 
-    }
-
-
+}

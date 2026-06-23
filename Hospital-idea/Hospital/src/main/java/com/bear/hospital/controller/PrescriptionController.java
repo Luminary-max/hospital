@@ -32,15 +32,35 @@ public class PrescriptionController {
     @SuppressWarnings("unchecked")
     @PostMapping("/save")
     public ResponseData save(@RequestBody Map<String, Object> params) {
-        int oId = Integer.parseInt(params.get("oId").toString());
-        List<Map<String, Object>> rawList = (List<Map<String, Object>>) params.get("details");
+        Object oIdObj = params.get("oId");
+        Object rawListObj = params.get("details");
+        if (oIdObj == null || rawListObj == null) {
+            return ResponseData.fail("参数不完整");
+        }
+        int oId;
+        try {
+            oId = Integer.parseInt(oIdObj.toString());
+        } catch (NumberFormatException e) {
+            return ResponseData.fail("oId格式无效");
+        }
+        List<Map<String, Object>> rawList;
+        try {
+            rawList = (List<Map<String, Object>>) rawListObj;
+        } catch (ClassCastException e) {
+            return ResponseData.fail("details格式无效");
+        }
         List<PrescriptionDetail> details = new ArrayList<>();
         for (Map<String, Object> m : rawList) {
             PrescriptionDetail d = new PrescriptionDetail();
             d.setDrId((String) m.get("drId"));
             if (m.get("pdUsage") != null) d.setPdUsage(m.get("pdUsage").toString());
+            if (m.get("pdRoute") != null) d.setPdRoute(m.get("pdRoute").toString());
             if (m.get("pdDosage") != null) d.setPdDosage(m.get("pdDosage").toString());
             if (m.get("pdFrequency") != null) d.setPdFrequency(m.get("pdFrequency").toString());
+            if (m.get("pdTiming") != null) d.setPdTiming(m.get("pdTiming").toString());
+            if (m.get("pdSkinTest") != null) d.setPdSkinTest(Integer.parseInt(m.get("pdSkinTest").toString()));
+            if (m.get("pdTcmGroupNo") != null) d.setPdTcmGroupNo(m.get("pdTcmGroupNo").toString());
+            if (m.get("pdDecoctionMethod") != null) d.setPdDecoctionMethod(m.get("pdDecoctionMethod").toString());
             if (m.get("pdDays") != null) d.setPdDays(Integer.parseInt(m.get("pdDays").toString()));
             if (m.get("pdQuantity") != null) d.setPdQuantity(Integer.parseInt(m.get("pdQuantity").toString()));
             if (m.get("pdNote") != null) d.setPdNote(m.get("pdNote").toString());

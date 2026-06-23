@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -114,5 +115,62 @@ public class PatientController {
     public ResponseData patientAge(){
         return  ResponseData.success("统计患者男女人数成功", this.patientService.patientAge());
 
+    }
+
+    /**
+     * 设置黑名单
+     */
+    @GetMapping("/setBlacklist")
+    public ResponseData setBlacklist(@RequestParam int pId, @RequestParam int blacklisted) {
+        if (this.patientService.setBlacklist(pId, blacklisted == 1)) {
+            return ResponseData.success("设置成功");
+        }
+        return ResponseData.fail("设置失败");
+    }
+
+    /**
+     * 按标签查询患者
+     */
+    @GetMapping("/findByTag")
+    public ResponseData findByTag(@RequestParam(required = false) String tag) {
+        return ResponseData.success("查询成功", this.patientService.findByTag(tag));
+    }
+
+    /**
+     * Feature 8: 分诊护士现场快速创建患者
+     */
+    @PostMapping("quickCreate")
+    @ResponseBody
+    public ResponseData quickCreate(@RequestParam String pName, @RequestParam String pGender,
+        @RequestParam String pPhone) {
+        Patient patient = new Patient();
+        patient.setPName(pName);
+        patient.setPGender(pGender);
+        patient.setPPhone(pPhone);
+        // Auto-generate pId: timestamp based + use existing max pId to avoid collision
+        int pId;
+        try {
+            pId = (int) (System.currentTimeMillis() % 100000);
+            if (pId < 10000) pId += 10000;
+            // Ensure id is not taken (retry if needed)
+            while (patientService.findPatientById(pId) != null) {
+                pId = (pId + 1) % 100000;
+                if (pId < 10000) pId += 10000;
+            }
+        } catch(Exception e) {
+            pId = (int) (System.nanoTime() % 89999) + 10000;
+        }
+        patient.setPId(pId);
+        // Default password 123456
+        patient.setPPassword("123456");
+        patient.setPState(1);
+        Boolean bo = this.patientService.addPatient(patient);
+        if (bo) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("pId", patient.getPId());
+            map.put("pName", pName);
+            return ResponseData.success("快速创建患者成功", map);
+        }
+        return ResponseData.fail("快速创建患者失败");
     }
 }

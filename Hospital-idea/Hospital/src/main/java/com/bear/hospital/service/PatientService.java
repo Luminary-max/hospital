@@ -34,4 +34,14 @@ public interface PatientService {
      * 统计患者男女人数
      */
     List<Integer> patientAge();
+
+    /**
+     * 设置黑名单状态
+     */
+    Boolean setBlacklist(int pId, boolean blacklisted);
+
+    /**
+     * 根据标签查询患者
+     */
+    List<Patient> findByTag(String tag);
 }

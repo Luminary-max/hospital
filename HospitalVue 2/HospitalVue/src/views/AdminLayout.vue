@@ -45,7 +45,7 @@
       <el-col :span="12">
         <el-card>
           <div slot="header"><i class="el-icon-warning-outline"></i> 待办事项</div>
-          <el-table :data="todoList" stripe size="small">
+          <el-table :data="todoList" stripe size="small" style="width:100%">
             <el-table-column prop="label" label="事项" min-width="140"></el-table-column>
             <el-table-column prop="count" label="数量" width="60" align="center"></el-table-column>
             <el-table-column label="操作" width="100" align="center">
@@ -113,3 +113,4 @@ export default {
 .stat-num{font-size:22px;font-weight:700;color:#303133;}
 .stat-label{font-size:13px;color:#909399;margin-top:2px;}
 </style>
+

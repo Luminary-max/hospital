@@ -14,10 +14,20 @@ public class PrescriptionDetail {
     private String drId;
     @JsonProperty("pdUsage")
     private String pdUsage;
+    @JsonProperty("pdRoute")
+    private String pdRoute;
     @JsonProperty("pdDosage")
     private String pdDosage;
     @JsonProperty("pdFrequency")
     private String pdFrequency;
+    @JsonProperty("pdTiming")
+    private String pdTiming;
+    @JsonProperty("pdSkinTest")
+    private Integer pdSkinTest;
+    @JsonProperty("pdTcmGroupNo")
+    private String pdTcmGroupNo;
+    @JsonProperty("pdDecoctionMethod")
+    private String pdDecoctionMethod;
     @JsonProperty("pdDays")
     private Integer pdDays;
     @JsonProperty("pdQuantity")
@@ -41,10 +51,20 @@ public class PrescriptionDetail {
     public void setDrId(String drId) { this.drId = drId; }
     public String getPdUsage() { return pdUsage; }
     public void setPdUsage(String pdUsage) { this.pdUsage = pdUsage; }
+    public String getPdRoute() { return pdRoute; }
+    public void setPdRoute(String pdRoute) { this.pdRoute = pdRoute; }
     public String getPdDosage() { return pdDosage; }
     public void setPdDosage(String pdDosage) { this.pdDosage = pdDosage; }
     public String getPdFrequency() { return pdFrequency; }
     public void setPdFrequency(String pdFrequency) { this.pdFrequency = pdFrequency; }
+    public String getPdTiming() { return pdTiming; }
+    public void setPdTiming(String pdTiming) { this.pdTiming = pdTiming; }
+    public Integer getPdSkinTest() { return pdSkinTest; }
+    public void setPdSkinTest(Integer pdSkinTest) { this.pdSkinTest = pdSkinTest; }
+    public String getPdTcmGroupNo() { return pdTcmGroupNo; }
+    public void setPdTcmGroupNo(String pdTcmGroupNo) { this.pdTcmGroupNo = pdTcmGroupNo; }
+    public String getPdDecoctionMethod() { return pdDecoctionMethod; }
+    public void setPdDecoctionMethod(String pdDecoctionMethod) { this.pdDecoctionMethod = pdDecoctionMethod; }
     public Integer getPdDays() { return pdDays; }
     public void setPdDays(Integer pdDays) { this.pdDays = pdDays; }
     public Integer getPdQuantity() { return pdQuantity; }

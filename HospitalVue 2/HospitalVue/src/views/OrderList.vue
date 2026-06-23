@@ -11,7 +11,7 @@
       <el-tag class="total-tag">共 {{ total }} 条</el-tag>
     </div>
 
-    <el-table :data="orderData" stripe border highlight-current-row>
+    <el-table :data="orderData" stripe border highlight-current-row style="width:100%">
       <el-table-column type="expand">
         <template slot-scope="s">
           <div class="expand-body">
@@ -24,45 +24,45 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="oId" label="单号" width="80" align="center"></el-table-column>
-      <el-table-column prop="pId" label="患者" width="65" align="center"></el-table-column>
-      <el-table-column prop="dId" label="医生" width="75" align="center"></el-table-column>
-      <el-table-column prop="oTriage" label="分诊" width="75" align="center">
+      <el-table-column prop="oId"   label="单号"   width="80"   align="center" ></el-table-column>
+      <el-table-column prop="pId"   label="患者"   width="65"   align="center" ></el-table-column>
+      <el-table-column prop="dId"   label="医生"   width="75"   align="center" ></el-table-column>
+      <el-table-column prop="oTriage"   label="分诊"   width="75"   align="center" >
         <template slot-scope="s">
           <span :class="'tag-' + (s.row.oTriage==='急诊'?'emerg':s.row.oTriage==='专家门诊'?'expert':'normal')">{{ s.row.oTriage || '普通' }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="oStart" label="挂号时间" min-width="160"></el-table-column>
-      <el-table-column label="费用" width="110" align="center">
+      <el-table-column label="费用" width="150" align="center">
         <template slot-scope="s">
-          <div class="fee-row"><span class="fee-label">挂号</span><span class="fee-value">¥{{ s.row.oRegistrationFee || '0' }}</span></div>
-          <div class="fee-row"><span class="fee-label">合计</span><span class="fee-total">¥{{ s.row.oTotalPrice || '0' }}</span></div>
+          <div>挂号: ¥{{ Number(s.row.oregistrationFee || s.row.oRegistrationFee || 0).toFixed(2) }}</div>
+          <div>药费: ¥{{ Number(s.row.ototalPrice || s.row.oTotalPrice || 0).toFixed(2) }}</div>
         </template>
       </el-table-column>
-      <el-table-column label="支付" width="120" align="center">
+      <el-table-column label="支付" width="150" align="center">
         <template slot-scope="s">
-          <div v-if="s.row.oPaymentMethod">
-            <el-tag size="mini" type="info">{{ s.row.oPaymentMethod }}</el-tag>
-            <div class="pay-detail">医保¥{{ s.row.oInsuranceCovered || '0' }} 自付¥{{ s.row.oSelfPay || '0' }}</div>
+          <div v-if="s.row.opaymentMethod || s.row.oPaymentMethod">
+            <el-tag size="mini" type="info">{{ s.row.opaymentMethod || s.row.oPaymentMethod }}</el-tag>
+            <div style="font-size:11px;color:#909399;margin-top:2px;">医保¥{{ Number(s.row.oinsuranceCovered || s.row.oInsuranceCovered || 0).toFixed(2) }} 自付¥{{ Number(s.row.oselfPay || s.row.oSelfPay || 0).toFixed(2) }}</div>
           </div>
           <span v-else class="no-data">---</span>
         </template>
       </el-table-column>
-      <el-table-column label="缴费" width="85" align="center">
+      <el-table-column label="缴费" width="80" align="center">
         <template slot-scope="s">
-          <el-tag v-if="s.row.oPriceState === 1" type="success" size="small">已缴费</el-tag>
-          <el-button v-else-if="s.row.oState === 1" type="danger" size="mini" @click="openPaymentDlg(s.row)">去收费</el-button>
+          <el-tag v-if="s.row.opriceState === 1 || s.row.oPriceState === 1" type="success" size="small">已缴费</el-tag>
+          <el-button v-else-if="(s.row.ostate || s.row.oState) === 1" type="danger" size="mini" @click="openPaymentDlg(s.row)">去收费</el-button>
           <span v-else class="no-data">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="状态" width="75" align="center">
+      <el-table-column label="状态"   width="75"   align="center" >
         <template slot-scope="s">
-          <span :class="'status-' + (s.row.oState === 1 && s.row.oPriceState === 1 ? 'done' : s.row.oState === 1 ? 'wait' : 'fail')">
-            {{ s.row.oState === 1 && s.row.oPriceState === 1 ? '已完成' : s.row.oState === 1 ? '待缴费' : '未完成' }}
+          <span :class="'status-' + ( ((s.row.ostate||s.row.oState) === 1 && (s.row.opriceState||s.row.oPriceState) === 1) ? 'done' : (s.row.ostate||s.row.oState) === 1 ? 'wait' : 'fail')">
+            {{ ((s.row.ostate||s.row.oState) === 1 && (s.row.opriceState||s.row.oPriceState) === 1) ? '已完成' : (s.row.ostate||s.row.oState) === 1 ? '待缴费' : '未完成' }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="95" fixed="right" align="center">
+      <el-table-column label="操作"   width="95"   fixed="right"   align="center" >
         <template slot-scope="s">
           <el-button type="primary" size="mini" icon="el-icon-document" circle @click="viewBilling(s.row.oId)" title="收费记录"></el-button>
           <el-button type="danger" size="mini" icon="el-icon-delete" circle @click="deleteDialog(s.row.oId)" title="删除"></el-button>
@@ -103,13 +103,13 @@
     </el-dialog>
 
     <el-dialog title="收费明细" :visible.sync="billingDlgVisible" width="650px">
-      <el-table :data="billingData" border stripe size="small">
-        <el-table-column prop="brType" label="收费类型" width="120"></el-table-column>
-        <el-table-column prop="brAmount" label="金额" width="100"><template slot-scope="s">¥{{ s.row.brAmount }}</template></el-table-column>
-        <el-table-column prop="brPaymentMethod" label="支付方式" width="90"></el-table-column>
-        <el-table-column prop="brInvoiceNo" label="发票号" width="140"></el-table-column>
-        <el-table-column prop="brPayTime" label="收费时间" width="160"></el-table-column>
-        <el-table-column prop="brOperator" label="操作员" width="80"></el-table-column>
+      <el-table :data="billingData" border stripe size="small" style="width:100%">
+        <el-table-column prop="brType"   label="收费类型"   width="120" ></el-table-column>
+        <el-table-column prop="brAmount"   label="金额"   width="100" ><template slot-scope="s">¥{{ s.row.brAmount }}</template></el-table-column>
+        <el-table-column prop="brPaymentMethod"   label="支付方式"   width="90" ></el-table-column>
+        <el-table-column prop="brInvoiceNo"   label="发票号"   width="140" ></el-table-column>
+        <el-table-column prop="brPayTime"   label="收费时间"   width="160" ></el-table-column>
+        <el-table-column prop="brOperator"   label="操作员"   width="80" ></el-table-column>
       </el-table>
       <div v-if="billingData.length===0" class="empty-state">暂无收费记录</div>
     </el-dialog>
@@ -125,10 +125,11 @@ export default {
       paymentDlgVisible: false,
       paymentForm: { oId: null, oRegistrationFee: 0, oTotalPrice: 0, paymentMethod: "", insuranceCovered: 0, invoiceNo: "", operator: "" },
       billingDlgVisible: false, billingData: [],
+      payDlgRow: null
     };
   },
   computed: {
-    totalForPayment() { return (parseFloat(this.paymentForm.oRegistrationFee||0) + parseFloat(this.paymentForm.oTotalPrice||0)).toFixed(2); },
+    totalForPayment() { return (parseFloat(this.payDlgRow && (this.payDlgRow.oregistrationFee || this.payDlgRow.oRegistrationFee || 0)) + parseFloat(this.payDlgRow && (this.payDlgRow.ototalPrice || this.payDlgRow.oTotalPrice || 0))).toFixed(2); },
     selfPayAmount() { return Math.max(0, parseFloat(this.totalForPayment) - parseFloat(this.paymentForm.insuranceCovered||0)).toFixed(2); },
   },
   methods: {
@@ -138,7 +139,10 @@ export default {
       });
     },
     openPaymentDlg(row) {
-      this.paymentForm = { oId: row.oId, oRegistrationFee: row.oRegistrationFee||0, oTotalPrice: row.oTotalPrice||0, paymentMethod: "", insuranceCovered: 0, invoiceNo: "INV-"+Date.now(), operator: "" };
+      this.payDlgRow = row;
+      const regFee = Number(row.oregistrationFee || row.oRegistrationFee || 0);
+      const total = Number(row.ototalPrice || row.oTotalPrice || 0);
+      this.paymentForm = { oId: row.oid || row.oId, oRegistrationFee: regFee, oTotalPrice: total, paymentMethod: "", insuranceCovered: 0, invoiceNo: "INV-"+Date.now(), operator: "" };
       this.paymentDlgVisible = true;
     },
     processPayment() {
@@ -178,3 +182,13 @@ export default {
 .status-fail { display:inline-block; background:#fef0f0; color:#f56c6c; padding:2px 8px; border-radius:4px; font-size:12px; }
 .empty-state { text-align:center; padding:30px; color:#999; }
 </style>
+
+
+
+
+
+
+
+
+
+

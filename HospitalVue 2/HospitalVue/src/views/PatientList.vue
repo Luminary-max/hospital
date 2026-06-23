@@ -13,7 +13,7 @@
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加患者</el-button>
       </div>
     </div>
-    <el-table :data="patientData" stripe border>
+    <el-table :data="patientData" stripe border style="width:100%">
       <el-table-column label="账号" prop="pId" width="70"></el-table-column>
       <el-table-column label="姓名" prop="pName" width="80"></el-table-column>
       <el-table-column label="性别" prop="pGender" width="55"></el-table-column>
@@ -27,10 +27,11 @@
       <el-table-column label="血型" prop="pBloodType" width="55"></el-table-column>
       <el-table-column label="地址" prop="pAddress" min-width="160" show-overflow-tooltip></el-table-column>
       <el-table-column label="状态" width="65"><template slot-scope="s"><el-tag :type="s.row.pState===1?'success':'danger'" size="mini">{{ s.row.pState===1?'正常':'删除' }}</el-tag></template></el-table-column>
-      <el-table-column label="操作" width="95" fixed="right" align="center">
+      <el-table-column label="操作" width="130" fixed="right" align="center">
         <template slot-scope="s">
           <el-button type="success" size="mini" icon="el-icon-edit" circle @click="modifyDialog(s.row.pId)" title="编辑"></el-button>
           <el-button type="danger" size="mini" icon="el-icon-delete" circle @click="deleteDialog(s.row.pId)" title="删除"></el-button>
+          <el-button type="warning" size="mini" icon="el-icon-key" circle @click="resetPwd(s.row)" title="重置密码为123456"></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -126,6 +127,16 @@ export default {
     modifyPatient(fn) { this.$refs[fn].validate(v=>{if(!v)return;request.get("admin/modifyPatient",{params:this.modifyForm}).then(r=>{this.modifyFormVisible=false;this.requestPatients();this.$message.success("修改成功");});}); },
     deletePatient(id){request.get("admin/deletePatient",{params:{pId:id}}).then(()=>this.requestPatients());},
     deleteDialog(id){this.$confirm("确定删除?","提示",{type:"warning"}).then(()=>{this.deletePatient(id);this.$message.success("删除成功");}).catch(()=>{});},
+    // 重置密码为123456
+    resetPwd(row) {
+      this.$confirm("将重置【"+row.pName+"】的密码为 123456，确认继续？","重置密码",{type:"warning"}).then(()=>{
+        row.pPassword = "123456";
+        request.get("admin/modifyPatient",{params:row}).then(r=>{
+          if(r.data.status===200) this.$message.success("密码已重置为 123456");
+          else this.$message.error(r.data.msg);
+        });
+      }).catch(()=>{});
+    },
   },
   created(){this.requestPatients();}
 };

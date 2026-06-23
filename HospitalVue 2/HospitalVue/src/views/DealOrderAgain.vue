@@ -43,7 +43,7 @@
                 <el-button type="primary" @click="requestDrug">查询</el-button>
               </el-form-item>
             </el-form>
-            <el-table :data="drugData" border stripe size="mini" height="200">
+            <el-table :data="drugData" border stripe size="mini" height="200" style="width:100%">
               <el-table-column prop="drId" label="编号" width="80"></el-table-column>
               <el-table-column prop="drName" label="药品名称" width="140"></el-table-column>
               <el-table-column label="单价" width="80">
@@ -60,7 +60,7 @@
           </el-col>
           <el-col :span="12">
             <el-tag type="warning">已选药品（合计：¥{{ drugTotalPrice }}）</el-tag>
-            <el-table :data="drugBuyData" border stripe size="mini" height="250">
+            <el-table :data="drugBuyData" border stripe size="mini" height="250" style="width:100%">
               <el-table-column prop="drName" label="药名" width="100"></el-table-column>
               <el-table-column prop="pdUsage" label="用法" width="60"></el-table-column>
               <el-table-column prop="pdDosage" label="用量" width="60"></el-table-column>
@@ -91,7 +91,7 @@
                 <el-button type="primary" @click="requestCheck">查询</el-button>
               </el-form-item>
             </el-form>
-            <el-table :data="checkData" border stripe size="mini" height="200">
+            <el-table :data="checkData" border stripe size="mini" height="200" style="width:100%">
               <el-table-column prop="chId" label="编号" width="80"></el-table-column>
               <el-table-column prop="chName" label="项目名称" width="200"></el-table-column>
               <el-table-column label="价格" width="80">
@@ -107,7 +107,7 @@
           </el-col>
           <el-col :span="12">
             <el-tag type="success" style="margin-bottom:10px;">已选检查（合计：¥{{ checkTotalPrice }}）</el-tag>
-            <el-table :data="checkBuyData" border stripe size="mini" height="200">
+            <el-table :data="checkBuyData" border stripe size="mini" height="200" style="width:100%">
               <el-table-column prop="chId" label="编号" width="80"></el-table-column>
               <el-table-column prop="chName" label="项目名" width="180"></el-table-column>
               <el-table-column label="价格" width="80">
@@ -243,3 +243,4 @@ export default {
   }
 };
 </script>
+

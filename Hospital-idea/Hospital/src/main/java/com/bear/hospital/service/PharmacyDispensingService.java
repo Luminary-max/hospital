@@ -7,6 +7,9 @@ import java.util.HashMap;
 public interface PharmacyDispensingService {
     HashMap<String, Object> findAll(int pageNumber, int size, Integer status);
     Boolean dispense(int pdId, String dispenseBy, DrugService drugService);
+    Boolean review(int pdId, String reviewer);
+    Boolean returnDrug(int pdId, String returnBy);
     Boolean createDispensing(int oId, String drId, int quantity);
+    PharmacyDispensing findById(int pdId);
 }
 

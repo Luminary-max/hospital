@@ -30,6 +30,12 @@ public class OutpatientEmr {
     private String createTime;
     @JsonProperty("updateTime")
     private String updateTime;
+    @JsonProperty("allergyHistory")
+    private String allergyHistory;
+    @JsonProperty("medicalAdvice")
+    private String medicalAdvice;
+    @JsonProperty("followUpSuggest")
+    private String followUpSuggest;
 
     @TableField(exist = false)
     @JsonProperty("pName")
@@ -73,4 +79,10 @@ public class OutpatientEmr {
     public void setDName(String dName) { this.dName = dName; }
     public String getOStart() { return oStart; }
     public void setOStart(String oStart) { this.oStart = oStart; }
+    public String getAllergyHistory() { return allergyHistory; }
+    public void setAllergyHistory(String allergyHistory) { this.allergyHistory = allergyHistory; }
+    public String getMedicalAdvice() { return medicalAdvice; }
+    public void setMedicalAdvice(String medicalAdvice) { this.medicalAdvice = medicalAdvice; }
+    public String getFollowUpSuggest() { return followUpSuggest; }
+    public void setFollowUpSuggest(String followUpSuggest) { this.followUpSuggest = followUpSuggest; }
 }

@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bear.hospital.mapper.DrugMapper;
+import com.bear.hospital.mapper.DrugPriceLogMapper;
 import com.bear.hospital.pojo.Drug;
+import com.bear.hospital.pojo.DrugPriceLog;
 import com.bear.hospital.service.DrugService;
+import com.bear.hospital.utils.TodayUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,82 +19,86 @@ import java.util.List;
 public class DrugServiceImpl implements DrugService {
     @Autowired
     private DrugMapper drugMapper;
-    /**
-     * 分页模糊查询所有药物信息
-     */
+    @Autowired
+    private DrugPriceLogMapper drugPriceLogMapper;
     @Override
     public HashMap<String, Object> findAllDrugs(int pageNumber, int size, String query, Integer typeFilter){
         Page<Drug> page = new Page<>(pageNumber, size);
         QueryWrapper<Drug> wrapper = new QueryWrapper<>();
-        wrapper.like("dr_name", query);
         if (typeFilter != null && typeFilter > 0) {
             wrapper.eq("dr_type", typeFilter);
         }
-        // 如果query不为空，扩展搜索到规格和厂家
         if (query != null && !query.isEmpty()) {
             wrapper.and(w -> w.like("dr_name", query)
+                .or().like("dr_generic_name", query)
+                .or().like("dr_pinyin", query)
                 .or().like("dr_spec", query)
                 .or().like("dr_manufacturer", query));
-        } else {
-            wrapper.like("dr_name", query);
         }
         IPage<Drug> iPage = this.drugMapper.selectPage(page, wrapper);
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("total", iPage.getTotal());       //总条数
-        hashMap.put("size", iPage.getPages());       //总页数
-        hashMap.put("pageNumber", iPage.getCurrent());//当前页
-        hashMap.put("drugs", iPage.getRecords()); //查询到的记录
+        hashMap.put("total", iPage.getTotal());
+        hashMap.put("size", iPage.getPages());
+        hashMap.put("pageNumber", iPage.getCurrent());
+        hashMap.put("drugs", iPage.getRecords());
         return hashMap;
     }
-
-    /**
-     * 根据id查找药物
-     */
     @Override
     public Drug findDrug(String drId){
         return this.drugMapper.selectById(drId);
     }
-    /**
-     * 根据id删除药物数量
-     */
     @Override
     public Boolean reduceDrugNumber(String drId,int usedNumber){
         Drug drug = this.drugMapper.selectById(drId);
-        if(drug.getDrNumber() < usedNumber)
-            return false;
+        if(drug.getDrNumber() < usedNumber) return false;
         drug.setDrNumber(drug.getDrNumber()-usedNumber);
         this.drugMapper.updateById(drug);
         return true;
     }
-    /**
-     * 增加药物信息
-     */
     public Boolean addDrug(Drug drug){
-        //如果账号已存在则返回false
-        List<Drug> drugs = this.drugMapper.selectList(null);
-        for (Drug drug1 : drugs) {
-            if (drug.getDrId() == drug1.getDrId()) {
-                return false;
-            }
+        if (drug.getDrId() != null) {
+            Drug existing = this.drugMapper.selectById(drug.getDrId());
+            if (existing != null) return false;
         }
         this.drugMapper.insert(drug);
         return true;
     }
-    /**
-     * 删除药物信息
-     */
     @Override
     public Boolean deleteDrug(String drId) {
         this.drugMapper.deleteById(drId);
         return true;
     }
-    /**
-     * 修改药物信息
-     */
     @Override
     public Boolean modifyDrug(Drug drug) {
+        Drug old = this.drugMapper.selectById(drug.getDrId());
+        if (old != null && old.getDrPrice() != drug.getDrPrice()) {
+            DrugPriceLog log = new DrugPriceLog();
+            log.setDrId(drug.getDrId());
+            log.setOldPrice(old.getDrPrice());
+            log.setNewPrice(drug.getDrPrice());
+            log.setChangeReason("管理员修改价格");
+            log.setOperator("管理员");
+            log.setCreateTime(TodayUtil.getToday());
+            drugPriceLogMapper.insert(log);
+        }
         int i = this.drugMapper.updateById(drug);
         System.out.println("影响行数："+i);
         return true;
+    }
+    public List<DrugPriceLog> findPriceLogs(String drId) {
+        QueryWrapper<DrugPriceLog> wrapper = new QueryWrapper<>();
+        if (drId != null && !drId.trim().isEmpty()) {
+            wrapper.eq("dr_id", drId);
+        }
+        wrapper.orderByDesc("dpl_id");
+        return drugPriceLogMapper.selectList(wrapper);
+    }
+    @Override
+    public Boolean toggleDisabled(String drId) {
+        Drug drug = this.drugMapper.selectById(drId);
+        if (drug == null) return false;
+        Integer current = drug.getDrDisabled();
+        drug.setDrDisabled((current != null && current == 1) ? 0 : 1);
+        return this.drugMapper.updateById(drug) > 0;
     }
 }

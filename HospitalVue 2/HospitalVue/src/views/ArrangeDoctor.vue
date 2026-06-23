@@ -18,7 +18,7 @@
                 @click="requestDoctors"
             ></el-button>
         </el-input>
-        <el-table :data="doctorData" border>
+        <el-table :data="doctorData" border style="width:100%">
             <el-table-column
                 label="账号"
                 prop="dId"

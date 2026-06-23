@@ -51,6 +51,25 @@ import PharmacyDispensingList from "@/views/PharmacyDispensingList.vue";
 import NotificationList from "@/views/NotificationList.vue";
 import TriageRecordList from "@/views/TriageRecordList.vue";
 import DrugBatchList from "@/views/DrugBatchList.vue";
+import DrugCategoryList from "@/views/DrugCategoryList.vue";
+import RechargeList from "@/views/RechargeList.vue";
+import CheckResultList from "@/views/CheckResultList.vue";
+import DoctorCheckOrder from "@/views/DoctorCheckOrder.vue";
+import CashierSettlement from "@/views/CashierSettlement.vue";
+
+// 患者端新增页面
+import PatientDelivery from "@/views/PatientDelivery.vue";
+import PatientReports from "@/views/PatientReports.vue";
+
+// 新增页面
+import DiagnosisDictList from "@/views/DiagnosisDictList.vue";
+import EmrTemplateList from "@/views/EmrTemplateList.vue";
+import PrescriptionTemplateList from "@/views/PrescriptionTemplateList.vue";
+import RefundApproval from "@/views/RefundApproval.vue";
+import InvoiceManage from "@/views/InvoiceManage.vue";
+import DoctorStatsPanel from "@/views/DoctorStatsPanel.vue";
+import InventoryCenter from "@/views/InventoryCenter.vue";
+import PublicQueueDisplay from "@/views/PublicQueueDisplay.vue";
 
 Vue.prototype.$echarts = echarts;//引入echarts
 Vue.use(ElementUI);
@@ -64,6 +83,10 @@ const routes = [
   {
     path: "/login",
     component: Login
+  },
+  {
+    path: "/publicQueue",
+    component: PublicQueueDisplay
   },
   {
     path: "/admin",
@@ -165,8 +188,63 @@ const routes = [
         meta: { requireAuth: true },
       },
       {
+        path: "/drugCategoryList",
+        component: DrugCategoryList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/inventoryCenter",
+        component: InventoryCenter,
+        meta: { requireAuth: true },
+      },
+      {
         path: "/auditLogList",
         component: AuditLogList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/rechargeList",
+        component: RechargeList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/checkResultList",
+        component: CheckResultList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/cashierSettlement",
+        component: CashierSettlement,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/diagnosisDictList",
+        component: DiagnosisDictList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/emrTemplateList",
+        component: EmrTemplateList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/prescriptionTemplateList",
+        component: PrescriptionTemplateList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/refundApproval",
+        component: RefundApproval,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/invoiceManage",
+        component: InvoiceManage,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/doctorStatsPanel",
+        component: DoctorStatsPanel,
         meta: { requireAuth: true },
       },
     ]
@@ -218,6 +296,21 @@ const routes = [
         component: MyEmr,
         meta: { requireAuth: true },
       },
+      {
+        path: "/myNotificationList",
+        component: NotificationList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/patientDelivery",
+        component: PatientDelivery,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/patientReports",
+        component: PatientReports,
+        meta: { requireAuth: true },
+      },
     ]
   },
   {
@@ -264,6 +357,11 @@ const routes = [
       {
         path: "/prescriptionList",
         component: PrescriptionList,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/doctorCheckOrder",
+        component: DoctorCheckOrder,
         meta: { requireAuth: true },
       },
     ],

@@ -148,4 +148,16 @@ public class AdminController {
         return ResponseData.success("修改患者信息成功");
     }
 
+    /**
+     * Feature 10: 校验Token有效性
+     */
+    @GetMapping("verifyToken")
+    public ResponseData verifyToken(@RequestParam String token) {
+        try {
+            com.auth0.jwt.interfaces.DecodedJWT jwt = JwtUtil.verify(token);
+            return ResponseData.success("Token有效", jwt.getClaims());
+        } catch (Exception e) {
+            return ResponseData.fail("Token无效或已过期");
+        }
+    }
 }

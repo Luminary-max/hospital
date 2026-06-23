@@ -16,7 +16,7 @@
         <el-button type="primary" size="small" @click="addFormVisible = true"><i class="el-icon-plus"></i> 增加医生</el-button>
       </div>
     </div>
-    <el-table :data="doctorData" stripe border>
+    <el-table :data="doctorData" stripe border style="width:100%">
       <el-table-column label="账号" prop="dId" width="80"></el-table-column>
       <el-table-column label="姓名" prop="dName" width="80"></el-table-column>
       <el-table-column label="性别" prop="dGender" width="55"></el-table-column>

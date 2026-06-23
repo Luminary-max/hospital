@@ -24,7 +24,9 @@
           <el-menu-item index="myBed" @click="menuClick('myBed')"><i class="el-icon-office-building"></i><span>我的床位</span></el-menu-item>
           <el-menu-item index="queueStatus" @click="menuClick('queueStatus')"><i class="el-icon-s-order"></i><span>排队状态</span></el-menu-item>
           <el-menu-item index="patientCard" @click="menuClick('patientCard')"><i class="el-icon-user"></i><span>个人信息</span></el-menu-item>
-          <el-menu-item index="notificationList" @click="menuClick('notificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
+          <el-menu-item index="myNotificationList" @click="menuClick('myNotificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
+          <el-menu-item index="patientDelivery" @click="menuClick('patientDelivery')"><i class="el-icon-truck"></i><span>送药申请</span></el-menu-item>
+          <el-menu-item index="patientReports" @click="menuClick('patientReports')"><i class="el-icon-download"></i><span>报告下载</span></el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="layout-main"><router-view></router-view></el-main>

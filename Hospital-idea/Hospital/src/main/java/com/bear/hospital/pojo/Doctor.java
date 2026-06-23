@@ -58,6 +58,9 @@ public class Doctor implements Serializable {
     @JsonProperty("dAvgStar")
     @Excel(name = "平均分")
     private Double dAvgStar;//必须为integer类型，为int类型的话更新时会自动更新为0
+    @JsonProperty("dMaxDaily")
+    @Excel(name = "每日最大接诊量")
+    private Integer dMaxDaily;
 
     /**
      * 是否已排班，排班id
@@ -68,7 +71,7 @@ public class Doctor implements Serializable {
     public Doctor() {
     }
 
-    public Doctor(String dId, String dPassword, String dName, String dGender, String dCard, String dEmail, String dPhone, String dPost, String dIntroduction, String dSection, Integer dState, Double dPrice, Integer dPeople, Double dStar, Double dAvgStar, String arrangeId) {
+    public Doctor(String dId, String dPassword, String dName, String dGender, String dCard, String dEmail, String dPhone, String dPost, String dIntroduction, String dSection, Integer dState, Double dPrice, Integer dPeople, Double dStar, Double dAvgStar, Integer dMaxDaily, String arrangeId) {
         this.dId = dId;
         this.dPassword = dPassword;
         this.dName = dName;
@@ -84,6 +87,7 @@ public class Doctor implements Serializable {
         this.dPeople = dPeople;
         this.dStar = dStar;
         this.dAvgStar = dAvgStar;
+        this.dMaxDaily = dMaxDaily;
         this.arrangeId = arrangeId;
     }
 
@@ -207,6 +211,14 @@ public class Doctor implements Serializable {
         this.dAvgStar = dAvgStar;
     }
 
+    public Integer getdMaxDaily() {
+        return dMaxDaily;
+    }
+
+    public void setdMaxDaily(Integer dMaxDaily) {
+        this.dMaxDaily = dMaxDaily;
+    }
+
     public String getArrangeId() {
         return arrangeId;
     }
@@ -233,6 +245,7 @@ public class Doctor implements Serializable {
                 ", dPeople=" + dPeople +
                 ", dStar=" + dStar +
                 ", dAvgStar=" + dAvgStar +
+                ", dMaxDaily=" + dMaxDaily +
                 ", arrangeId='" + arrangeId + '\'' +
                 '}';
     }

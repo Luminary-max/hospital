@@ -28,4 +28,15 @@ public class BillingController {
         List<BillingRecord> list = this.billingService.findByOrderId(oId);
         return ResponseData.success("查询成功", list);
     }
+
+    /**
+     * Feature 9: 收费员日结统计
+     */
+    @RequestMapping("dailySummary")
+    public ResponseData dailySummary(@RequestParam(required = false) String date) {
+        if (date == null || date.isEmpty()) {
+            date = com.bear.hospital.utils.TodayUtil.getTodayYmd();
+        }
+        return ResponseData.success("查询成功", this.billingService.dailySummary(date));
+    }
 }
