@@ -25,9 +25,7 @@ public class TriageRecord {
     @JsonProperty("tCreateTime")
     private String tCreateTime;
 
-    // Vital signs fields
-    @JsonProperty("tChiefComplaint")
-    private String tChiefComplaint;   // 主诉
+    // Vital signs fields (分诊评估用，非诊断)
     @JsonProperty("tTemperature")
     private String tTemperature;      // 体温
     @JsonProperty("tBloodPressure")
@@ -63,8 +61,6 @@ public class TriageRecord {
     public String getTCreateTime() { return tCreateTime; }
     public void setTCreateTime(String tCreateTime) { this.tCreateTime = tCreateTime; }
 
-    public String getTChiefComplaint() { return tChiefComplaint; }
-    public void setTChiefComplaint(String tChiefComplaint) { this.tChiefComplaint = tChiefComplaint; }
     public String getTTemperature() { return tTemperature; }
     public void setTTemperature(String tTemperature) { this.tTemperature = tTemperature; }
     public String getTBloodPressure() { return tBloodPressure; }

@@ -28,6 +28,13 @@ public class BillingServiceImpl implements BillingService {
         return this.billingMapper.selectList(wrapper);
     }
 
+    @Override
+    public List<BillingRecord> findByEmrId(Integer emrId) {
+        QueryWrapper<BillingRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("emr_id", emrId).orderByAsc("br_id");
+        return this.billingMapper.selectList(wrapper);
+    }
+
     /**
      * Feature 9: 收费员日结统计
      * Returns totalIncome, regIncome, drugIncome, checkIncome,

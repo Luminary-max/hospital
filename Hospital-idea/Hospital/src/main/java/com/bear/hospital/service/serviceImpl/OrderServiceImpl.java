@@ -128,12 +128,16 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         if (timeField != null) {
-            // Lua: atomic check-and-decrement. Returns 1 on success, 0 if already 0
-            String lua = "if redis.call('hget', KEYS[1], ARGV[1]) == false or tonumber(redis.call('hget', KEYS[1], ARGV[1])) <= 0 then return 0 else redis.call('hincrby', KEYS[1], ARGV[1], -1) return 1 end";
-            Object result = jedis.eval(lua, java.util.Collections.singletonList(arId), java.util.Collections.singletonList(timeField));
-            if ("0".equals(String.valueOf(result))) {
-                jedis.close();
-                return false;
+            try {
+                // Lua: atomic check-and-decrement. Returns 1 on success, 0 if already 0
+                String lua = "if redis.call('hget', KEYS[1], ARGV[1]) == false or tonumber(redis.call('hget', KEYS[1], ARGV[1])) <= 0 then return 0 else redis.call('hincrby', KEYS[1], ARGV[1], -1) return 1 end";
+                Object result = jedis.eval(lua, java.util.Collections.singletonList(arId), java.util.Collections.singletonList(timeField));
+                if ("0".equals(String.valueOf(result))) {
+                    jedis.close();
+                    return false;
+                }
+            } catch (Exception e) {
+                System.err.println("Redis不可用，跳过分诊限额校验: " + e.getMessage());
             }
         }
         jedis.close();
@@ -188,23 +192,27 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public Boolean processPayment(int oId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator) {
-        // Feature 8: Auto-generate invoice number
+        return processPayment(oId, null, paymentMethod, invoiceNo, insuranceCovered, selfPay, operator);
+    }
+
+    /** 处理收费（按正确业务流程：传入病历ID emrId，药费/检查费关联到病历） */
+    public Boolean processPayment(int oId, Integer emrId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator) {
         if (invoiceNo == null || invoiceNo.isEmpty()) {
             invoiceNo = generateInvoiceNo();
         }
         String finalInvoiceNo = invoiceNo;
-        // 先查订单获取费用，再更新（避免清零后查不到原金额）
         Orders order = this.orderMapper.selectById(oId);
-        // 插入收费记录（使用原始费用，非清零后的值）
+        // 挂号费关联到订单o_id（挂号时就产生了）
         if (order != null && order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
-            BillingRecord record = new BillingRecord(oId, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            BillingRecord record = new BillingRecord(oId, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
             billingMapper.insert(record);
         }
+        // 药费+检查费关联到病历emr_id
         if (order != null && order.getOTotalPrice() != null && order.getOTotalPrice() > 0) {
-            BillingRecord record = new BillingRecord(oId, "药费+检查费", order.getOTotalPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            BillingRecord record = new BillingRecord(oId, emrId, "药费+检查费", order.getOTotalPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
             billingMapper.insert(record);
         } else if (order != null) {
-            BillingRecord record = new BillingRecord(oId, "药费+检查费", 0.00, paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            BillingRecord record = new BillingRecord(oId, emrId, "药费+检查费", 0.00, paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
             billingMapper.insert(record);
         }
         // 再更新订单状态
@@ -217,10 +225,17 @@ public class OrderServiceImpl implements OrderService {
             .set("o_price_state", 1)
             .set("o_total_price", 0.00);
         this.orderMapper.update(null, wrapper);
-        // Feature 8: Write to invoice_record table
+        // Feature 8: Write to invoice_record table (关联缴费记录)
         double totalAmount = (order != null && order.getORegistrationFee() != null ? order.getORegistrationFee() : 0.00)
                 + (order != null && order.getOTotalPrice() != null ? order.getOTotalPrice() : 0.00);
         InvoiceRecord invRecord = new InvoiceRecord(oId, finalInvoiceNo, totalAmount, TodayUtil.getToday(), operator);
+        // 关联最新的缴费记录 br_id
+        QueryWrapper<BillingRecord> brWrapper = new QueryWrapper<>();
+        brWrapper.eq("o_id", oId).orderByDesc("br_id").last("limit 1");
+        BillingRecord latestBr = billingMapper.selectOne(brWrapper);
+        if (latestBr != null) {
+            invRecord.setBrId(latestBr.getBrId());
+        }
         this.invoiceRecordMapper.insert(invRecord);
         return true;
     }
@@ -409,6 +424,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ========== Feature 1: Cancel Appointment ==========
+    /**
+     * 医生完成全部接诊后统一推进订单状态到 STATE_ORDERED
+     */
+    @Override
+    public Boolean finalizeConsultation(int oId) {
+        return updateOrderState(oId, Orders.STATE_ORDERED);
+    }
+
     @Override
     public Boolean cancelOrder(int oId, String reason) {
         UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();

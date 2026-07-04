@@ -70,18 +70,19 @@ com\bear\hospital\controller\InventoryController.class
 com\bear\hospital\controller\DiagnosisDictController.class
 com\bear\hospital\service\serviceImpl\PatientServiceImpl.class
 com\bear\hospital\pojo\Admin.class
+com\bear\hospital\pojo\PrescriptionMaster.class
 com\bear\hospital\mapper\DrugBatchMapper.class
 com\bear\hospital\controller\PrescriptionTemplateController.class
 com\bear\hospital\controller\DeliveryRequestController.class
 com\bear\hospital\mapper\EmrMapper.class
 com\bear\hospital\mapper\DiagnosisDictMapper.class
-com\bear\hospital\mapper\BedMapper.class
 com\bear\hospital\pojo\PrescriptionDetail.class
 com\bear\hospital\service\serviceImpl\PrescriptionTemplateServiceImpl.class
 com\bear\hospital\pojo\DrugPriceLog.class
 com\bear\hospital\controller\CheckController.class
 com\bear\hospital\pojo\Orders.class
 com\bear\hospital\mapper\InventoryTransactionMapper.class
+com\bear\hospital\mapper\PrescriptionMasterMapper.class
 com\bear\hospital\config\JedisConfig.class
 com\bear\hospital\mapper\DispensingBatchDetailMapper.class
 com\bear\hospital\spring\SpringContextHolder.class
@@ -96,7 +97,6 @@ com\bear\hospital\controller\InvoiceRecordController.class
 com\bear\hospital\mapper\ArrangeMapper.class
 com\bear\hospital\mapper\AdminMapper.class
 com\bear\hospital\service\serviceImpl\InvoiceRecordServiceImpl.class
-com\bear\hospital\pojo\Bed.class
 com\bear\hospital\mapper\DrugPriceLogMapper.class
 com\bear\hospital\service\NotificationService.class
 com\bear\hospital\pojo\DispensingBatchDetail.class
@@ -111,9 +111,7 @@ com\bear\hospital\controller\NotificationController.class
 com\bear\hospital\service\PatientService.class
 com\bear\hospital\service\serviceImpl\DoctorServiceImpl.class
 com\bear\hospital\pojo\RefundRequest.class
-com\bear\hospital\controller\BedController.class
 com\bear\hospital\controller\EmrController.class
-com\bear\hospital\service\serviceImpl\BedServiceImpl.class
 com\bear\hospital\mapper\DeliveryRequestMapper.class
 com\bear\hospital\mapper\DrugMapper.class
 com\bear\hospital\utils\Md5Util.class
@@ -131,7 +129,6 @@ com\bear\hospital\controller\PrescriptionController.class
 com\bear\hospital\pojo\EmrTemplate.class
 com\bear\hospital\service\InvoiceRecordService.class
 com\bear\hospital\service\serviceImpl\DrugCategoryServiceImpl.class
-com\bear\hospital\service\BedService.class
 com\bear\hospital\mapper\PharmacyDispensingMapper.class
 com\bear\hospital\controller\DoctorController.class
 com\bear\hospital\service\serviceImpl\DeliveryRequestServiceImpl.class

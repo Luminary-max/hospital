@@ -132,20 +132,25 @@ public class AdminController {
         return ResponseData.fail("删除挂号信息失败");
     }
     /**
-     * 根据id查找患者
+     * 根据id查找患者（仅查看）
      */
     @RequestMapping("findPatient")
     public ResponseData findPatient(@RequestParam(value = "pId") int pId) {
         return ResponseData.success("查询患者成功", this.patientService.findPatientById(pId));
     }
     /**
-     * 修改患者信息
+     * 修改患者信息 —— 管理员无权修改，请使用患者端自行修改
      */
     @RequestMapping("modifyPatient")
     @ResponseBody
     public ResponseData modifyPatient(Patient patient) {
-        this.patientService.modifyPatient(patient);
-        return ResponseData.success("修改患者信息成功");
+        // 管理员不能修改患者信息; 仅密码重置功能保留简短操作
+        if (patient.getPPassword() != null && patient.getPId() > 0
+                && patient.getPName() == null && patient.getPGender() == null) {
+            this.patientService.modifyPatient(patient);
+            return ResponseData.success("密码已重置");
+        }
+        return ResponseData.fail("管理员无权修改患者个人信息，请前往患者端操作");
     }
 
     /**

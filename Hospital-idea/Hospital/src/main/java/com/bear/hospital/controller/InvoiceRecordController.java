@@ -22,6 +22,14 @@ public class InvoiceRecordController {
     }
 
     /**
+     * Feature 8: 根据缴费记录查询发票
+     */
+    @GetMapping("findByBilling")
+    public ResponseData findByBilling(@RequestParam int brId) {
+        return ResponseData.success("查询成功", invoiceRecordService.findByBillingId(brId));
+    }
+
+    /**
      * Feature 8: 根据日期查询发票
      */
     @GetMapping("findByDate")

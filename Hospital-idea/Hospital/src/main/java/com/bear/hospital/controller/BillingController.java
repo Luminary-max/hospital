@@ -29,6 +29,13 @@ public class BillingController {
         return ResponseData.success("查询成功", list);
     }
 
+    /** 按病历查找收费记录（正确业务流程） */
+    @RequestMapping("findByEmr")
+    public ResponseData findByEmr(@RequestParam int emrId) {
+        List<BillingRecord> list = this.billingService.findByEmrId(emrId);
+        return ResponseData.success("查询成功", list);
+    }
+
     /**
      * Feature 9: 收费员日结统计
      */

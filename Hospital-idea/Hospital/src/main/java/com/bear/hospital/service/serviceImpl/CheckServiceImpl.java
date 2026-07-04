@@ -110,10 +110,6 @@ public class CheckServiceImpl implements CheckService {
         oc.setOcStatus(0); // 未缴费
         oc.setOcCreateTime(TodayUtil.getToday());
         int inserted = this.orderCheckMapper.insert(oc);
-        if (inserted > 0) {
-            // Update order state to 已开处方/检查(3)
-            orderService.updateOrderState(oId, Orders.STATE_ORDERED);
-        }
         return inserted > 0;
     }
 

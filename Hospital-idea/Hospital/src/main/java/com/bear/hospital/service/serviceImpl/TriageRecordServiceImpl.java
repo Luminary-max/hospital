@@ -60,7 +60,6 @@ public class TriageRecordServiceImpl implements TriageRecordService {
         if (triageRecord.getTLevel() != null) wrapper.set("t_level", triageRecord.getTLevel());
         if (triageRecord.getTStatus() != null) wrapper.set("t_status", triageRecord.getTStatus());
         if (triageRecord.getTNote() != null) wrapper.set("t_note", triageRecord.getTNote());
-        if (triageRecord.getTChiefComplaint() != null) wrapper.set("t_chief_complaint", triageRecord.getTChiefComplaint());
         if (triageRecord.getTTemperature() != null) wrapper.set("t_temperature", triageRecord.getTTemperature());
         if (triageRecord.getTBloodPressure() != null) wrapper.set("t_blood_pressure", triageRecord.getTBloodPressure());
         if (triageRecord.getTHeartRate() != null) wrapper.set("t_heart_rate", triageRecord.getTHeartRate());

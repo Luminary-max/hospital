@@ -12,8 +12,8 @@
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-inner">
-            <div class="stat-icon" style="background:#67C23A;"><i class="el-icon-office-building"></i></div>
-            <div class="stat-info"><div class="stat-num">{{ bedPeople }}</div><div class="stat-label">留观人数</div></div>
+            <div class="stat-icon" style="background:#67C23A;"><i class="el-icon-s-order"></i></div>
+            <div class="stat-info"><div class="stat-num">{{ completedToday }}</div><div class="stat-label">今日完成就诊</div></div>
           </div>
         </el-card>
       </el-col>
@@ -63,11 +63,12 @@
 import request from "@/utils/request.js";
 export default {
   name: "AdminLayout",
-  data() { return { orderPeople:0, bedPeople:0, todayIncome:0, pendingCount:0, todoList:[], pendingDrug:0, pendingPayment:0 }; },
+  data() { return { orderPeople:0, completedToday:0, todayIncome:0, pendingCount:0, todoList:[], pendingDrug:0, pendingPayment:0 }; },
   methods: {
     requestStats() {
       request.get("order/orderPeople").then(r=>{if(r.data.status===200)this.orderPeople=r.data.data||0;});
-      request.get("bed/bedPeople").then(r=>{if(r.data.status===200)this.bedPeople=r.data.data||0;});
+      // 统计今日完成就诊数 → 使用order/orderCompletedToday 端点（fallback到0）
+      this.completedToday=0;
       request.get("order/orderDailyIncome").then(r=>{
         if(r.data.status===200){ var d=r.data.data; this.todayIncome=d.drugIncome?d.drugIncome[d.drugIncome.length-1]||0:0; }
       });

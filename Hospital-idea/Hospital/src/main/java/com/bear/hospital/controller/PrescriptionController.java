@@ -2,10 +2,12 @@ package com.bear.hospital.controller;
 
 import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.pojo.PrescriptionDetail;
+import com.bear.hospital.pojo.PrescriptionMaster;
 import com.bear.hospital.service.OrderService;
 import com.bear.hospital.service.PharmacyDispensingService;
 import com.bear.hospital.service.PrescriptionService;
 import com.bear.hospital.utils.ResponseData;
+import com.bear.hospital.utils.TodayUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +51,10 @@ public class PrescriptionController {
         } catch (ClassCastException e) {
             return ResponseData.fail("details格式无效");
         }
+        // 提取处方主表信息
+        String dId = params.get("dId") != null ? params.get("dId").toString() : null;
+        String diagnosis = params.get("pmDiagnosis") != null ? params.get("pmDiagnosis").toString() : null;
+
         List<PrescriptionDetail> details = new ArrayList<>();
         for (Map<String, Object> m : rawList) {
             PrescriptionDetail d = new PrescriptionDetail();
@@ -67,8 +73,14 @@ public class PrescriptionController {
             if (m.get("drPrice") != null) d.setPdPrice(Double.parseDouble(m.get("drPrice").toString()));
             details.add(d);
         }
-        prescriptionService.savePrescriptions(oId, details);
-        // 自动生成发药记录
+        // 使用新方法保存处方（含主表+明细+pmId关联）
+        if (prescriptionService instanceof com.bear.hospital.service.serviceImpl.PrescriptionServiceImpl) {
+            ((com.bear.hospital.service.serviceImpl.PrescriptionServiceImpl) prescriptionService)
+                .savePrescriptions(oId, details, dId, diagnosis);
+        } else {
+            prescriptionService.savePrescriptions(oId, details);
+        }
+        // 自动生成发药记录（关联到处方明细）
         for (PrescriptionDetail d : details) {
             pharmacyDispensingService.createDispensing(oId, d.getDrId(), d.getPdQuantity());
         }

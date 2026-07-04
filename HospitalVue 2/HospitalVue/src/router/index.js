@@ -19,7 +19,6 @@ import DealOrder from "@/views/DealOrder.vue";
 import DrugList from "@/views/DrugList.vue";
 import CheckList from "@/views/CheckList.vue";
 import DoctorOrder from "@/views/DoctorOrder.vue";
-import InBed from "@/views/InBed.vue";
 import ArrangeIndex from "@/views/ArrangeIndex.vue";
 import SectionList from "@/views/SectionList.vue";
 import AdminLayout from "@/views/AdminLayout.vue";
@@ -27,8 +26,6 @@ import DoctorLayout from "@/views/DoctorLayout.vue";
 import PatientLayout from "@/views/PatientLayout.vue";
 import SectionIndex from "@/views/SectionIndex.vue";
 import ArrangeDoctor from "@/views/ArrangeDoctor.vue";
-import MyBed from "@/views/MyBed.vue";
-import BedList from "@/views/BedList.vue";
 import DataExpore from "@/views/DataExpore.vue";
 import echarts from 'echarts';//引入echarts
 import DealOrderAgain from "@/views/DealOrderAgain.vue";
@@ -42,7 +39,6 @@ import PrescriptionList from "@/views/PrescriptionList.vue";
 import QueueStatus from "@/views/QueueStatus.vue";
 import MyPrescription from "@/views/MyPrescription.vue";
 import MyEmr from "@/views/MyEmr.vue";
-import ObserveBedList from "@/views/ObserveBedList.vue";
 
 import AuditLogList from "@/views/AuditLogList.vue";
 
@@ -126,11 +122,6 @@ const routes = [
         meta: { requireAuth: true },
       },
       {
-        path: "/bedList",
-        component: BedList,
-        meta: { requireAuth: true },
-      },
-      {
         path: "/dataExpore",
         component: DataExpore,
         meta: { requireAuth: true },
@@ -160,11 +151,6 @@ const routes = [
       {
         path: "/queueManage",
         component: QueueManage,
-        meta: { requireAuth: true },
-      },
-      {
-        path: "/observeBedList",
-        component: ObserveBedList,
         meta: { requireAuth: true },
       },
       {
@@ -274,10 +260,6 @@ const routes = [
         component: MyOrder
       },
       {
-        path: "/myBed",
-        component: MyBed
-      },
-      {
         path: "/patientCard",
         component: PatientCard,
       },
@@ -340,10 +322,6 @@ const routes = [
       {
         path: "/doctorOrder",
         component: DoctorOrder,
-      },
-      {
-        path: "/inBed",
-        component: InBed,
       },
       {
         path: "/doctorCard",

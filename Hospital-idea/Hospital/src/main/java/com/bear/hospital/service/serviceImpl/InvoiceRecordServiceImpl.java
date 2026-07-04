@@ -28,6 +28,13 @@ public class InvoiceRecordServiceImpl implements InvoiceRecordService {
     }
 
     @Override
+    public List<InvoiceRecord> findByBillingId(Integer brId) {
+        QueryWrapper<InvoiceRecord> wrapper = new QueryWrapper<>();
+        wrapper.eq("br_id", brId).orderByAsc("inv_id");
+        return this.invoiceRecordMapper.selectList(wrapper);
+    }
+
+    @Override
     public List<InvoiceRecord> findByDate(String date) {
         QueryWrapper<InvoiceRecord> wrapper = new QueryWrapper<>();
         wrapper.like("inv_create_time", date).orderByAsc("inv_id");

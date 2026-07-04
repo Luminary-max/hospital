@@ -48,7 +48,8 @@ public class Orders {
     @JsonProperty("oQueueNumber")
     private String oQueueNumber;
     @JsonProperty("oTriage")
-    private String oTriage;
+    @Deprecated
+    private String oTriage; // 已废弃，请使用 oRegType（挂号类型）
 
     // 新增字段
     @JsonProperty("oRegistrationFee")
@@ -141,6 +142,7 @@ public class Orders {
     public String getOQueueNumber() { return oQueueNumber; }
     public void setOQueueNumber(String oQueueNumber) { this.oQueueNumber = oQueueNumber; }
     public String getOTriage() { return oTriage; }
+    @Deprecated
     public void setOTriage(String oTriage) { this.oTriage = oTriage; }
 
     public Double getORegistrationFee() { return oRegistrationFee; }

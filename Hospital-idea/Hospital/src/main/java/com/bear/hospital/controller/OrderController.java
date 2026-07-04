@@ -40,11 +40,13 @@ public class OrderController {
     @PostMapping("processPayment")
     @ResponseBody
     public ResponseData processPayment(@RequestParam int oId,
+        @RequestParam(required = false) Integer emrId,
         @RequestParam String paymentMethod, @RequestParam String invoiceNo,
         @RequestParam(required = false) Double insuranceCovered,
         @RequestParam(required = false) Double selfPay,
         @RequestParam(required = false) String operator) {
-        this.orderService.processPayment(oId, paymentMethod, invoiceNo, insuranceCovered, selfPay, operator);
+        // 药费/检查费关联到病历；挂号费仍关联到订单
+        this.orderService.processPayment(oId, emrId, paymentMethod, invoiceNo, insuranceCovered, selfPay, operator);
         return ResponseData.success("收费成功");
     }
     /**
@@ -179,6 +181,17 @@ public class OrderController {
         if (this.orderService.updateOrderState(oId, newState))
             return ResponseData.success("更新状态成功");
         return ResponseData.fail("更新状态失败，状态转换不合法");
+    }
+
+    /**
+     * 医生完成接诊，统一推进订单到已开单状态
+     */
+    @PostMapping("finalizeConsultation")
+    @ResponseBody
+    public ResponseData finalizeConsultation(@RequestParam int oId) {
+        if (this.orderService.finalizeConsultation(oId))
+            return ResponseData.success("接诊完成，已开单");
+        return ResponseData.fail("状态转变失败");
     }
 
     /**

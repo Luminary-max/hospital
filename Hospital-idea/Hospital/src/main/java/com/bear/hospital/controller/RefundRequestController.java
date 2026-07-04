@@ -32,10 +32,15 @@ public class RefundRequestController {
     }
 
     /**
-     * Feature 7: 审核通过退费
+     * Feature 7: 审核通过退费（含校验）
      */
     @PostMapping("approve")
     public ResponseData approve(@RequestParam int rfId, @RequestParam String approver) {
+        // 前置校验
+        String error = refundRequestService.validateBeforeApprove(rfId);
+        if (error != null) {
+            return ResponseData.fail(error);
+        }
         return refundRequestService.approve(rfId, approver)
                 ? ResponseData.success("退费已批准")
                 : ResponseData.fail("审批失败");

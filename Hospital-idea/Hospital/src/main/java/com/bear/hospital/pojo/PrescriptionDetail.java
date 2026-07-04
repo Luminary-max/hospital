@@ -10,6 +10,8 @@ public class PrescriptionDetail {
     private int pdId;
     @JsonProperty("oId")
     private int oId;
+    @JsonProperty("pmId")
+    private Integer pmId;
     @JsonProperty("drId")
     private String drId;
     @JsonProperty("pdUsage")
@@ -47,6 +49,8 @@ public class PrescriptionDetail {
     public void setPdId(int pdId) { this.pdId = pdId; }
     public int getOId() { return oId; }
     public void setOId(int oId) { this.oId = oId; }
+    public Integer getPmId() { return pmId; }
+    public void setPmId(Integer pmId) { this.pmId = pmId; }
     public String getDrId() { return drId; }
     public void setDrId(String drId) { this.drId = drId; }
     public String getPdUsage() { return pdUsage; }

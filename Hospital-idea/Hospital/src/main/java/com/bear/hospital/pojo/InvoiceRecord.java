@@ -13,6 +13,8 @@ public class InvoiceRecord {
     private String invNo;
     @JsonProperty("oId")
     private Integer oId;
+    @JsonProperty("brId")
+    private Integer brId;
     @JsonProperty("invType")
     private String invType;
     @JsonProperty("invAmount")
@@ -42,6 +44,8 @@ public class InvoiceRecord {
     public void setInvNo(String invNo) { this.invNo = invNo; }
     public Integer getOId() { return oId; }
     public void setOId(Integer oId) { this.oId = oId; }
+    public Integer getBrId() { return brId; }
+    public void setBrId(Integer brId) { this.brId = brId; }
     public String getInvType() { return invType; }
     public void setInvType(String invType) { this.invType = invType; }
     public Double getInvAmount() { return invAmount; }

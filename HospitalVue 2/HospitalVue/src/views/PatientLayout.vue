@@ -12,8 +12,8 @@
       <el-col :span="12">
         <el-card shadow="hover" class="stat-card">
           <div class="stat-inner">
-            <div class="stat-icon" style="background:#67C23A;"><i class="el-icon-office-building"></i></div>
-            <div class="stat-info"><div class="stat-num">{{ bedPeople }}</div><div class="stat-label">今日留观总人数</div></div>
+            <div class="stat-icon" style="background:#67C23A;"><i class="el-icon-s-order"></i></div>
+            <div class="stat-info"><div class="stat-num">{{ myOrderCount }}</div><div class="stat-label">我的挂号数</div></div>
           </div>
         </el-card>
       </el-col>
@@ -25,12 +25,16 @@
 import request from "@/utils/request.js";
 export default {
   name: "PatientLayout",
-  data() { return { orderPeople: 0, bedPeople: 0 }; },
+  data() { return { orderPeople: 0, myOrderCount: 0 }; },
   methods: {
     requestPeople() { request.get("order/orderPeople").then(r=>{if(r.data.status===200)this.orderPeople=r.data.data||0;}); },
-    requestBed() { request.get("bed/bedPeople").then(r=>{if(r.data.status===200)this.bedPeople=r.data.data||0;}); }
+    requestMyOrders() {
+      const pId = (()=>{try{const t=sessionStorage.getItem("token");if(!t)return null;const p=JSON.parse(atob(t.split(".")[1]));return p.pId;}catch(e){return null;}})();
+      if(pId) request.get("patient/findOrderByPid",{params:{pId}}).then(r=>{if(r.data.status===200)this.myOrderCount=(r.data.data||[]).length;}).catch(()=>{this.myOrderCount=0;});
+      else this.myOrderCount=0;
+    }
   },
-  created() { this.requestPeople(); this.requestBed(); }
+  created() { this.requestPeople(); this.requestMyOrders(); }
 };
 </script>
 <style scoped>

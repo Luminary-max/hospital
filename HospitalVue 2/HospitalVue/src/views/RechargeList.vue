@@ -215,6 +215,7 @@ export default {
     openPaymentDlg(row) {
       this.paymentForm = {
         oId: row.oId,
+        emrId: row.emrId || null,
         oRegistrationFee: row.oRegistrationFee||0,
         oDrugFee: row.oDrugFee || row.oTotalPrice || 0,
         oCheckFee: row.oCheckFee || 0,
@@ -233,6 +234,7 @@ export default {
       request.post("order/processPayment", null, {
         params: {
           oId: this.paymentForm.oId,
+          emrId: this.paymentForm.emrId || null,
           paymentMethod: this.paymentForm.paymentMethod,
           invoiceNo: this.paymentForm.invoiceNo||"INV-"+Date.now(),
           insuranceCovered: this.paymentForm.insuranceCovered||0,

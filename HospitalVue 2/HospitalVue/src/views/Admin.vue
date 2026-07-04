@@ -56,11 +56,6 @@
             <el-menu-item index="refundApproval" @click="menuClick('refundApproval')"><span>退费审批</span></el-menu-item>
             <el-menu-item index="invoiceManage" @click="menuClick('invoiceManage')"><span>发票管理</span></el-menu-item>
           </el-submenu>
-          <el-submenu index="4">
-            <template slot="title"><i class="el-icon-office-building"></i><span>床位管理</span></template>
-            <el-menu-item index="bedList" @click="menuClick('bedList')">床位列表</el-menu-item>
-            <el-menu-item index="observeBedList" @click="menuClick('observeBedList')">观察区</el-menu-item>
-          </el-submenu>
           <el-menu-item index="notificationList" @click="menuClick('notificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
           <el-submenu index="7">
             <template slot="title"><i class="el-icon-s-data"></i><span>数据统计</span></template>

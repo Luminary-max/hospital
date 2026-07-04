@@ -34,10 +34,10 @@ public interface OrderService {
      * 根据id设置缴费状态
      */
     Boolean updatePrice(int oId);
-    /**
-     * 处理收费（更新订单+记录收费流水）
-     */
+    /** 处理收费（旧接口兼容，药费/检查费不关联病历） */
     Boolean processPayment(int oId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator);
+    /** 处理收费（正确业务流程：emrId关联病历，挂号费仍关联订单） */
+    Boolean processPayment(int oId, Integer emrId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator);
     /**
      * 查找医生已完成的挂号单
      */
@@ -89,6 +89,8 @@ public interface OrderService {
     Boolean updateOrderState(int oId, int newState);
 
     // -------- Feature 1: Cancel Appointment (取消挂号) --------
+    /** 医生完成全部接诊后统一推进订单状态 */
+    Boolean finalizeConsultation(int oId);
     Boolean cancelOrder(int oId, String reason);
 
     // -------- Feature 2: Re-registration (复诊挂号) --------

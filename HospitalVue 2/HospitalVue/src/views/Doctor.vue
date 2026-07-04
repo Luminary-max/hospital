@@ -22,7 +22,6 @@
           <el-menu-item index="prescriptionList" @click="menuClick('prescriptionList')"><i class="el-icon-document"></i><span>处方管理</span></el-menu-item>
           <el-menu-item index="doctorCheckOrder" @click="menuClick('doctorCheckOrder')"><i class="el-icon-first-aid-kit"></i><span>检查开单</span></el-menu-item>
           <el-menu-item index="doctorQueue" @click="menuClick('doctorQueue')"><i class="el-icon-s-order"></i><span>叫号面板</span></el-menu-item>
-          <el-menu-item index="inBed" @click="menuClick('inBed')"><i class="el-icon-office-building"></i><span>床位安排</span></el-menu-item>
           <el-menu-item index="doctorCard" @click="menuClick('doctorCard')"><i class="el-icon-user"></i><span>个人信息</span></el-menu-item>
         </el-menu>
       </el-aside>
