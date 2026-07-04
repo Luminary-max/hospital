@@ -1,328 +1,115 @@
 erDiagram
-    %% ===== 基础数据 =====
-    科室 {
-        int de_id PK
-        string de_name
-        string de_introduce
-    }
-    医生 {
-        string d_id PK
-        string d_name
-        string d_post
-        string d_section FK
-        string d_phone
-        int d_max_daily
-    }
-    患者 {
-        int p_id PK
-        string p_name
-        string p_gender
-        string p_phone
-        string p_card
-        string p_insurance_id
-        string p_insurance_type
-        string p_blacklisted
-    }
-    药品 {
-        string dr_id PK
-        string dr_name
-        double dr_price
-        string dr_unit
-        string dr_type
-        int dr_number
-    }
-    药品分类 {
-        int dc_id PK
-        string dc_name
-        int dc_parent_id FK
-    }
-    检查项目 {
-        string ch_id PK
-        string ch_name
-        double ch_price
-    }
-    排班 {
-        string ar_id PK
-        string ar_time
-        string d_id FK
-    }
+    %% ===================================================================
+    %% 完全按照门诊业务实际流程设计
+    %% 流程：排班→预约→挂号→分诊/排队→就诊→开方/开检查→缴费→执行→票据
+    %% ===================================================================
 
-    %% ===== 门诊核心流程 =====
-    分诊记录 {
-        int t_id PK
-        int p_id FK
-        string d_id FK
-        int t_level
-        string t_source
-        string t_chief_complaint
-        string t_temperature
-        string t_blood_pressure
-        int t_heart_rate
-        string t_weight
-        int t_status
-        string t_create_time
-    }
-    挂号订单 {
-        int o_id PK
-        int p_id FK
-        string d_id FK
-        string o_start
-        string o_end
-        int o_state
-        int o_price_state
-        double o_registration_fee
-        double o_total_price
-        string o_payment_method
-        string o_invoice_no
-        double o_insurance_covered
-        double o_self_pay
-        string o_cancel_reason
-        int o_missed
-    }
-    排队叫号 {
-        int q_id PK
-        int o_id FK
-        int p_id FK
-        string d_id FK
-        int q_state
-        string q_create_time
-        string q_call_time
-    }
-    门诊病历 {
-        int emr_id PK
-        int o_id FK
-        int p_id FK
-        string d_id FK
-        string chief_complaint
-        string present_illness
-        string past_history
-        string physical_exam
-        string diagnosis
-        string treatment_plan
-        string allergy_history
-        string medical_advice
-        string follow_up_suggest
-    }
+    %% 基础数据
+    科室
+    医生
+    患者
+    药品
+    药品分类
+    检查项目
+    诊断字典
+    处方模板
+    病历模板
 
-    %% ===== 处方流程 =====
-    处方主表 {
-        int pm_id PK
-        int o_id FK
-        string d_id FK
-        string pm_diagnosis
-        string pm_type
-        int pm_status
-        string pm_create_time
-    }
-    处方明细 {
-        int pd_id PK
-        int o_id FK
-        int pm_id FK
-        string dr_id FK
-        string pd_usage
-        string pd_route
-        string pd_dosage
-        string pd_frequency
-        string pd_timing
-        int pd_skin_test
-        string pd_tcm_group_no
-        string pd_decoction_method
-        int pd_days
-        int pd_quantity
-        double pd_price
-    }
+    %% 第一步：排班预约
+    排班
+    预约
 
-    %% ===== 药房流程 =====
-    发药记录 {
-        int pds_id PK
-        int presc_detail_id FK
-        int db_id FK
-        int pd_quantity
-        int pd_status
-        string pd_dispense_by
-        string pd_review_by
-        string pd_return_by
-    }
+    %% 第二步：挂号
+    挂号订单
 
-    %% ===== 检查流程 =====
-    检查开单 {
-        int oc_id PK
-        int o_id FK
-        string ch_id FK
-        double ch_price
-        int oc_status
-        string oc_result
-        string oc_result_time
-        string oc_operator
-    }
+    %% 第三步：诊前
+    分诊记录
+    排队叫号
 
-    %% ===== 收费/退费流程 =====
-    缴费记录 {
-        int br_id PK
-        int o_id FK
-        int emr_id FK
-        int oc_id FK
-        string br_type
-        double br_amount
-        string br_payment_method
-        string br_invoice_no
-        string br_pay_time
-        string br_operator
-    }
-    发票 {
-        int inv_id PK
-        string inv_no
-        int o_id FK
-        int br_id FK
-        double inv_amount
-        int inv_status
-        string inv_operator
-        string inv_create_time
-    }
-    退费申请 {
-        int rf_id PK
-        int o_id FK
-        int br_id FK
-        int oc_id FK
-        double rf_amount
-        string rf_reason
-        int rf_status
-        string rf_requester
-        string rf_approver
-    }
+    %% 第四步：就诊
+    门诊病历
 
-    %% ===== 辅助功能 =====
-    消息通知 {
-        int n_id PK
-        int p_id FK
-        string d_id FK
-        string n_type
-        string n_title
-        int n_is_read
-    }
-    代取药申请 {
-        int dl_id PK
-        int o_id FK
-        int p_id FK
-        string dl_agent_name
-        string dl_pickup_code
-        int dl_status
-    }
-    预约 {
-        int ap_id PK
-        int o_id FK
-        string ar_id FK
-        string ap_time
-        int ap_status
-    }
-    处方模板 {
-        int pt_id PK
-        string pt_name
-        string d_id FK
-        string pt_diagnosis
-        string pt_dept
-        string pt_content
-    }
-    病历模板 {
-        int et_id PK
-        string et_name
-        string d_id FK
-        string et_chief_complaint
-        string et_diagnosis
-    }
-    诊断字典 {
-        int dd_id PK
-        string dd_code
-        string dd_name
-        string dd_dept
-    }
+    %% 第五步：医生开立
+    处方主表
+    处方明细
+    检查开单
 
-    %% ===== 库存 =====
-    药品批次 {
-        int db_id PK
-        string dr_id FK
-        string db_batch_no
-        string db_expire_date
-        int db_quantity
-        double db_purchase_price
-    }
-    库存变动 {
-        int it_id PK
-        string dr_id FK
-        int db_id FK
-        string it_type
-        int it_quantity
-        string it_operator
-    }
-    药品调价记录 {
-        int dpl_id PK
-        string dr_id FK
-        double old_price
-        double new_price
-        string change_reason
-    }
+    %% 第六步：缴费
+    缴费记录
 
-    %% ===== RELATIONSHIPS =====
+    %% 第七步：执行
+    发药记录
 
-    %% 科室-医生
-    科室 ||--o{ 医生 : "de_id"
+    %% 第八步：票据
+    发票
+    退费申请
 
-    %% 医生-业务
-    医生 ||--o{ 排班 : "d_id"
-    医生 ||--o{ 分诊记录 : "d_id"
-    医生 ||--o{ 挂号订单 : "d_id"
-    医生 ||--o{ 排队叫号 : "d_id"
-    医生 ||--o{ 门诊病历 : "d_id"
-    医生 ||--o{ 处方主表 : "d_id"
-    医生 ||--o{ 处方模板 : "d_id"
-    医生 ||--o{ 病历模板 : "d_id"
+    %% 辅助
+    代取药申请
+    消息通知
 
-    %% 患者-业务
-    患者 ||--o{ 分诊记录 : "p_id"
-    患者 ||--o{ 挂号订单 : "p_id"
-    患者 ||--o{ 排队叫号 : "p_id"
-    患者 ||--o{ 门诊病历 : "p_id"
-    患者 ||--o{ 消息通知 : "p_id"
-    患者 ||--o{ 代取药申请 : "p_id"
+    %% 库存
+    药品批次
+    库存变动
+    药品调价记录
 
-    %% 订单为中心
-    挂号订单 ||--o{ 门诊病历 : "o_id"
-    挂号订单 ||--o{ 缴费记录 : "o_id"
-    挂号订单 ||--o{ 发票 : "o_id"
-    挂号订单 ||--o{ 处方主表 : "o_id"
-    挂号订单 ||--o{ 处方明细 : "o_id"
-    挂号订单 ||--o{ 检查开单 : "o_id"
-    挂号订单 ||--o{ 排队叫号 : "o_id"
-    挂号订单 ||--o{ 退费申请 : "o_id"
-    挂号订单 ||--o{ 代取药申请 : "o_id"
-    挂号订单 ||--o{ 预约 : "o_id"
+    %% ===================================================================
+    %% 关系：按流程顺序串联，不设中心枢纽
+    %% ===================================================================
 
-    %% 处方主表-明细
-    处方主表 ||--o{ 处方明细 : "pm_id"
+    %% ── 基础 ──
+    科室 ||--o{ 医生 : ""
+    医生 ||--o{ 排班 : ""
 
-    %% 处方明细-发药
-    处方明细 ||--o{ 发药记录 : "presc_detail_id"
+    %% ── 第一步：排班 → 预约 ──
+    患者 ||--o{ 预约 : ""
+    排班 ||--o{ 预约 : ""
 
-    %% 检查开单-收费关联
-    检查开单 ||--o{ 缴费记录 : "oc_id"
-    检查开单 ||--o{ 退费申请 : "oc_id"
+    %% ── 第二步：预约 → 挂号 ──
+    预约 ||--o{ 挂号订单 : ""
+    患者 ||--o{ 挂号订单 : ""
+    医生 ||--o{ 挂号订单 : ""
 
-    %% 病历-收费
-    门诊病历 ||--o{ 缴费记录 : "emr_id"
+    %% ── 第三步：挂号 → 诊前 ──
+    挂号订单 ||--o{ 分诊记录 : ""
+    挂号订单 ||--o{ 排队叫号 : ""
 
-    %% 收费-发票-退费
-    缴费记录 ||--o{ 发票 : "br_id"
-    缴费记录 ||--o{ 退费申请 : "br_id"
+    %% ── 第四步：挂号 → 就诊 ──
+    挂号订单 ||--o{ 门诊病历 : ""
+    患者 ||--o{ 门诊病历 : ""
+    医生 ||--o{ 门诊病历 : ""
 
-    %% 药品库存体系
-    药品 ||--o{ 药品分类 : "dc_id"
-    药品 ||--o{ 药品批次 : "dr_id"
-    药品 ||--o{ 药品调价记录 : "dr_id"
-    药品 ||--o{ 处方明细 : "dr_id"
-    药品 ||--o{ 库存变动 : "dr_id"
-    药品分类 ||--o{ 药品分类 : "dc_parent_id"
-    药品批次 ||--o{ 发药记录 : "db_id"
-    药品批次 ||--o{ 库存变动 : "db_id"
+    %% ── 第五步：就诊 → 开立 ──
+    门诊病历 ||--o{ 处方主表 : ""
+    门诊病历 ||--o{ 检查开单 : ""
+    医生 ||--o{ 处方主表 : ""
+    处方主表 ||--o{ 处方明细 : ""
+    药品 ||--o{ 处方明细 : ""
+    检查项目 ||--o{ 检查开单 : ""
 
-    %% 检查体系
-    检查项目 ||--o{ 检查开单 : "ch_id"
+    %% ── 第六步：开立 → 缴费 ──
+    处方主表 ||--o{ 缴费记录 : ""
+    检查开单 ||--o{ 缴费记录 : ""
+    门诊病历 ||--o{ 缴费记录 : ""
+
+    %% ── 第七步：缴费 → 执行 ──
+    处方明细 ||--o{ 发药记录 : ""
+    药品批次 ||--o{ 发药记录 : ""
+
+    %% ── 第八步：缴费 → 票据 ──
+    缴费记录 ||--o{ 发票 : ""
+    缴费记录 ||--o{ 退费申请 : ""
+
+    %% ── 库存 ──
+    药品 ||--o{ 药品批次 : ""
+    药品 ||--o{ 药品调价记录 : ""
+    药品 ||--o{ 库存变动 : ""
+    药品分类 ||--o{ 药品分类 : ""
+    药品分类 ||--o{ 药品 : ""
+    药品批次 ||--o{ 库存变动 : ""
+
+    %% ── 辅助 ──
+    医生 ||--o{ 处方模板 : ""
+    医生 ||--o{ 病历模板 : ""
+    患者 ||--o{ 消息通知 : ""
+    患者 ||--o{ 代取药申请 : ""
