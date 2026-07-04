@@ -9,12 +9,8 @@ public class PharmacyDispensing {
     @TableId(value = "pd_id")
     @JsonProperty("pdId")
     private Integer pdId;
-    @JsonProperty("oId")
-    private Integer oId;
     @JsonProperty("prescDetailId")
     private Integer prescDetailId;
-    @JsonProperty("drId")
-    private String drId;
     @JsonProperty("dbId")
     private Integer dbId;
     @JsonProperty("pdQuantity")
@@ -42,12 +38,8 @@ public class PharmacyDispensing {
 
     public Integer getPdId() { return pdId; }
     public void setPdId(Integer pdId) { this.pdId = pdId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
     public Integer getPrescDetailId() { return prescDetailId; }
     public void setPrescDetailId(Integer prescDetailId) { this.prescDetailId = prescDetailId; }
-    public String getDrId() { return drId; }
-    public void setDrId(String drId) { this.drId = drId; }
     public Integer getDbId() { return dbId; }
     public void setDbId(Integer dbId) { this.dbId = dbId; }
     public Integer getPdQuantity() { return pdQuantity; }

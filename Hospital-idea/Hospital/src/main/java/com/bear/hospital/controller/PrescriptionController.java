@@ -80,9 +80,10 @@ public class PrescriptionController {
         } else {
             prescriptionService.savePrescriptions(oId, details);
         }
-        // 自动生成发药记录（关联到处方明细）
-        for (PrescriptionDetail d : details) {
-            pharmacyDispensingService.createDispensing(oId, d.getDrId(), d.getPdQuantity());
+        // 自动生成发药记录（关联到处方明细pdId）
+        for (int i = 0; i < details.size(); i++) {
+            PrescriptionDetail d = details.get(i);
+            pharmacyDispensingService.createDispensing(d.getPdId(), d.getPdQuantity());
         }
         return ResponseData.success("保存成功");
     }

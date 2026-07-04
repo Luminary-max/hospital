@@ -701,7 +701,7 @@ export default {
         }
         // 2. 保存处方明细
         if (this.drugBuyData.length > 0) {
-          await request.post("prescription/save", { oId: this.oId, details: this.drugBuyData });
+          await request.post("prescription/save", { oId: this.oId, dId: this.dId, pmDiagnosis: this.emr.diagnosis || '', details: this.drugBuyData });
         }
         // 3. 更新订单到orders表（兼容已有功能）
         const drugStr = this.drugBuyData.map(d => {

@@ -36,7 +36,7 @@
       </div>
       <div class="now-serving-number" v-if="currentCalling">
         <span class="pulse-ring"></span>
-        {{ currentCalling.qNumber || currentCalling.q_number || '---' }}
+        #{{ currentCalling.queueIndex || '?' }}
       </div>
       <div class="now-serving-number idle-text" v-else>---</div>
       <div class="now-serving-info" v-if="currentCalling">
@@ -61,7 +61,6 @@
         </div>
         <div class="pq-dept-waiting">
           <span>等待 {{ dept.waiting || 0 }} 人</span>
-          <el-tag
             :type="(dept.waiting || 0) > 3 ? 'danger' : (dept.waiting || 0) > 0 ? 'warning' : 'success'"
             size="mini"
             effect="dark"
@@ -71,7 +70,7 @@
         </div>
         <div class="pq-wait-list" v-if="dept.waitList && dept.waitList.length > 0">
           <div class="pq-wait-item" v-for="(item, wi) in dept.waitList.slice(0, 5)" :key="wi">
-            <span class="wait-num">{{ item.qNumber || item.q_number || '--' }}</span>
+            <span class="wait-num">#{{ item.queueIndex || '?' }}</span>
           </div>
         </div>
         <div class="pq-wait-empty" v-else>
@@ -96,14 +95,14 @@
 import request from "@/utils/request.js";
 
 const DEMO_DEPTS = [
-  { deptName: '内科', waiting: 12, finished: 35, calling: 'N-028', waitList: [{ qNumber: 'N-029' }, { qNumber: 'N-030' }, { qNumber: 'N-031' }] },
-  { deptName: '外科', waiting: 8, finished: 27, calling: 'W-016', waitList: [{ qNumber: 'W-017' }, { qNumber: 'W-018' }] },
-  { deptName: '妇产科', waiting: 5, finished: 18, calling: 'F-009', waitList: [{ qNumber: 'F-010' }, { qNumber: 'F-011' }] },
-  { deptName: '儿科', waiting: 3, finished: 14, calling: 'P-005', waitList: [{ qNumber: 'P-006' }, { qNumber: 'P-007' }] },
-  { deptName: '五官科', waiting: 6, finished: 12, calling: 'E-007', waitList: [{ qNumber: 'E-008' }, { qNumber: 'E-009' }, { qNumber: 'E-010' }] },
-  { deptName: '中医科', waiting: 2, finished: 9, calling: 'T-003', waitList: [{ qNumber: 'T-004' }] },
-  { deptName: '康复医学科', waiting: 4, finished: 7, calling: 'A-004', waitList: [{ qNumber: 'A-005' }, { qNumber: 'A-006' }] },
-  { deptName: '急诊科', waiting: 1, finished: 22, calling: 'J-015', waitList: [{ qNumber: 'J-016' }] }
+  { deptName: '内科', waiting: 12, finished: 35, calling: '#28', waitList: [{ queueIndex: 29 }, { queueIndex: 30 }, { queueIndex: 31 }] },
+  { deptName: '外科', waiting: 8, finished: 27, calling: '#16', waitList: [{ queueIndex: 17 }, { queueIndex: 18 }] },
+  { deptName: '妇产科', waiting: 5, finished: 18, calling: '#9', waitList: [{ queueIndex: 10 }, { queueIndex: 11 }] },
+  { deptName: '儿科', waiting: 3, finished: 14, calling: '#5', waitList: [{ queueIndex: 6 }, { queueIndex: 7 }] },
+  { deptName: '五官科', waiting: 6, finished: 12, calling: '#7', waitList: [{ queueIndex: 8 }, { queueIndex: 9 }, { queueIndex: 10 }] },
+  { deptName: '中医科', waiting: 2, finished: 9, calling: '#3', waitList: [{ queueIndex: 4 }] },
+  { deptName: '康复医学科', waiting: 4, finished: 7, calling: '#4', waitList: [{ queueIndex: 5 }, { queueIndex: 6 }] },
+  { deptName: '急诊科', waiting: 1, finished: 22, calling: '#15', waitList: [{ queueIndex: 16 }] }
 ];
 
 export default {
@@ -184,7 +183,7 @@ export default {
                   if (qRes.data && qRes.data.status === 200) {
                     const list = qRes.data.data || [];
                     const cur = list.find(q => q.qState === 1);
-                    dept.calling = cur ? (cur.qNumber || cur.q_number) : '---';
+                    dept.calling = cur ? ('#' + (cur.queueIndex || '?')) : '---';
                     dept.waitList = list.filter(q => q.qState === 0);
                     dept.waiting = dept.waitList.length;
                     dept.finished = list.filter(q => q.qState === 3).length;
@@ -213,7 +212,7 @@ export default {
         this.waitingTotal = DEMO_DEPTS.reduce((s, d) => s + d.waiting, 0);
         this.finishedTotal = DEMO_DEPTS.reduce((s, d) => s + d.finished, 0);
         this.currentCalling = {
-          qNumber: 'N-028',
+          queueIndex: 28,
           deptName: '内科',
           pName: '张患者'
         };

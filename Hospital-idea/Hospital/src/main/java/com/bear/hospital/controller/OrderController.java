@@ -2,10 +2,13 @@ package com.bear.hospital.controller;
 
 import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.service.OrderService;
+import com.bear.hospital.service.RefundRequestService;
 import com.bear.hospital.utils.ResponseData;
 import com.bear.hospital.utils.TodayUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 import java.util.ArrayList;
 
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 public class OrderController {
     @Autowired
     private OrderService orderService;
+    @Resource
+    private RefundRequestService refundRequestService;
     /**
      * 根据id更新挂号信息
      */
@@ -249,6 +254,22 @@ public class OrderController {
     @RequestMapping("patientBillingDetail")
     public ResponseData patientBillingDetail(@RequestParam int pId) {
         return ResponseData.success("查询成功", this.orderService.patientBillingDetail(pId));
+    }
+
+    /**
+     * 退款处理：创建退费申请（前端 order/refund 兼容入口）
+     */
+    @RequestMapping("refund")
+    public ResponseData refund(@RequestParam int oId, @RequestParam String reason, @RequestParam(required = false) String operator) {
+        com.bear.hospital.pojo.RefundRequest req = new com.bear.hospital.pojo.RefundRequest();
+        req.setOId(oId);
+        req.setRfReason(reason);
+        req.setRfRequester(operator != null ? operator : "收费员");
+        req.setRfStatus(com.bear.hospital.pojo.RefundRequest.STATUS_PENDING);
+        req.setRfCreateTime(com.bear.hospital.utils.TodayUtil.getToday());
+        return refundRequestService.create(req)
+            ? ResponseData.success("退费申请已提交，等待审核")
+            : ResponseData.fail("退费申请提交失败");
     }
 
     /**

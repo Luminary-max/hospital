@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.bear.hospital.mapper.DrugMapper;
 import com.bear.hospital.mapper.PharmacyDispensingMapper;
+import com.bear.hospital.mapper.PrescriptionMapper;
 import com.bear.hospital.pojo.Drug;
 import com.bear.hospital.pojo.PharmacyDispensing;
+import com.bear.hospital.pojo.PrescriptionDetail;
 import com.bear.hospital.service.DrugService;
 import com.bear.hospital.service.InventoryService;
 import com.bear.hospital.service.PharmacyDispensingService;
@@ -22,6 +24,8 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
     private PharmacyDispensingMapper pharmacyDispensingMapper;
     @Resource
     private DrugMapper drugMapper;
+    @Resource
+    private PrescriptionMapper prescriptionMapper;
     @Resource
     private InventoryService inventoryService;
 
@@ -39,22 +43,28 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
         return map;
     }
 
+    private PrescriptionDetail getDetailByPrescDetailId(Integer prescDetailId) {
+        if (prescDetailId == null) return null;
+        return prescriptionMapper.selectById(prescDetailId);
+    }
+
     @Override
     public Boolean dispense(int pdId, String dispenseBy, DrugService drugService) {
-        // 查出待发药记录
         PharmacyDispensing pd = this.pharmacyDispensingMapper.selectById(pdId);
         if (pd == null) return false;
         if (pd.getPdStatus() == null || pd.getPdStatus() != 0) return false;
-        // 校验：关联订单必须已缴费（o_price_state=1），否则不可发药
+        // 通过处方明细获取订单ID
+        PrescriptionDetail detail = getDetailByPrescDetailId(pd.getPrescDetailId());
+        if (detail == null) return false;
+        // 校验：关联订单必须已缴费
         com.bear.hospital.mapper.OrderMapper orderMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderMapper.class);
-        com.bear.hospital.pojo.Orders order = orderMapper2.selectById(pd.getOId());
+        com.bear.hospital.pojo.Orders order = orderMapper2.selectById(detail.getOId());
         if (order == null || order.getOPriceState() == null || order.getOPriceState() != 1) {
-            return false; // 未缴费不可发药
+            return false;
         }
-        Integer batchId = inventoryService.dispenseFefo(pd.getDrId(), pd.getPdQuantity(), dispenseBy,
+        Integer batchId = inventoryService.dispenseFefo(detail.getDrId(), pd.getPdQuantity(), dispenseBy,
             "DISPENSE-" + pdId);
         if (batchId == null) return false;
-        // 更新发药状态 -> 待复核(1)
         UpdateWrapper<PharmacyDispensing> wrapper = new UpdateWrapper<>();
         wrapper.eq("pd_id", pdId)
             .set("pd_status", 1)
@@ -80,7 +90,9 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
     public Boolean returnDrug(int pdId, String returnBy) {
         PharmacyDispensing pd = this.pharmacyDispensingMapper.selectById(pdId);
         if (pd == null || pd.getPdStatus() == null || pd.getPdStatus() != 2) return false;
-        if (!inventoryService.returnStock(pd.getDrId(), pd.getDbId(), pd.getPdQuantity(), returnBy,
+        PrescriptionDetail detail = getDetailByPrescDetailId(pd.getPrescDetailId());
+        if (detail == null) return false;
+        if (!inventoryService.returnStock(detail.getDrId(), pd.getDbId(), pd.getPdQuantity(), returnBy,
                 "RETURN-" + pdId)) return false;
         UpdateWrapper<PharmacyDispensing> wrapper = new UpdateWrapper<>();
         wrapper.eq("pd_id", pdId).set("pd_status", 3)
@@ -89,10 +101,9 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
     }
 
     @Override
-    public Boolean createDispensing(int oId, String drId, int quantity) {
+    public Boolean createDispensing(Integer prescDetailId, Integer quantity) {
         PharmacyDispensing pd = new PharmacyDispensing();
-        pd.setOId(oId);
-        pd.setDrId(drId);
+        pd.setPrescDetailId(prescDetailId);
         pd.setPdQuantity(quantity);
         pd.setPdStatus(0);
         pd.setPdCreateTime(TodayUtil.getToday());

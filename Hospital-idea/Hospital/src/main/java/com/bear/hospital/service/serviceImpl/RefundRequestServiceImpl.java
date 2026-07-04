@@ -11,6 +11,7 @@ import com.bear.hospital.mapper.RefundRequestMapper;
 import com.bear.hospital.pojo.OrderCheck;
 import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.pojo.PharmacyDispensing;
+import com.bear.hospital.pojo.PrescriptionDetail;
 import com.bear.hospital.pojo.RefundRequest;
 import com.bear.hospital.service.RefundRequestService;
 import com.bear.hospital.utils.TodayUtil;
@@ -76,16 +77,20 @@ public class RefundRequestServiceImpl implements RefundRequestService {
         }
 
         // 验证3: 必须确认所有药品已退药后才能退费
-        // 有任何药品处于 已发药(status=2) 或 待复核(status=1) 状态，均拒绝退费
-        QueryWrapper<PharmacyDispensing> pdWrapper = new QueryWrapper<>();
-        pdWrapper.eq("o_id", request.getOId());
-        java.util.List<PharmacyDispensing> dispensingList = pharmacyDispensingMapper.selectList(pdWrapper);
-        for (PharmacyDispensing pd : dispensingList) {
-            if (pd.getPdStatus() != null && pd.getPdStatus() == 1) {
-                return "药品正在复核中，无法退费。请等待复核完成后退药再退费";
-            }
-            if (pd.getPdStatus() != null && pd.getPdStatus() == 2) {
-                return "药品已发药，必须先退药后才能退费";
+        // 通过处方明细关联查询该订单的所有发药记录
+        com.bear.hospital.mapper.PrescriptionMapper prescMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PrescriptionMapper.class);
+        java.util.List<PrescriptionDetail> details = prescMapper.findByOrderId(request.getOId());
+        for (PrescriptionDetail detail : details) {
+            QueryWrapper<PharmacyDispensing> pdWrapper = new QueryWrapper<>();
+            pdWrapper.eq("presc_detail_id", detail.getPdId());
+            java.util.List<PharmacyDispensing> dispensingList = pharmacyDispensingMapper.selectList(pdWrapper);
+            for (PharmacyDispensing pd : dispensingList) {
+                if (pd.getPdStatus() != null && pd.getPdStatus() == 1) {
+                    return "药品正在复核中，无法退费。请等待复核完成后退药再退费";
+                }
+                if (pd.getPdStatus() != null && pd.getPdStatus() == 2) {
+                    return "药品已发药，必须先退药后才能退费";
+                }
             }
         }
 

@@ -46,4 +46,12 @@ public class BillingController {
         }
         return ResponseData.success("查询成功", this.billingService.dailySummary(date));
     }
+
+    /**
+     * 日结统计别名（前端使用）
+     */
+    @RequestMapping("dailySettlement")
+    public ResponseData dailySettlement(@RequestParam(required = false) String date) {
+        return dailySummary(date);
+    }
 }

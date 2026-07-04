@@ -10,8 +10,6 @@ public class TriageRecord {
     @TableId(value = "t_id")
     @JsonProperty("tId")
     private Integer tId;
-    @JsonProperty("oId")
-    private Integer oId;
     @JsonProperty("pId")
     private Integer pId;
     @JsonProperty("dId")
@@ -24,16 +22,20 @@ public class TriageRecord {
     private String tNote;
     @JsonProperty("tCreateTime")
     private String tCreateTime;
+    @JsonProperty("tChiefComplaint")
+    private String tChiefComplaint;
+    @JsonProperty("tSource")
+    private String tSource;
 
-    // Vital signs fields (分诊评估用，非诊断)
+    // Vital signs fields
     @JsonProperty("tTemperature")
-    private String tTemperature;      // 体温
+    private String tTemperature;
     @JsonProperty("tBloodPressure")
-    private String tBloodPressure;    // 血压
+    private String tBloodPressure;
     @JsonProperty("tHeartRate")
-    private Integer tHeartRate;       // 心率
+    private Integer tHeartRate;
     @JsonProperty("tWeight")
-    private String tWeight;           // 体重
+    private String tWeight;
 
     @TableField(exist = false)
     @JsonProperty("pName")
@@ -46,8 +48,6 @@ public class TriageRecord {
 
     public Integer getTId() { return tId; }
     public void setTId(Integer tId) { this.tId = tId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
     public Integer getPId() { return pId; }
     public void setPId(Integer pId) { this.pId = pId; }
     public String getDId() { return dId; }
@@ -69,6 +69,12 @@ public class TriageRecord {
     public void setTHeartRate(Integer tHeartRate) { this.tHeartRate = tHeartRate; }
     public String getTWeight() { return tWeight; }
     public void setTWeight(String tWeight) { this.tWeight = tWeight; }
+
+    public String getTChiefComplaint() { return tChiefComplaint; }
+    public void setTChiefComplaint(String tChiefComplaint) { this.tChiefComplaint = tChiefComplaint; }
+    public String getTSource() { return tSource; }
+    public void setTSource(String tSource) { this.tSource = tSource; }
+
     public String getPName() { return pName; }
     public void setPName(String pName) { this.pName = pName; }
     public String getDName() { return dName; }

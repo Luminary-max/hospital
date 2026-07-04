@@ -75,8 +75,8 @@ public class PatientController {
         if (this.orderService.addOrder(order, arId)) {
             // 挂号成功后自动取号
             try {
-                String qNumber = queueService.takeNumber(order.getOId(), order.getPId(), order.getdId());
-                return ResponseData.success("挂号成功，排队号码：" + qNumber);
+                String queueIndex = queueService.takeNumber(order.getOId(), order.getPId(), order.getdId());
+                return ResponseData.success("挂号成功，您的排队序号：" + queueIndex);
             } catch(Exception e) {
                 return ResponseData.success("插入挂号信息成功");
             }

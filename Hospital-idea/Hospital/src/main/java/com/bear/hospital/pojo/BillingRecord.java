@@ -13,6 +13,8 @@ public class BillingRecord {
     private Integer oId;
     @JsonProperty("emrId")
     private Integer emrId;
+    @JsonProperty("ocId")
+    private Integer ocId;
     @JsonProperty("brType")
     private String brType;
     @JsonProperty("brAmount")
@@ -28,9 +30,10 @@ public class BillingRecord {
 
     public BillingRecord() {}
 
-    public BillingRecord(Integer oId, Integer emrId, String brType, Double brAmount, String brPaymentMethod, String brInvoiceNo, String brPayTime, String brOperator) {
+    public BillingRecord(Integer oId, Integer emrId, Integer ocId, String brType, Double brAmount, String brPaymentMethod, String brInvoiceNo, String brPayTime, String brOperator) {
         this.oId = oId;
         this.emrId = emrId;
+        this.ocId = ocId;
         this.brType = brType;
         this.brAmount = brAmount;
         this.brPaymentMethod = brPaymentMethod;
@@ -45,6 +48,8 @@ public class BillingRecord {
     public void setOId(Integer oId) { this.oId = oId; }
     public Integer getEmrId() { return emrId; }
     public void setEmrId(Integer emrId) { this.emrId = emrId; }
+    public Integer getOcId() { return ocId; }
+    public void setOcId(Integer ocId) { this.ocId = ocId; }
     public String getBrType() { return brType; }
     public void setBrType(String brType) { this.brType = brType; }
     public Double getBrAmount() { return brAmount; }
@@ -63,6 +68,8 @@ public class BillingRecord {
         return "BillingRecord{" +
                 "brId=" + brId +
                 ", oId=" + oId +
+                ", emrId=" + emrId +
+                ", ocId=" + ocId +
                 ", brType='" + brType + '\'' +
                 ", brAmount=" + brAmount +
                 ", brPaymentMethod='" + brPaymentMethod + '\'' +

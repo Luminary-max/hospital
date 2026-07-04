@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QueueServiceImpl implements QueueService {
@@ -29,46 +30,16 @@ public class QueueServiceImpl implements QueueService {
     @Transactional
     public String takeNumber(int oId, int pId, String dId) {
         String today = todayYmd();
-        int maxNum = queueMapper.getTodayMaxNumber(dId, today);
-        String prefix = getDeptPrefix(dId);
-        String qNumber = prefix + String.format("%03d", maxNum + 1);
-
         QueueNumber qn = new QueueNumber();
         qn.setOId(oId);
         qn.setPId(pId);
         qn.setDId(dId);
-        qn.setQNumber(qNumber);
         qn.setQState(0);
         qn.setQCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         queueMapper.insert(qn);
-        return qNumber;
-    }
-
-    private String getDeptPrefix(String dId) {
-        // 根据科室获取前缀
-        Doctor doc = doctorMapper.selectById(dId);
-        if (doc == null || doc.getdSection() == null) return "A";
-        String section = doc.getdSection();
-        Map<String, String> prefixMap = new HashMap<>();
-        prefixMap.put("神经内科", "N"); prefixMap.put("呼吸与危重症医学科", "N");
-        prefixMap.put("内分泌科", "N"); prefixMap.put("消化内科", "N");
-        prefixMap.put("心血管内科", "N"); prefixMap.put("肾内科", "N");
-        prefixMap.put("发热门诊", "N");
-        prefixMap.put("手足外科", "W"); prefixMap.put("普通外科", "W");
-        prefixMap.put("肛肠外科", "W"); prefixMap.put("神经外科", "W");
-        prefixMap.put("泌尿外科", "W"); prefixMap.put("骨科", "W");
-        prefixMap.put("烧伤整形外科", "W");
-        prefixMap.put("妇科", "F"); prefixMap.put("产科", "F");
-        prefixMap.put("儿科", "P"); prefixMap.put("儿童保健科", "P");
-        prefixMap.put("耳鼻咽喉科", "E"); prefixMap.put("眼科", "E"); prefixMap.put("口腔科", "E");
-        prefixMap.put("中医科", "T");
-        // 默认
-        for (Map.Entry<String, String> e : prefixMap.entrySet()) {
-            if (section.contains(e.getKey()) || e.getKey().contains(section)) {
-                return e.getValue();
-            }
-        }
-        return "A";
+        // 返回排队序号（基于该医生当天等待人数+1）
+        int index = queueMapper.countWaiting(dId, today) + 1;
+        return String.valueOf(index);
     }
 
     @Override
@@ -77,27 +48,26 @@ public class QueueServiceImpl implements QueueService {
         String today = todayYmd();
         // 先标记正在叫号的为完成
         QueryWrapper<QueueNumber> currentWrapper = new QueryWrapper<>();
-        currentWrapper.eq("d_id", dId).eq("q_state", 1).apply("q_create_time LIKE CONCAT({0}, '%')", today);
+        currentWrapper.eq("d_id", dId).eq("q_state", 1).apply("DATE(q_create_time) = CURDATE()");
         QueueNumber current = queueMapper.selectOne(currentWrapper);
         if (current != null) {
             current.setQState(3);
             current.setQFinishTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             queueMapper.updateById(current);
         }
-        QueueNumber next;
+        // 重新排入已过号患者
         if (reQueueId != null) {
-            // 重新排入已过号的患者（加到队列最前）
-            next = queueMapper.selectById(reQueueId);
-            if (next != null) {
-                next.setQState(0);
-                queueMapper.updateById(next);
+            QueueNumber re = queueMapper.selectById(reQueueId);
+            if (re != null) {
+                re.setQState(0);
+                queueMapper.updateById(re);
             }
         }
-        // 取下一个待叫号
+        // 取下一个待叫号（按创建时间升序）
         QueryWrapper<QueueNumber> nextWrapper = new QueryWrapper<>();
-        nextWrapper.eq("d_id", dId).eq("q_state", 0).apply("q_create_time LIKE CONCAT({0}, '%')", today)
+        nextWrapper.eq("d_id", dId).eq("q_state", 0).apply("DATE(q_create_time) = CURDATE()")
                 .orderByAsc("q_id").last("LIMIT 1");
-        next = queueMapper.selectOne(nextWrapper);
+        QueueNumber next = queueMapper.selectOne(nextWrapper);
         if (next != null) {
             next.setQState(1);
             next.setQCallTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
@@ -113,18 +83,38 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public List<QueueNumber> listByDoctorToday(String dId) {
-        return queueMapper.findByDoctorToday(dId, todayYmd());
+        List<QueueNumber> list = queueMapper.findByDoctorToday(dId, todayYmd());
+        // 计算派生排队序号
+        int idx = 1;
+        for (QueueNumber qn : list) {
+            if (qn.getQState() == 0 || qn.getQState() == 1) {
+                qn.setQueueIndex(idx++);
+            }
+        }
+        return list;
     }
 
     @Override
     public QueueNumber findByPatientToday(int pId) {
-        return queueMapper.findByPatientToday(pId, todayYmd());
+        QueueNumber qn = queueMapper.findByPatientToday(pId, todayYmd());
+        if (qn != null) {
+            // 计算前面等待人数
+            QueryWrapper<QueueNumber> ahead = new QueryWrapper<>();
+            ahead.eq("d_id", qn.getDId())
+                .eq("q_state", 0)
+                .lt("q_id", qn.getQId())
+                .apply("DATE(q_create_time) = CURDATE()");
+            int aheadCount = queueMapper.selectCount(ahead);
+            qn.setQueueIndex(aheadCount + 1);
+        }
+        return qn;
     }
 
     @Override
     public List<Map<String, Object>> getDeptQueueStats() {
-        // 按科室统计排队数据
         List<Map<String, Object>> result = new ArrayList<>();
+        String today = todayYmd();
+        // 按科室统计排队数据
         String[] depts = {"内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科"};
         for (String dept : depts) {
             Map<String, Object> m = new HashMap<>();

@@ -135,9 +135,7 @@ erDiagram
     %% ===== 药房流程 =====
     发药记录 {
         int pds_id PK
-        int o_id FK
         int presc_detail_id FK
-        string dr_id FK
         int db_id FK
         int pd_quantity
         int pd_status
@@ -294,7 +292,6 @@ erDiagram
     挂号订单 ||--o{ 处方主表 : "o_id"
     挂号订单 ||--o{ 处方明细 : "o_id"
     挂号订单 ||--o{ 检查开单 : "o_id"
-    挂号订单 ||--o{ 发药记录 : "o_id"
     挂号订单 ||--o{ 排队叫号 : "o_id"
     挂号订单 ||--o{ 退费申请 : "o_id"
     挂号订单 ||--o{ 代取药申请 : "o_id"
@@ -322,7 +319,6 @@ erDiagram
     药品 ||--o{ 药品批次 : "dr_id"
     药品 ||--o{ 药品调价记录 : "dr_id"
     药品 ||--o{ 处方明细 : "dr_id"
-    药品 ||--o{ 发药记录 : "dr_id"
     药品 ||--o{ 库存变动 : "dr_id"
     药品分类 ||--o{ 药品分类 : "dc_parent_id"
     药品批次 ||--o{ 发药记录 : "db_id"

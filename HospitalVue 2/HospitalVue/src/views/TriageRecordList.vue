@@ -22,7 +22,7 @@
           <el-option label="优先" value="1"></el-option>
           <el-option label="急诊" value="2"></el-option>
         </el-select>
-        <el-input v-model="query" placeholder="搜索订单ID/患者ID" size="small" class="search-input" clearable @keyup.enter.native="loadData">
+        <el-input v-model="query" placeholder="搜索患者ID/医生ID" size="small" class="search-input" clearable @keyup.enter.native="loadData">
           <el-button slot="append" icon="el-icon-search" @click="loadData"></el-button>
         </el-input>
       </div>
@@ -33,7 +33,6 @@
 
     <el-table :data="triageData" border stripe style="width:100%">
       <el-table-column prop="tId" label="编号" width="65" align="center"></el-table-column>
-      <el-table-column prop="oId" label="订单ID" width="70" align="center"></el-table-column>
       <el-table-column prop="pId" label="患者ID" width="65" align="center"></el-table-column>
       <el-table-column prop="dId" label="医生ID" width="65" align="center"></el-table-column>
       <el-table-column label="分诊级别" width="80" align="center">
@@ -86,11 +85,6 @@
       <el-form :model="form" :rules="rules" ref="form" label-width="100px" size="small">
         <el-row :gutter="15">
           <el-col :span="8">
-            <el-form-item label="订单ID" prop="oId">
-              <el-input v-model.number="form.oId" :disabled="isEdit"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
             <el-form-item label="患者ID" prop="pId">
               <el-input v-model.number="form.pId"></el-input>
             </el-form-item>
@@ -98,6 +92,16 @@
           <el-col :span="8">
             <el-form-item label="医生ID" prop="dId">
               <el-input v-model="form.dId"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="来源" prop="tSource">
+              <el-select v-model="form.tSource" placeholder="分诊来源">
+                <el-option label="现场" value="现场"></el-option>
+                <el-option label="预约" value="预约"></el-option>
+                <el-option label="转诊" value="转诊"></el-option>
+                <el-option label="急诊" value="急诊"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -158,14 +162,13 @@ export default {
       statusFilter:'', levelFilter:'', query:'',
       dialogVisible:false, isEdit:false,
       form:{
-        oId:null, pId:null, dId:null, tLevel:0,
+        pId:null, dId:null, tLevel:0, tSource:'现场',
         tTemperature:null, tBloodPressure:'', tHeartRate:null, tWeight:null,
         tChiefComplaint:'', tNote:''
       },
       rules:{
-        oId:[{required:true,message:"请输入订单ID",trigger:"blur"},{type:'number',message:"请输入数字",trigger:"blur"}],
         pId:[{required:true,message:"请输入患者ID",trigger:"blur"},{type:'number',message:"请输入数字",trigger:"blur"}],
-        dId:[{required:true,message:"请输入医生ID",trigger:"blur"},{type:'number',message:"请输入数字",trigger:"blur"}]
+        dId:[{required:true,message:"请输入医生ID",trigger:"blur"}]
       }
     };
   },
@@ -186,7 +189,7 @@ export default {
     },
     openAddDialog() {
       this.isEdit=false;
-      this.form={oId:null,pId:null,dId:null,tLevel:0,tTemperature:null,tBloodPressure:'',tHeartRate:null,tWeight:null,tChiefComplaint:'',tNote:''};
+      this.form={pId:null,dId:null,tLevel:0,tSource:'现场',tTemperature:null,tBloodPressure:'',tHeartRate:null,tWeight:null,tChiefComplaint:'',tNote:''};
       this.dialogVisible=true;
       this.$nextTick(()=>{if(this.$refs.form)this.$refs.form.clearValidate();});
     },
@@ -199,8 +202,6 @@ export default {
     submitForm() {
       this.$refs.form.validate(valid=>{
         if(!valid) return;
-        // API: POST triage/create — 需要后端实现
-        // 编辑复用同一接口，携带tId进行更新
         request.post("triage/create", this.form).then(res=>{
           if(res.data.status===200){
             this.$message.success(this.isEdit?"更新成功":"新增成功");

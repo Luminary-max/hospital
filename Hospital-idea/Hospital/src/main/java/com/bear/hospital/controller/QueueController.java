@@ -16,8 +16,8 @@ public class QueueController {
 
     @GetMapping("/takeNumber")
     public ResponseData takeNumber(@RequestParam int oId, @RequestParam int pId, @RequestParam String dId) {
-        String qNumber = queueService.takeNumber(oId, pId, dId);
-        return qNumber != null ? ResponseData.success("取号成功", qNumber) : ResponseData.fail("取号失败");
+        String queueIndex = queueService.takeNumber(oId, pId, dId);
+        return queueIndex != null ? ResponseData.success("取号成功", queueIndex) : ResponseData.fail("取号失败");
     }
 
     @GetMapping("/callNext")

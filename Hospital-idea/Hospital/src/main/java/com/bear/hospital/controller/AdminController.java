@@ -117,7 +117,7 @@ public class AdminController {
      * 分页模糊查询所有挂号信息
      */
     @RequestMapping("findAllOrders")
-    public ResponseData findAllOrders(@RequestParam(value = "pageNumber") int pageNumber, @RequestParam(value = "size") int size, @RequestParam(value = "query") String query){
+    public ResponseData findAllOrders(@RequestParam(value = "pageNumber") int pageNumber, @RequestParam(value = "size") int size, @RequestParam(value = "query", required = false, defaultValue = "") String query){
         return ResponseData.success("返回挂号信息成功",  this.orderService.findAllOrders(pageNumber, size, query));
     }
     /**

@@ -17,8 +17,8 @@
     <div v-else-if="queueInfo" class="queue-card">
       <!-- 排队号码大展示 -->
       <div class="queue-number-section">
-        <div class="queue-label">您的排队号码</div>
-        <div class="queue-number" :class="'q-state-' + queueInfo.q_state">{{ queueInfo.q_number || queueInfo.qNumber || '---' }}</div>
+        <div class="queue-label">您的排队序号</div>
+        <div class="queue-number" :class="'q-state-' + queueInfo.q_state">#{{ queueInfo.queueIndex || '---' }}</div>
       </div>
 
       <el-divider></el-divider>
@@ -115,7 +115,7 @@ export default {
                 if (dr.data.status === 200) {
                   const qList = dr.data.data || [];
                   const current = qList.find(function(q) { return q.qState === 1 || q.q_status === 1; });
-                  this.currentCall = current ? (current.qNumber || current.q_number || "---") : "暂无叫号";
+                  this.currentCall = current ? ("#" + (current.queueIndex || '?')) : "暂无叫号";
                 }
               } catch(e) {}
             }

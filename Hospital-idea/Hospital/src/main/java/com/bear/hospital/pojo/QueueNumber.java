@@ -14,8 +14,6 @@ public class QueueNumber {
     private int pId;
     @JsonProperty("dId")
     private String dId;
-    @JsonProperty("qNumber")
-    private String qNumber;
     @JsonProperty("qState")
     private Integer qState;
     @JsonProperty("qCreateTime")
@@ -34,6 +32,9 @@ public class QueueNumber {
     @TableField(exist = false)
     @JsonProperty("deptName")
     private String deptName;
+    @TableField(exist = false)
+    @JsonProperty("queueIndex")
+    private Integer queueIndex;  // 派生排队序号
 
     public QueueNumber() {}
 
@@ -45,8 +46,6 @@ public class QueueNumber {
     public void setPId(int pId) { this.pId = pId; }
     public String getDId() { return dId; }
     public void setDId(String dId) { this.dId = dId; }
-    public String getQNumber() { return qNumber; }
-    public void setQNumber(String qNumber) { this.qNumber = qNumber; }
     public Integer getQState() { return qState; }
     public void setQState(Integer qState) { this.qState = qState; }
     public String getQCreateTime() { return qCreateTime; }
@@ -61,4 +60,6 @@ public class QueueNumber {
     public void setDName(String dName) { this.dName = dName; }
     public String getDeptName() { return deptName; }
     public void setDeptName(String deptName) { this.deptName = deptName; }
+    public Integer getQueueIndex() { return queueIndex; }
+    public void setQueueIndex(Integer queueIndex) { this.queueIndex = queueIndex; }
 }

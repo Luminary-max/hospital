@@ -195,27 +195,45 @@ public class OrderServiceImpl implements OrderService {
         return processPayment(oId, null, paymentMethod, invoiceNo, insuranceCovered, selfPay, operator);
     }
 
-    /** 处理收费（按正确业务流程：传入病历ID emrId，药费/检查费关联到病历） */
+    /** 处理收费（分项收费：挂号费 + 检查费 + 药费） */
     public Boolean processPayment(int oId, Integer emrId, String paymentMethod, String invoiceNo, Double insuranceCovered, Double selfPay, String operator) {
         if (invoiceNo == null || invoiceNo.isEmpty()) {
             invoiceNo = generateInvoiceNo();
         }
         String finalInvoiceNo = invoiceNo;
         Orders order = this.orderMapper.selectById(oId);
-        // 挂号费关联到订单o_id（挂号时就产生了）
+        // 1. 挂号费 — 关联订单o_id
         if (order != null && order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
-            BillingRecord record = new BillingRecord(oId, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
+            BillingRecord regRecord = new BillingRecord(oId, null, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            billingMapper.insert(regRecord);
         }
-        // 药费+检查费关联到病历emr_id
-        if (order != null && order.getOTotalPrice() != null && order.getOTotalPrice() > 0) {
-            BillingRecord record = new BillingRecord(oId, emrId, "药费+检查费", order.getOTotalPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
-        } else if (order != null) {
-            BillingRecord record = new BillingRecord(oId, emrId, "药费+检查费", 0.00, paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
-            billingMapper.insert(record);
+        // 2. 检查费 — 按检查单逐项收取（整单全收）
+        com.bear.hospital.mapper.OrderCheckMapper orderCheckMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderCheckMapper.class);
+        java.util.List<com.bear.hospital.pojo.OrderCheck> checks = orderCheckMapper2.selectList(
+            new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.OrderCheck>()
+                .eq("o_id", oId)
+        );
+        for (com.bear.hospital.pojo.OrderCheck oc : checks) {
+            if (oc.getChPrice() != null && oc.getChPrice() > 0) {
+                BillingRecord checkRecord = new BillingRecord(oId, emrId, oc.getOcId(), "检查费", oc.getChPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+                billingMapper.insert(checkRecord);
+                // 更新检查单状态为已缴费（oc_status=1）
+                orderCheckMapper2.update(null,
+                    new com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper<com.bear.hospital.pojo.OrderCheck>()
+                        .eq("oc_id", oc.getOcId()).set("oc_status", 1));
+                System.out.println("检查费已缴费: ocId=" + oc.getOcId() + ", 金额=" + oc.getChPrice());
+            }
         }
-        // 再更新订单状态
+        // 3. 药费 — 按处方明细逐项收取
+        com.bear.hospital.mapper.PrescriptionMapper prescriptionMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PrescriptionMapper.class);
+        java.util.List<com.bear.hospital.pojo.PrescriptionDetail> drugs = prescriptionMapper2.findByOrderId(oId);
+        for (com.bear.hospital.pojo.PrescriptionDetail d : drugs) {
+            if (d.getPdPrice() != null && d.getPdPrice() > 0) {
+                BillingRecord drugRecord = new BillingRecord(oId, emrId, null, "药费", d.getPdPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+                billingMapper.insert(drugRecord);
+            }
+        }
+        // 更新订单状态
         UpdateWrapper<Orders> wrapper = new UpdateWrapper<>();
         wrapper.eq("o_id", oId)
             .set("o_payment_method", paymentMethod)
@@ -225,11 +243,15 @@ public class OrderServiceImpl implements OrderService {
             .set("o_price_state", 1)
             .set("o_total_price", 0.00);
         this.orderMapper.update(null, wrapper);
-        // Feature 8: Write to invoice_record table (关联缴费记录)
-        double totalAmount = (order != null && order.getORegistrationFee() != null ? order.getORegistrationFee() : 0.00)
-                + (order != null && order.getOTotalPrice() != null ? order.getOTotalPrice() : 0.00);
+        // 写发票（关联最新缴费记录）
+        double totalAmount = (order != null && order.getORegistrationFee() != null ? order.getORegistrationFee() : 0.00);
+        for (com.bear.hospital.pojo.OrderCheck oc : checks) {
+            if (oc.getChPrice() != null) totalAmount += oc.getChPrice();
+        }
+        for (com.bear.hospital.pojo.PrescriptionDetail d : drugs) {
+            if (d.getPdPrice() != null) totalAmount += d.getPdPrice();
+        }
         InvoiceRecord invRecord = new InvoiceRecord(oId, finalInvoiceNo, totalAmount, TodayUtil.getToday(), operator);
-        // 关联最新的缴费记录 br_id
         QueryWrapper<BillingRecord> brWrapper = new QueryWrapper<>();
         brWrapper.eq("o_id", oId).orderByDesc("br_id").last("limit 1");
         BillingRecord latestBr = billingMapper.selectOne(brWrapper);

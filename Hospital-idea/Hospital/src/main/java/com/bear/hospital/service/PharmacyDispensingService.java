@@ -9,7 +9,7 @@ public interface PharmacyDispensingService {
     Boolean dispense(int pdId, String dispenseBy, DrugService drugService);
     Boolean review(int pdId, String reviewer);
     Boolean returnDrug(int pdId, String returnBy);
-    Boolean createDispensing(int oId, String drId, int quantity);
+    Boolean createDispensing(Integer prescDetailId, Integer quantity);
     PharmacyDispensing findById(int pdId);
 }
 

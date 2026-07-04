@@ -56,35 +56,26 @@ public class PharmacyDispensingController {
         return ResponseData.fail("退药失败，仅已发药记录可以退药");
     }
 
-    /**
-     * Feature 1: 用药指导单打印
-     */
     @RequestMapping("printGuide")
     public ResponseData printGuide(@RequestParam int pdId) {
         PharmacyDispensing pd = pharmacyDispensingService.findById(pdId);
         if (pd == null) return ResponseData.fail("发药记录不存在");
-        Drug drug = drugMapper.selectById(pd.getDrId());
+        // 通过处方明细获取药品和订单信息
+        PrescriptionDetail detail = prescriptionMapper.selectById(pd.getPrescDetailId());
+        if (detail == null) return ResponseData.fail("处方明细不存在");
+        Drug drug = drugMapper.selectById(detail.getDrId());
         if (drug == null) return ResponseData.fail("药品信息不存在");
-        // Get prescription details for dosage/frequency/route
-        List<PrescriptionDetail> details = prescriptionMapper.findByOrderId(pd.getOId());
-        PrescriptionDetail detail = null;
-        for (PrescriptionDetail d : details) {
-            if (d.getDrId().equals(pd.getDrId())) {
-                detail = d;
-                break;
-            }
-        }
         Map<String, Object> guide = new HashMap<>();
         guide.put("drugName", drug.getDrName());
-        guide.put("dosage", detail != null ? detail.getPdDosage() : null);
-        guide.put("frequency", detail != null ? detail.getPdFrequency() : null);
-        guide.put("route", detail != null ? detail.getPdRoute() : null);
-        guide.put("timing", detail != null ? detail.getPdTiming() : null);
-        guide.put("usage", detail != null ? detail.getPdUsage() : null);
+        guide.put("dosage", detail.getPdDosage());
+        guide.put("frequency", detail.getPdFrequency());
+        guide.put("route", detail.getPdRoute());
+        guide.put("timing", detail.getPdTiming());
+        guide.put("usage", detail.getPdUsage());
         guide.put("contraindications", drug.getDrContraindication());
         guide.put("storage", drug.getDrStorage());
         guide.put("adverseReactions", drug.getDrAdverseReaction());
-        guide.put("oId", pd.getOId());
+        guide.put("oId", detail.getOId());
         guide.put("quantity", pd.getPdQuantity());
         return ResponseData.success("查询成功", guide);
     }

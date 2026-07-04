@@ -4,11 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.bear.hospital.mapper.OrderMapper;
 import com.bear.hospital.mapper.TriageRecordMapper;
-import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.pojo.TriageRecord;
-import com.bear.hospital.service.OrderService;
 import com.bear.hospital.service.TriageRecordService;
 import com.bear.hospital.utils.TodayUtil;
 import org.springframework.stereotype.Service;
@@ -19,10 +16,6 @@ import java.util.HashMap;
 public class TriageRecordServiceImpl implements TriageRecordService {
     @Resource
     private TriageRecordMapper triageRecordMapper;
-    @Resource
-    private OrderMapper orderMapper;
-    @Resource
-    private OrderService orderService;
 
     @Override
     public HashMap<String, Object> findAll(int pageNumber, int size, Integer status, Integer level) {
@@ -40,17 +33,10 @@ public class TriageRecordServiceImpl implements TriageRecordService {
 
     @Override
     public Boolean createTriage(TriageRecord triageRecord) {
-        // Set create time
         triageRecord.setTCreateTime(TodayUtil.getToday());
-        // Set default status if not provided
         if (triageRecord.getTStatus() == null) triageRecord.setTStatus(0);
-        int inserted = this.triageRecordMapper.insert(triageRecord);
-        if (inserted <= 0) return false;
-        // Update order state to 已分诊(1)
-        if (triageRecord.getOId() != null) {
-            orderService.updateOrderState(triageRecord.getOId(), Orders.STATE_TRIAGED);
-        }
-        return true;
+        if (triageRecord.getTSource() == null) triageRecord.setTSource("现场");
+        return this.triageRecordMapper.insert(triageRecord) > 0;
     }
 
     @Override
@@ -64,6 +50,7 @@ public class TriageRecordServiceImpl implements TriageRecordService {
         if (triageRecord.getTBloodPressure() != null) wrapper.set("t_blood_pressure", triageRecord.getTBloodPressure());
         if (triageRecord.getTHeartRate() != null) wrapper.set("t_heart_rate", triageRecord.getTHeartRate());
         if (triageRecord.getTWeight() != null) wrapper.set("t_weight", triageRecord.getTWeight());
+        if (triageRecord.getTChiefComplaint() != null) wrapper.set("t_chief_complaint", triageRecord.getTChiefComplaint());
         return this.triageRecordMapper.update(null, wrapper) > 0;
     }
 }

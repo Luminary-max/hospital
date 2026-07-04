@@ -12,7 +12,7 @@
           <el-radio-button :label="2">已发药</el-radio-button>
           <el-radio-button :label="3">已退药</el-radio-button>
         </el-radio-group>
-        <el-input v-model="query" placeholder="搜索订单ID/药品ID" size="small" class="search-input" clearable @keyup.enter.native="loadData">
+        <el-input v-model="query" placeholder="搜索处方明细ID" size="small" class="search-input" clearable @keyup.enter.native="loadData">
           <el-button slot="append" icon="el-icon-search" @click="loadData"></el-button>
         </el-input>
       </div>
@@ -23,11 +23,7 @@
 
     <el-table :data="dispensingData" border stripe style="width:100%">
       <el-table-column prop="pdId" label="编号" width="65" align="center"></el-table-column>
-      <el-table-column prop="oId" label="订单ID" width="75" align="center"></el-table-column>
-      <el-table-column prop="drId" label="药品ID" width="70" align="center"></el-table-column>
-      <el-table-column label="药品名称" min-width="120">
-        <template slot-scope="s">{{ s.row.drName || '--' }}</template>
-      </el-table-column>
+      <el-table-column prop="prescDetailId" label="处方明细ID" width="90" align="center"></el-table-column>
       <el-table-column prop="dbId" label="批次ID" width="65" align="center"></el-table-column>
       <el-table-column prop="pdQuantity" label="数量" width="60" align="center"></el-table-column>
       <el-table-column label="状态" width="80" align="center">

@@ -14,7 +14,7 @@
     <el-card shadow="always" v-if="currentPatient" style="margin-bottom:20px; background:#f0f9eb;">
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <div>
-          <span style="font-size:24px; font-weight:bold; color:#67C23A;">{{ currentPatient.q_number }}</span>
+          <span style="font-size:24px; font-weight:bold; color:#67C23A;">#{{ currentPatient.queueIndex || '?' }}</span>
           <span style="font-size:18px; margin-left:20px;">{{ currentPatient.p_name }}</span>
           <el-tag type="success" style="margin-left:10px;">正在就诊</el-tag>
         </div>
@@ -29,7 +29,9 @@
     <h4>候诊列表（{{ waitingList.length }} 人等待）</h4>
     <el-table :data="waitingList" border stripe style="width:100%">
       <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
-      <el-table-column prop="q_number" label="排队号码" width="100" align="center"></el-table-column>
+      <el-table-column label="序号" width="80" align="center">
+        <template slot-scope="s">{{ s.row.queueIndex || s.row.q_id }}</template>
+      </el-table-column>
       <el-table-column prop="p_name" label="患者姓名" width="90" align="center"></el-table-column>
       <el-table-column prop="q_create_time" label="取号时间" min-width="180"></el-table-column>
       <el-table-column label="状态" width="90" align="center">
