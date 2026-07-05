@@ -352,13 +352,30 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public HashMap<String, String> findOrderTime(String arId){
         HashMap<String, String> map = new HashMap<>();
-        // 不使用 Redis，直接返回默认余号
-        map.put("eTOn", "40");
-        map.put("nTOt", "40");
-        map.put("tTOe", "40");
-        map.put("fTOf", "40");
-        map.put("fTOs", "40");
-        map.put("sTOs", "40");
+        // 根据排班ID统计当天已挂号人数，动态计算余号
+        String arIdStr = arId;
+        String dId = null;
+        String date = null;
+        if (arIdStr != null && arIdStr.length() >= 15) {
+            dId = arIdStr.substring(0, 6);
+            date = arIdStr.substring(6, 16);
+        }
+        int totalSlots = 40;
+        int used = 0;
+        if (dId != null && date != null) {
+            try {
+                used = this.orderMapper.orderPeopleByDid(date, dId);
+            } catch (Exception e) {}
+        }
+        int remaining = Math.max(0, totalSlots - used);
+        // 每个时段平均分配余号
+        int perSlot = remaining / 6;
+        map.put("eTOn", String.valueOf(perSlot));
+        map.put("nTOt", String.valueOf(perSlot));
+        map.put("tTOe", String.valueOf(perSlot));
+        map.put("fTOf", String.valueOf(perSlot));
+        map.put("fTOs", String.valueOf(perSlot));
+        map.put("sTOs", String.valueOf(perSlot));
         return map;
     }
     /**
