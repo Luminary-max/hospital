@@ -42,9 +42,46 @@ public class TriageRecordServiceImpl implements TriageRecordService {
         if (ok && triageRecord.getPId() != null) {
             try {
                 com.bear.hospital.mapper.OrderMapper orderMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderMapper.class);
+                // 先找该指定医生下该患者最新的待诊订单
                 com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-                wrapper.eq("p_id", triageRecord.getPId()).eq("o_state", 0).orderByDesc("o_id").last("LIMIT 1");
+                if (triageRecord.getDId() != null) {
+                    wrapper.eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId());
+                } else {
+                    wrapper.eq("p_id", triageRecord.getPId());
+                }
+                wrapper.eq("o_state", 0).orderByDesc("o_id").last("LIMIT 1");
                 com.bear.hospital.pojo.Orders order = orderMapper.selectOne(wrapper);
+                // 如果找不到该医生下的待诊订单，看看该患者今天有没有挂这个医生的号（o_state=1）
+                if (order == null && triageRecord.getDId() != null) {
+                    wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+                    wrapper.eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId())
+                        .eq("o_state", 1).orderByDesc("o_id").last("LIMIT 1");
+                    order = orderMapper.selectOne(wrapper);
+                }
+                // 仍然找不到，自动创建一个挂号订单
+                if (order == null && triageRecord.getDId() != null) {
+                    try {
+                        com.bear.hospital.pojo.Orders newOrder = new com.bear.hospital.pojo.Orders();
+                        newOrder.setPId(triageRecord.getPId());
+                        newOrder.setDId(triageRecord.getDId());
+                        newOrder.setOState(1);
+                        newOrder.setOPriceState(0);
+                        newOrder.setOStart(TodayUtil.getTodayYmd() + " " +
+                            new java.text.SimpleDateFormat("HH:mm").format(new java.util.Date()));
+                        // 使用 RandomUtil 生成订单ID（与 OrderServiceImpl.addOrder 一致）
+                        newOrder.setOId(com.bear.hospital.utils.RandomUtil.randomOid(triageRecord.getPId()));
+                        int inserted = orderMapper.insert(newOrder);
+                        if (inserted > 0) {
+                            order = orderMapper.selectOne(
+                                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders>()
+                                    .eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId())
+                                    .orderByDesc("o_id").last("LIMIT 1")
+                            );
+                        }
+                    } catch(Exception e2) {
+                        System.err.println("分诊自动创建订单失败: " + e2.getMessage());
+                    }
+                }
                 if (order != null) {
                     order.setOState(1);
                     orderMapper.updateById(order);
