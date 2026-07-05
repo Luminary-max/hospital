@@ -62,7 +62,7 @@ public class TriageRecordServiceImpl implements TriageRecordService {
                     try {
                         com.bear.hospital.pojo.Orders newOrder = new com.bear.hospital.pojo.Orders();
                         newOrder.setPId(triageRecord.getPId());
-                        newOrder.setDId(triageRecord.getDId());
+                        newOrder.setdId(triageRecord.getDId());
                         newOrder.setOState(1);
                         newOrder.setOPriceState(0);
                         newOrder.setOStart(TodayUtil.getTodayYmd() + " " +
@@ -71,13 +71,6 @@ public class TriageRecordServiceImpl implements TriageRecordService {
                         int newId = (maxId != null ? maxId : 21000) + 1;
                         newOrder.setOId(newId);
                         int inserted = orderMapper.insert(newOrder);
-                        if (inserted > 0) {
-                            order = orderMapper.selectOne(
-                                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders>()
-                                    .eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId())
-                                    .orderByDesc("o_id").last("LIMIT 1")
-                            );
-                        }
                         if (inserted > 0) {
                             order = orderMapper.selectOne(
                                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders>()
