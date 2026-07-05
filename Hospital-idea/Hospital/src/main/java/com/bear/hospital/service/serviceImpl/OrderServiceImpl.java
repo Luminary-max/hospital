@@ -259,11 +259,15 @@ public class OrderServiceImpl implements OrderService {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.like("o_start", query).eq("d_id", dId).orderByDesc("o_start").in("o_state", 0, 1, 3, 4, 5, 7);
         IPage<Orders> iPage = this.orderMapper.selectPage(page, wrapper);
-        // 手动补上患者姓名
+        // 手动补上患者姓名和医生姓名
         for (Orders order : iPage.getRecords()) {
             if (order.getPName() == null && order.getPId() > 0) {
                 com.bear.hospital.pojo.Patient p = patientMapper.selectById(order.getPId());
                 if (p != null) order.setPName(p.getPName());
+            }
+            if (order.getdName() == null && order.getdId() != null) {
+                com.bear.hospital.pojo.Doctor d = doctorMapper.selectById(order.getdId());
+                if (d != null) order.setdName(d.getdName());
             }
         }
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -282,11 +286,15 @@ public class OrderServiceImpl implements OrderService {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.like("p_id", query).eq("d_id", dId).orderByDesc("o_start");
         IPage<Orders> iPage = this.orderMapper.selectPage(page, wrapper);
-        // 手动补上患者姓名
+        // 手动补上患者姓名和医生姓名
         for (Orders order : iPage.getRecords()) {
             if (order.getPName() == null && order.getPId() > 0) {
                 com.bear.hospital.pojo.Patient p = patientMapper.selectById(order.getPId());
                 if (p != null) order.setPName(p.getPName());
+            }
+            if (order.getdName() == null && order.getdId() != null) {
+                com.bear.hospital.pojo.Doctor d = doctorMapper.selectById(order.getdId());
+                if (d != null) order.setdName(d.getdName());
             }
         }
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -360,7 +368,14 @@ public class OrderServiceImpl implements OrderService {
             dId = arIdStr.substring(0, 6);
             date = arIdStr.substring(6, 16);
         }
+        // 使用医生实际日限额，而不是硬编码40
         int totalSlots = 40;
+        if (dId != null) {
+            Doctor doctor = this.doctorMapper.selectById(dId);
+            if (doctor != null && doctor.getdMaxDaily() != null && doctor.getdMaxDaily() > 0) {
+                totalSlots = doctor.getdMaxDaily();
+            }
+        }
         int used = 0;
         if (dId != null && date != null) {
             try {
@@ -368,14 +383,14 @@ public class OrderServiceImpl implements OrderService {
             } catch (Exception e) {}
         }
         int remaining = Math.max(0, totalSlots - used);
-        // 每个时段平均分配余号
-        int perSlot = remaining / 6;
-        map.put("eTOn", String.valueOf(perSlot));
-        map.put("nTOt", String.valueOf(perSlot));
-        map.put("tTOe", String.valueOf(perSlot));
-        map.put("fTOf", String.valueOf(perSlot));
-        map.put("fTOs", String.valueOf(perSlot));
-        map.put("sTOs", String.valueOf(perSlot));
+        // 直接显示总余号，不分6段（避免整数除法精度丢失）
+        String remainingStr = String.valueOf(remaining);
+        map.put("eTOn", remainingStr);
+        map.put("nTOt", remainingStr);
+        map.put("tTOe", remainingStr);
+        map.put("fTOf", remainingStr);
+        map.put("fTOs", remainingStr);
+        map.put("sTOs", remainingStr);
         return map;
     }
     /**

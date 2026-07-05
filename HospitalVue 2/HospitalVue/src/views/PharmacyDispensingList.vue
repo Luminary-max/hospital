@@ -149,7 +149,7 @@ export default {
       this.$prompt("请输入复核药师姓名", "复核确认", { inputPlaceholder:"复核药师" }).then(({ value })=> {
         if (!value) return this.$message.warning("请输入复核药师");
         // API: GET pharmacy/review — 需要后端实现
-        request.get("pharmacy/review", { params: { pdId:row.pdId, reviewBy:value } }).then(res => {
+        request.get("pharmacy/review", { params: { pdId:row.pdId, reviewer:value } }).then(res => {
           if (res.data.status===200) {
             this.$message.success("复核通过，发药完成！");
             this.loadData();

@@ -37,7 +37,12 @@
         <el-form-item label="医生">{{ orderForm.dName }}</el-form-item>
         <el-form-item label="挂号日期">{{ orderForm.orderDate }}</el-form-item>
         <el-form-item label="时间段" prop="oTime">
-          <el-select v-model="orderForm.oTime" style="width:100%"><el-option v-for="t in times" :key="t" :label="t" :value="t"></el-option></el-select>
+          <el-select v-model="orderForm.oTime" style="width:100%">
+            <el-option v-for="t in times" :key="t.label" :label="t.label" :value="t.value"></el-option>
+          </el-select>
+          <div v-if="totalRemaining !== null" style="font-size:12px;color:#909399;margin-top:4px;">
+            今日余号：<span style="color:#E6A23C;font-weight:bold;">{{ totalRemaining }}</span> 个
+          </div>
         </el-form-item>
       </el-form>
       <div slot="footer"><el-button @click="orderFormVisible=false">取消</el-button><el-button type="primary" @click="orderSuccess('orderForm')">确定</el-button></div>
@@ -57,26 +62,28 @@ export default {
       allDepts: [], sectionData: [], monthDays: [], selectedDate: '',
       clickTag: false, orderFormVisible: false, orderForm: {orderDate:""}, times: [],
       orderRules: { oTime: [{required:true,message:"请选择时间段",trigger:"blur"}] },
-      orderDate: "", idTime: ""
+      orderDate: "", idTime: "", totalRemaining: null
     };
   },
   methods: {
     tokenDecode(t) { if(t) return jwtDecode(t); },
     requestTime(id) {
       this.idTime = id + this.orderDate;
+      this.totalRemaining = null;
       request.get("order/findOrderTime",{params:{arId:this.idTime}}).then(res=>{
         const isToday = new Date(this.orderDate).toDateString() === new Date().toDateString();
+        var remaining = parseInt(res.data.data.eTOn||0);
+        this.totalRemaining = remaining;
         var arr = [];
-        var slots = [["08:30-09:30","eTOn","09:30"],["09:30-10:30","nTOt","10:30"],["10:30-11:30","tTOe","11:30"],["14:30-15:30","fTOf","15:30"],["15:30-16:30","fTOs","16:30"],["16:30-17:30","sTOs","17:30"]];
-        slots.forEach(s => { if (!this.isAfter(s[2]) || !isToday) arr.push(s[0]+"  余号 "+res.data.data[s[1]]); });
+        var slots = [["08:30-09:30","09:30"],["09:30-10:30","10:30"],["10:30-11:30","11:30"],["14:30-15:30","15:30"],["15:30-16:30","16:30"],["16:30-17:30","17:30"]];
+        slots.forEach(s => { if (!this.isAfter(s[1]) || !isToday) arr.push({label:s[0],value:s[0]}); });
         this.times = arr;
       });
     },
     isAfter(t) { var n=new Date(),p=t.split(":"); return n.getHours()>+p[0]||(n.getHours()==+p[0]&&n.getMinutes()>+p[1]); },
     orderSuccess(fn) {
       this.$refs[fn].validate(v=>{if(!v)return;
-        var t=this.orderForm.oTime; if(t.indexOf("  ")>0) t=t.substring(0,11).trim();
-        request.get("patient/addOrder",{params:{pId:this.tokenDecode(getToken()).pId,dId:this.orderForm.dId,oStart:this.orderForm.orderDate+" "+t,arId:this.idTime}}).then(r=>{if(r.data.status!=200)return this.$message.error("无号源");this.orderFormVisible=false;this.$message.success("挂号成功");});
+        request.get("patient/addOrder",{params:{pId:this.tokenDecode(getToken()).pId,dId:this.orderForm.dId,oStart:this.orderForm.orderDate+" "+this.orderForm.oTime,arId:this.idTime}}).then(r=>{if(r.data.status!=200)return this.$message.error("无号源");this.orderFormVisible=false;this.$message.success("挂号成功");this.requestTime(this.orderForm.dId);});
       });
     },
     openClick(id,name) {

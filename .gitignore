@@ -3,4 +3,5 @@ node_modules/
 Hospital-idea/Hospital/target/
 *.rdb
 *.cache/
+*.log
 HospitalVue 2/HospitalVue/node_modules/.cache/

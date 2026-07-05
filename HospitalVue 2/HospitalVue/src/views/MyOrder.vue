@@ -88,6 +88,20 @@
           </div>
         </el-card>
 
+        <el-card shadow="never" style="margin-bottom:15px;" v-if="paymentCheckItems.length>0">
+          <div slot="header">
+            <span style="font-weight:bold;color:#67C23A;">检查项目</span>
+            <el-button type="text" size="mini" style="float:right;" @click="toggleAllChecks">
+              {{ allChecksSelected ? '取消全选' : '全选' }}
+            </el-button>
+          </div>
+          <div v-for="(c, idx) in paymentCheckItems" :key="idx" style="padding:6px 0;border-bottom:1px solid #f0f0f0;">
+            <el-checkbox v-model="c._selected">
+              {{ c.chName }} — ¥{{ parseFloat(c.chPrice||0).toFixed(2) }}
+            </el-checkbox>
+          </div>
+        </el-card>
+
         <el-divider></el-divider>
         <div style="font-size:18px;font-weight:bold;text-align:right;margin-bottom:15px;">
           合计：<span style="color:#E6A23C;">¥{{ selectedTotal.toFixed(2) }}</span>
@@ -196,7 +210,7 @@ export default {
       userId: null, orderData: [],
       // 缴费
       paymentVisible: false, paymentLoading: false, paymentOrder: {}, paymentDetails: [], totalPayment: 0, paymentMethod: '', paying: false,
-      payRegFee: true, allDrugsSelected: true,
+      payRegFee: true, allDrugsSelected: true, paymentCheckItems: [], allChecksSelected: true, paymentEmrId: null,
       // 退费
       refundVisible: false, refundOrder: {}, refundReason: '', refunding: false,
       // 费用明细
@@ -209,7 +223,8 @@ export default {
     selectedTotal() {
       var regFee = this.payRegFee ? (this.paymentOrder.oRegistrationFee||this.paymentOrder.oregistrationFee||0) : 0;
       var drugTotal = this.paymentDetails.filter(function(d) { return d._selected; }).reduce(function(s, d) { return s + d.pdQuantity * d.pdPrice; }, 0);
-      return regFee + drugTotal;
+      var checkTotal = this.paymentCheckItems.filter(function(c) { return c._selected; }).reduce(function(s, c) { return s + parseFloat(c.chPrice||0); }, 0);
+      return regFee + drugTotal + checkTotal;
     }
   },
   methods: {
@@ -218,14 +233,28 @@ export default {
       this.paymentOrder = row;
       this.paymentMethod = '';
       this.paymentDetails = [];
+      this.paymentCheckItems = [];
       this.payRegFee = true;
       this.allDrugsSelected = true;
+      this.allChecksSelected = true;
+      this.paymentEmrId = null;
       this.paymentVisible = true;
       this.paymentLoading = true;
       try {
         const res = await request.get("prescription/findByOrder", { params: { oId: row.oId } });
         if (res.data.status === 200) {
           this.paymentDetails = (res.data.data || []).map(function(d) { d._selected = true; return d; });
+        }
+      } catch(e) {}
+      // 加载检查项目
+      try {
+        const emrRes = await request.get("emr/findByOrder", { params: { oId: row.oId } });
+        if (emrRes.data.status === 200 && emrRes.data.data && emrRes.data.data.emrId) {
+          this.paymentEmrId = emrRes.data.data.emrId;
+          const checkRes = await request.get("check/findOrderChecks", { params: { pageNumber: 1, size: 50, emrId: emrRes.data.data.emrId } });
+          if (checkRes.data.status === 200 && checkRes.data.data && checkRes.data.data.records) {
+            this.paymentCheckItems = checkRes.data.data.records.map(function(c) { c._selected = true; return c; });
+          }
         }
       } catch(e) {}
       this.totalPayment = (row.oRegistrationFee||row.oregistrationFee||0) + (row.oTotalPrice||row.ototalPrice||0);
@@ -235,6 +264,11 @@ export default {
       this.allDrugsSelected = !this.allDrugsSelected;
       var self = this;
       this.paymentDetails.forEach(function(d) { d._selected = self.allDrugsSelected; });
+    },
+    toggleAllChecks() {
+      this.allChecksSelected = !this.allChecksSelected;
+      var self = this;
+      this.paymentCheckItems.forEach(function(c) { c._selected = self.allChecksSelected; });
     },
     async processPayment() {
       if (!this.paymentMethod) return this.$message.warning("请选择支付方式");

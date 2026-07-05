@@ -10,8 +10,10 @@
             </el-row>
             <el-table :data="orderData" stripe border style="width:100%">
                 <el-table-column prop="oId" label="挂号单号" width="80"></el-table-column>
-                <el-table-column prop="dId" label="本人ID" width="80"></el-table-column>
-                <el-table-column prop="pId" label="患者ID" width="100"></el-table-column>
+                <el-table-column label="本人姓名" width="80">
+                    <template slot-scope="s">{{ s.row.dName || s.row.dId }}</template>
+                </el-table-column>
+                <el-table-column prop="pName" label="患者姓名" width="100"></el-table-column>
                 <el-table-column prop="oStart" label="挂号时间" width="190"></el-table-column>
                 <el-table-column prop="oEnd" label="结束时间" width="180"></el-table-column>
                 <el-table-column prop="oRecord" label="病因" width="400"></el-table-column>
@@ -60,7 +62,7 @@ export default {
     data() { return { userId: 1, orderData: [], pageNumber: 1, size: 8, query: "", total: 3 }; },
     methods: {
         viewDetail(row) {
-            this.$alert(`患者ID：${row.pId}\n挂号时间：${row.oStart}\n病因：${row.oRecord || '无'}\n药物：${row.oDrug || '无'}\n检查：${row.oCheck || '无'}`, `挂号单 #${row.oId}`, { confirmButtonText: '关闭' });
+            this.$alert(`患者姓名：${row.pName || row.pId}\n挂号时间：${row.oStart}\n病因：${row.oRecord || '无'}\n药物：${row.oDrug || '无'}\n检查：${row.oCheck || '无'}`, `挂号单 #${row.oId}`, { confirmButtonText: '关闭' });
         },
         handleSizeChange(size) { this.size = size; this.requestOrders(); },
         handleCurrentChange(num) { this.pageNumber = num; this.requestOrders(); },
