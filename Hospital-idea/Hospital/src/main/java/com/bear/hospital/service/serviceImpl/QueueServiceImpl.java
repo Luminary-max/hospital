@@ -101,19 +101,17 @@ public class QueueServiceImpl implements QueueService {
                     .orderByAsc("o_id")
             );
             // 也找没有排队号的已分诊订单（o_state=1且无时间范围限制）
-            if (pendingOrders.isEmpty()) {
-                List<com.bear.hospital.pojo.Orders> triagedOrders = orderMapper2.selectList(
-                    new QueryWrapper<com.bear.hospital.pojo.Orders>()
-                        .eq("d_id", dId).eq("o_state", 1)
-                        .orderByAsc("o_id")
+            List<com.bear.hospital.pojo.Orders> triagedOrders = orderMapper2.selectList(
+                new QueryWrapper<com.bear.hospital.pojo.Orders>()
+                    .eq("d_id", dId).eq("o_state", 1)
+                    .orderByAsc("o_id")
+            );
+            for (com.bear.hospital.pojo.Orders to : triagedOrders) {
+                QueueNumber existing = queueMapper.selectOne(
+                    new QueryWrapper<QueueNumber>().eq("o_id", to.getOId())
                 );
-                for (com.bear.hospital.pojo.Orders to : triagedOrders) {
-                    QueueNumber existing = queueMapper.selectOne(
-                        new QueryWrapper<QueueNumber>().eq("o_id", to.getOId())
-                    );
-                    if (existing == null) {
-                        pendingOrders.add(to);
-                    }
+                if (existing == null) {
+                    pendingOrders.add(to);
                 }
             }
             for (com.bear.hospital.pojo.Orders order : pendingOrders) {
