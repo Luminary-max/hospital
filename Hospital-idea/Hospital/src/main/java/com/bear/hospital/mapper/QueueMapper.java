@@ -9,22 +9,24 @@ import org.apache.ibatis.annotations.Update;
 import java.util.List;
 
 public interface QueueMapper extends BaseMapper<QueueNumber> {
-    @Select("SELECT q.*, p.p_name, d.d_name, d.d_section AS dept_name " +
-            "FROM queue_number q " +
-            "LEFT JOIN orders o ON q.o_id = o.o_id " +
+    @Select("SELECT o.o_id, o.p_id AS p_id, q.q_id, q.q_state, q.q_create_time, q.q_call_time, q.q_finish_time, " +
+            "p.p_name, d.d_name, d.d_section AS dept_name " +
+            "FROM orders o " +
+            "LEFT JOIN queue_number q ON o.o_id = q.o_id " +
             "LEFT JOIN patient p ON o.p_id = p.p_id " +
             "LEFT JOIN doctor d ON o.d_id = d.d_id " +
-            "WHERE o.d_id = #{dId} AND DATE(q.q_create_time) = CURDATE() " +
-            "ORDER BY q.q_id ASC")
+            "WHERE o.d_id = #{dId} AND DATE(o.o_start) = CURDATE() AND o.o_state IN (0,3,4) " +
+            "ORDER BY COALESCE(q.q_id, o.o_id) ASC")
     List<QueueNumber> findByDoctorToday(@Param("dId") String dId, @Param("today") String today);
 
-    @Select("SELECT q.*, p.p_name, d.d_name, d.d_section AS dept_name " +
-            "FROM queue_number q " +
-            "LEFT JOIN orders o ON q.o_id = o.o_id " +
+    @Select("SELECT o.o_id, q.q_id, q.q_state, q.q_create_time, q.q_call_time, q.q_finish_time, " +
+            "p.p_name, d.d_name, d.d_section AS dept_name, d.d_id AS d_id " +
+            "FROM orders o " +
+            "LEFT JOIN queue_number q ON o.o_id = q.o_id " +
             "LEFT JOIN patient p ON o.p_id = p.p_id " +
             "LEFT JOIN doctor d ON o.d_id = d.d_id " +
-            "WHERE o.p_id = #{pId} AND DATE(q.q_create_time) = CURDATE() " +
-            "ORDER BY q.q_id DESC LIMIT 1")
+            "WHERE o.p_id = #{pId} AND DATE(o.o_start) = CURDATE() " +
+            "ORDER BY COALESCE(q.q_id, o.o_id) DESC LIMIT 1")
     QueueNumber findByPatientToday(@Param("pId") int pId, @Param("today") String today);
 
     @Select("SELECT COUNT(*) FROM queue_number q " +

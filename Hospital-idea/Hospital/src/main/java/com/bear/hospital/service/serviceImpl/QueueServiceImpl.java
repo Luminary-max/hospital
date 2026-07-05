@@ -57,6 +57,7 @@ public class QueueServiceImpl implements QueueService {
         ).stream().map(com.bear.hospital.pojo.Orders::getOId).collect(java.util.stream.Collectors.toList());
 
         if (!orderIds.isEmpty()) {
+            // 把当前正在就诊的（q_state=1）标记为已完成
             QueueNumber current2 = queueMapper.selectOne(
                 new QueryWrapper<QueueNumber>()
                     .in("o_id", orderIds)
@@ -76,9 +77,10 @@ public class QueueServiceImpl implements QueueService {
             if (re != null) {
                 re.setQState(0);
                 queueMapper.updateById(re);
+                return re; // 直接返回重新排入的记录
             }
         }
-        // 取下一个待叫号（按创建时间升序）— 通过 orders 关联找该医生名下排队
+        // 取下一个待叫号 — 优先从 queue_number 找 q_state=0 的
         if (!orderIds.isEmpty()) {
             QueryWrapper<QueueNumber> nextWrapper = new QueryWrapper<>();
             nextWrapper.in("o_id", orderIds).eq("q_state", 0).apply("DATE(q_create_time) = CURDATE()")
@@ -88,8 +90,31 @@ public class QueueServiceImpl implements QueueService {
                 next.setQState(1);
                 next.setQCallTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
                 queueMapper.updateById(next);
+                return next;
             }
-            return next;
+            // queue_number 中没有等待的，从 orders 中找没有排队号的待诊订单，自动创建排队记录
+            List<com.bear.hospital.pojo.Orders> pendingOrders = orderMapper2.selectList(
+                new QueryWrapper<com.bear.hospital.pojo.Orders>()
+                    .eq("d_id", dId)
+                    .in("o_state", 0, 3, 4)
+                    .apply("DATE(o_start) = CURDATE()")
+                    .orderByAsc("o_id")
+            );
+            for (com.bear.hospital.pojo.Orders order : pendingOrders) {
+                QueueNumber existing = queueMapper.selectOne(
+                    new QueryWrapper<QueueNumber>().eq("o_id", order.getOId())
+                );
+                if (existing == null) {
+                    // 自动创建排队记录并叫号
+                    QueueNumber newQn = new QueueNumber();
+                    newQn.setOId(order.getOId());
+                    newQn.setQState(1); // 直接设为已叫号
+                    newQn.setQCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                    newQn.setQCallTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                    queueMapper.insert(newQn);
+                    return newQn;
+                }
+            }
         }
         return null;
     }
@@ -102,9 +127,12 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public List<QueueNumber> listByDoctorToday(String dId) {
         List<QueueNumber> list = queueMapper.findByDoctorToday(dId, todayYmd());
-        // 计算派生排队序号
+        // 计算派生排队序号，处理没有排队号的订单（qState == null → 设为0）
         int idx = 1;
         for (QueueNumber qn : list) {
+            if (qn.getQState() == null) {
+                qn.setQState(0); // 未取号的订单默认为等待中
+            }
             if (qn.getQState() == 0 || qn.getQState() == 1) {
                 qn.setQueueIndex(idx++);
             }
@@ -115,7 +143,28 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public QueueNumber findByPatientToday(int pId) {
         QueueNumber qn = queueMapper.findByPatientToday(pId, todayYmd());
-        // 前面等待人数已在 Mapper 层通过 orders JOIN 处理
+        if (qn != null) {
+            // 没有排队号的设为等待中
+            if (qn.getQState() == null) {
+                qn.setQState(0);
+            }
+            // 计算前面人数和排队序号
+            String dId = qn.getDId();
+            if (dId != null) {
+                List<QueueNumber> todayList = queueMapper.findByDoctorToday(dId, todayYmd());
+                int idx = 0;
+                for (QueueNumber item : todayList) {
+                    if (item.getQState() == null || item.getQState() == 0) {
+                        idx++;
+                        if (item.getOId() == qn.getOId()) {
+                            qn.setQueueIndex(idx);
+                            qn.setAheadCount(idx - 1);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         return qn;
     }
 

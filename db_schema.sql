@@ -19,7 +19,7 @@
 -- Table structure for table `admini`
 --
 
-DROP TABLE IF EXISTS `admini`;
+DROP TABLE IF EXISTS `affair`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `admini` (
@@ -59,19 +59,19 @@ CREATE TABLE `arrange` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_arrange` BEFORE INSERT ON `arrange` FOR EACH ROW BEGIN
-    DECLARE count INT;
-    
-    -- 检查 `arrangement` 表中是否已经存在该 `ar_id`
-    SELECT COUNT(*) INTO count 
-    FROM arrangement 
-    WHERE ar_id = NEW.ar_id;
-    
-    -- 如果不存在，则插入新记录
-    IF count = 0 THEN
-        INSERT INTO arrangement (ar_id, ar_time)
-        VALUES (NEW.ar_id, NEW.ar_time);
-    END IF;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_arrange` BEFORE INSERT ON `arrange` FOR EACH ROW BEGIN
+    DECLARE count INT;
+    
+    -- 检查 `arrangement` 表中是否已经存在该 `ar_id`
+    SELECT COUNT(*) INTO count 
+    FROM arrangement 
+    WHERE ar_id = NEW.ar_id;
+    
+    -- 如果不存在，则插入新记录
+    IF count = 0 THEN
+        INSERT INTO arrangement (ar_id, ar_time)
+        VALUES (NEW.ar_id, NEW.ar_time);
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -252,14 +252,51 @@ CREATE TABLE `doctor` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_doctor` BEFORE INSERT ON `doctor` FOR EACH ROW BEGIN
-    DECLARE section_id CHAR(6);
-
-    -- 获取或创建科室编号
-    CALL get_or_create_department_id(NEW.d_section, section_id);
-
-    -- 设置新的科室编号到插入记录中
-    SET NEW.de_id = section_id;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_doctor` BEFORE INSERT ON `doctor` FOR EACH ROW BEGIN
+    DECLARE section_id CHAR(6);
+
+    -- 检查科室是否存在，不调用不存在的存储过程
+    SELECT de_id INTO section_id
+    FROM department
+    WHERE de_name = NEW.d_section
+    LIMIT 1;
+
+    IF section_id IS NOT NULL THEN
+        SET NEW.de_id = section_id;
+        UPDATE department SET de_number = de_number + 1 WHERE de_id = section_id;
+    END IF;
+END */;;
+DELIMITER ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `department_before_insert_doctor` BEFORE INSERT ON `doctor` FOR EACH ROW BEGIN
+    DECLARE section_id CHAR(6);
+    DECLARE new_section_id CHAR(6);
+    
+    -- 检查科室是否存在
+    SELECT de_id INTO section_id
+    FROM department
+    WHERE de_name = NEW.d_section
+    LIMIT 1;
+
+    -- 如果科室不存在，插入新的科室记录并生成新的科室编号
+    IF section_id IS NULL THEN
+        SET new_section_id = CONCAT('S', LPAD((SELECT COUNT(*) + 1 FROM department), 5, '0'));
+        INSERT INTO department (de_id, de_name, de_number) VALUES (new_section_id, NEW.d_section, 1);
+        SET NEW.de_id = new_section_id;
+    ELSE
+        -- 如果科室存在，获取科室编号并更新科室人数
+        SET NEW.de_id = section_id;
+        UPDATE department
+        SET de_number = de_number + 1
+        WHERE de_id = section_id;
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -275,50 +312,13 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `department_before_insert_doctor` BEFORE INSERT ON `doctor` FOR EACH ROW BEGIN
-    DECLARE section_id CHAR(6);
-    DECLARE new_section_id CHAR(6);
-    
-    -- 检查科室是否存在
-    SELECT de_id INTO section_id
-    FROM department
-    WHERE de_name = NEW.d_section
-    LIMIT 1;
-
-    -- 如果科室不存在，插入新的科室记录并生成新的科室编号
-    IF section_id IS NULL THEN
-        SET new_section_id = CONCAT('S', LPAD((SELECT COUNT(*) + 1 FROM department), 5, '0'));
-        INSERT INTO department (de_id, de_name, de_number) VALUES (new_section_id, NEW.d_section, 1);
-        SET NEW.de_id = new_section_id;
-    ELSE
-        -- 如果科室存在，获取科室编号并更新科室人数
-        SET NEW.de_id = section_id;
-        UPDATE department
-        SET de_number = de_number + 1
-        WHERE de_id = section_id;
-    END IF;
-END */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `update_department_count_after_doctor_deactivation` AFTER UPDATE ON `doctor` FOR EACH ROW BEGIN
-    IF NEW.d_state = 0 AND OLD.d_state != 0 THEN
-        -- 更新 department 表，减少相应科室的科室人数
-        UPDATE department
-        SET de_number = de_number - 1
-        WHERE de_id = NEW.de_id;
-    END IF;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `update_department_count_after_doctor_deactivation` AFTER UPDATE ON `doctor` FOR EACH ROW BEGIN
+    IF NEW.d_state = 0 AND OLD.d_state != 0 THEN
+        -- 更新 department 表，减少相应科室的科室人数
+        UPDATE department
+        SET de_number = de_number - 1
+        WHERE de_id = NEW.de_id;
+    END IF;
 END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -755,12 +755,14 @@ CREATE TABLE `pharmacy_dispensing` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
+DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `trg_dispensing_update_stock` AFTER UPDATE ON `pharmacy_dispensing` FOR EACH ROW BEGIN
     DECLARE before_stock INT;
     DECLARE after_stock INT;
     DECLARE v_dr_id CHAR(6);
 
-    IF NEW.pd_status = 2 AND (OLD.pd_status IS NULL OR OLD.pd_status < 2) THEN
+    -- pd_status=1: 发药 → 扣库存
+    IF NEW.pd_status = 1 AND (OLD.pd_status IS NULL OR OLD.pd_status < 1) THEN
         SELECT dr_id INTO v_dr_id FROM prescription_detail WHERE pd_id = NEW.presc_detail_id LIMIT 1;
         IF v_dr_id IS NOT NULL THEN
             SELECT dr_number INTO before_stock FROM drug WHERE dr_id = v_dr_id;
@@ -772,14 +774,26 @@ DELIMITER ;;
             VALUES
                 (v_dr_id, NEW.db_id, 'fa yao', -NEW.pd_quantity, before_stock, after_stock,
                  CONCAT('DISPENSE-', NEW.pd_id), NEW.pd_dispense_by,
-                 'auto stock deduction by trigger', NOW());
+                 'trigger: dispense deduction', NOW());
+        END IF;
+    -- pd_status=2: 退药 → 加回库存
+    ELSEIF NEW.pd_status = 2 AND (OLD.pd_status IS NULL OR OLD.pd_status < 2) THEN
+        SELECT dr_id INTO v_dr_id FROM prescription_detail WHERE pd_id = NEW.presc_detail_id LIMIT 1;
+        IF v_dr_id IS NOT NULL THEN
+            SELECT dr_number INTO before_stock FROM drug WHERE dr_id = v_dr_id;
+            UPDATE drug SET dr_number = dr_number + NEW.pd_quantity WHERE dr_id = v_dr_id;
+            SELECT dr_number INTO after_stock FROM drug WHERE dr_id = v_dr_id;
+            INSERT INTO inventory_transaction
+                (dr_id, db_id, it_type, it_quantity, it_before_quantity, it_after_quantity,
+                 it_reference, it_operator, it_note, it_create_time)
+            VALUES
+                (v_dr_id, NEW.db_id, 'tui yao', NEW.pd_quantity, before_stock, after_stock,
+                 CONCAT('RETURN-', NEW.pd_id), NEW.pd_return_by,
+                 'trigger: return restock', NOW());
         END IF;
     END IF;
 END */;;
 DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
@@ -1034,11 +1048,11 @@ SET character_set_client = @saved_cs_client;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_check`(IN ch_name_param VARCHAR(255),
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_check`(IN ch_name_param VARCHAR(255),
           IN ch_price_param DECIMAL(10, 2))
-BEGIN
-         INSERT INTO checks (ch_name, ch_price)
-         VALUES (ch_name_param, ch_price_param);
+BEGIN
+         INSERT INTO checks (ch_name, ch_price)
+         VALUES (ch_name_param, ch_price_param);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1055,15 +1069,15 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_drug`(IN dr_name_param VARCHAR(255),
-          IN dr_price_param DECIMAL(10, 2),
-          IN dr_number_param INT,
-         IN dr_publisher_param VARCHAR(255),
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_drug`(IN dr_name_param VARCHAR(255),
+          IN dr_price_param DECIMAL(10, 2),
+          IN dr_number_param INT,
+         IN dr_publisher_param VARCHAR(255),
          IN dr_unit_param VARCHAR(255))
-BEGIN
-         INSERT INTO drug (dr_name, dr_price, dr_number, dr_publisher, dr_unit)
-         VALUES(dr_name_param,dr_price_param,dr_number_param,dr_publisher_param,
-dr_unit_param);
+BEGIN
+         INSERT INTO drug (dr_name, dr_price, dr_number, dr_publisher, dr_unit)
+         VALUES(dr_name_param,dr_price_param,dr_number_param,dr_publisher_param,
+dr_unit_param);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1080,20 +1094,20 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_orders`(IN p_id_param INT,
-          IN d_id_param CHAR(6),
-          IN o_record_param VARCHAR(255),
-          IN o_start_param VARCHAR(255),
-          IN o_end_param VARCHAR(255),
-          IN o_state_param INT,
-          IN o_drug_param VARCHAR(255),
-          IN o_check_param VARCHAR(255),
-          IN o_total_price_param DECIMAL(10, 2),
-          IN o_price_state_param INT,
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insert_orders`(IN p_id_param INT,
+          IN d_id_param CHAR(6),
+          IN o_record_param VARCHAR(255),
+          IN o_start_param VARCHAR(255),
+          IN o_end_param VARCHAR(255),
+          IN o_state_param INT,
+          IN o_drug_param VARCHAR(255),
+          IN o_check_param VARCHAR(255),
+          IN o_total_price_param DECIMAL(10, 2),
+          IN o_price_state_param INT,
           IN o_advice_param VARCHAR(255))
-BEGIN
-       INSERT INTO `orders` (p_id, d_id, o_record, o_start, o_end, o_state, o_drug, o_check, o_total_price, o_price_state, o_advice)
-      VALUES(p_id_param,d_id_param,o_record_param,o_start_param,o_end_param,o_state_param, o_drug_param,o_check_param,o_total_price_param,o_price_state_param,o_advice_param);
+BEGIN
+       INSERT INTO `orders` (p_id, d_id, o_record, o_start, o_end, o_state, o_drug, o_check, o_total_price, o_price_state, o_advice)
+      VALUES(p_id_param,d_id_param,o_record_param,o_start_param,o_end_param,o_state_param, o_drug_param,o_check_param,o_total_price_param,o_price_state_param,o_advice_param);
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1342,3 +1356,7 @@ DELIMITER ;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-07-04 22:48:36
+
+
+
+

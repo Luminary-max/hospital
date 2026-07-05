@@ -15,7 +15,7 @@
       <div style="display:flex; align-items:center; justify-content:space-between;">
         <div>
           <span style="font-size:24px; font-weight:bold; color:#67C23A;">#{{ currentPatient.queueIndex || '?' }}</span>
-          <span style="font-size:18px; margin-left:20px;">{{ currentPatient.p_name }}</span>
+          <span style="font-size:18px; margin-left:20px;">{{ currentPatient.pName }}</span>
           <el-tag type="success" style="margin-left:10px;">正在就诊</el-tag>
         </div>
         <div>
@@ -30,15 +30,15 @@
     <el-table :data="waitingList" border stripe style="width:100%">
       <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
       <el-table-column label="序号" width="80" align="center">
-        <template slot-scope="s">{{ s.row.queueIndex || s.row.q_id }}</template>
+        <template slot-scope="s">{{ s.row.queueIndex || s.row.qId }}</template>
       </el-table-column>
-      <el-table-column prop="p_name" label="患者姓名" width="90" align="center"></el-table-column>
-      <el-table-column prop="q_create_time" label="取号时间" min-width="180"></el-table-column>
+      <el-table-column prop="pName" label="患者姓名" width="90" align="center"></el-table-column>
+      <el-table-column prop="qCreateTime" label="取号时间" min-width="180"></el-table-column>
       <el-table-column label="状态" width="90" align="center">
-        <template slot-scope="s"><el-tag :type="s.row.q_state===0?'warning':s.row.q_state===2?'danger':'success'" size="mini">{{ s.row.q_state===0?'等待中':s.row.q_state===2?'已过号':'已就诊' }}</el-tag></template>
+        <template slot-scope="s"><el-tag :type="s.row.qState===0?'warning':s.row.qState===2?'danger':'success'" size="mini">{{ s.row.qState===0?'等待中':s.row.qState===2?'已过号':'已就诊' }}</el-tag></template>
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
-        <template slot-scope="s"><el-button v-if="s.row.q_state===2" type="primary" size="mini" @click="reQueue(s.row)">重新排入</el-button></template>
+        <template slot-scope="s"><el-button v-if="s.row.qState===2" type="primary" size="mini" @click="reQueue(s.row)">重新排入</el-button></template>
       </el-table-column>
     </el-table>
   </el-card>
@@ -65,8 +65,8 @@ export default {
         const res = await request.get("queue/listByDoctor", { params: { dId: this.dId } });
         if (res.data.status === 200) {
           const data = res.data.data || [];
-          this.currentPatient = data.find(p => p.q_state === 1) || null;
-          this.waitingList = data.filter(p => p.q_state === 0 || p.q_state === 2);
+          this.currentPatient = data.find(p => p.qState === 1) || null;
+          this.waitingList = data.filter(p => p.qState !== 1 && p.qState !== 3);
         }
       } catch(e) {}
     },
@@ -81,13 +81,13 @@ export default {
     },
     startConsult() {
       if (this.currentPatient) {
-        this.$router.push("/dealOrder?oId=" + this.currentPatient.oId);
+        this.$router.push("/dealOrder?oId=" + this.currentPatient.oId + "&pId=" + (this.currentPatient.pId || ''));
       }
     },
     async skipNumber() {
       if (!this.currentPatient) return;
       try {
-        const res = await request.get("queue/skipNumber", { params: { qId: this.currentPatient.q_id } });
+        const res = await request.get("queue/skipNumber", { params: { qId: this.currentPatient.qId } });
         if (res.data.status === 200) {
           this.$message.warning("已标记为过号");
           this.loadQueue();
@@ -96,7 +96,7 @@ export default {
     },
     async reQueue(row) {
       try {
-        const res = await request.get("queue/callNext", { params: { dId: this.dId, reQueue: row.q_id } });
+        const res = await request.get("queue/callNext", { params: { dId: this.dId, reQueue: row.qId } });
         if (res.data.status === 200) {
           this.$message.success("已重新排入队列");
           this.loadQueue();
