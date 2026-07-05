@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,7 +18,7 @@ public class Orders {
     public static final int STATE_DISPENSED = 6;        // 已发药/检查完成
     public static final int STATE_COMPLETED = 7;        // 就诊完成
 
-    @TableId(value = "o_id")
+    @TableId(value = "o_id", type = IdType.AUTO)
     @JsonProperty("oId")
     private int oId;
     @JsonProperty("pId")

@@ -42,12 +42,11 @@ public class TriageRecordServiceImpl implements TriageRecordService {
         if (ok && triageRecord.getPId() != null) {
             try {
                 com.bear.hospital.mapper.OrderMapper orderMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderMapper.class);
-                // 先找该指定医生下该患者最新的待诊订单
+                // 先找该指定医生下该患者最新的待诊订单，找不到再找不限医生的
                 com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+                wrapper.eq("p_id", triageRecord.getPId());
                 if (triageRecord.getDId() != null) {
-                    wrapper.eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId());
-                } else {
-                    wrapper.eq("p_id", triageRecord.getPId());
+                    wrapper.eq("d_id", triageRecord.getDId());
                 }
                 wrapper.eq("o_state", 0).orderByDesc("o_id").last("LIMIT 1");
                 com.bear.hospital.pojo.Orders order = orderMapper.selectOne(wrapper);
@@ -68,9 +67,17 @@ public class TriageRecordServiceImpl implements TriageRecordService {
                         newOrder.setOPriceState(0);
                         newOrder.setOStart(TodayUtil.getTodayYmd() + " " +
                             new java.text.SimpleDateFormat("HH:mm").format(new java.util.Date()));
-                        // 使用 RandomUtil 生成订单ID（与 OrderServiceImpl.addOrder 一致）
-                        newOrder.setOId(com.bear.hospital.utils.RandomUtil.randomOid(triageRecord.getPId()));
+                        Integer maxId = orderMapper.selectMaxOId();
+                        int newId = (maxId != null ? maxId : 21000) + 1;
+                        newOrder.setOId(newId);
                         int inserted = orderMapper.insert(newOrder);
+                        if (inserted > 0) {
+                            order = orderMapper.selectOne(
+                                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders>()
+                                    .eq("p_id", triageRecord.getPId()).eq("d_id", triageRecord.getDId())
+                                    .orderByDesc("o_id").last("LIMIT 1")
+                            );
+                        }
                         if (inserted > 0) {
                             order = orderMapper.selectOne(
                                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders>()

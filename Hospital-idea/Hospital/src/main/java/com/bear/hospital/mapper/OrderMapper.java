@@ -3,6 +3,7 @@ package com.bear.hospital.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.bear.hospital.pojo.Orders;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -40,4 +41,7 @@ public interface OrderMapper extends BaseMapper<Orders> {
      */
     List<Orders> findOrderByPid(int pId);
 
+    /** 获取最大订单ID（用于分诊自动创建订单） */
+    @Select("SELECT MAX(o_id) FROM orders")
+    Integer selectMaxOId();
 }
