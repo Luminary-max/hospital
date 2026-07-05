@@ -61,10 +61,8 @@
         </div>
         <div class="pq-dept-waiting">
           <span>等待 {{ dept.waiting || 0 }} 人</span>
-            :type="(dept.waiting || 0) > 3 ? 'danger' : (dept.waiting || 0) > 0 ? 'warning' : 'success'"
-            size="mini"
-            effect="dark"
-          >
+          <el-tag :type="(dept.waiting || 0) > 3 ? 'danger' : (dept.waiting || 0) > 0 ? 'warning' : 'success'"
+            size="mini" effect="dark">
             {{ (dept.waiting || 0) > 0 ? '排队中' : '空闲' }}
           </el-tag>
         </div>

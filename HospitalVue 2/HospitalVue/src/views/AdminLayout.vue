@@ -67,8 +67,8 @@ export default {
   methods: {
     requestStats() {
       request.get("order/orderPeople").then(r=>{if(r.data.status===200)this.orderPeople=r.data.data||0;});
-      // 统计今日完成就诊数 → 使用order/orderCompletedToday 端点（fallback到0）
-      this.completedToday=0;
+      // 统计今日完成就诊数
+      request.get("order/orderCompletedToday").then(r=>{if(r.data.status===200)this.completedToday=r.data.data||0;}).catch(()=>{this.completedToday=0;});
       request.get("order/orderDailyIncome").then(r=>{
         if(r.data.status===200){ var d=r.data.data; this.todayIncome=d.drugIncome?d.drugIncome[d.drugIncome.length-1]||0:0; }
       });

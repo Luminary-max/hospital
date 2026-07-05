@@ -54,6 +54,7 @@ public interface OrderService {
      * 统计今天某个医生挂号人数
      */
     int orderPeopleByDid(String oStart, String dId);
+    int orderCompletedToday(String oStart);
     /**
      * 统计挂号男女人数
      */

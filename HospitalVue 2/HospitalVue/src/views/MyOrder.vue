@@ -20,7 +20,7 @@
           <template slot-scope="s">¥{{ s.row.ototalPrice || s.row.oTotalPrice || 0 }}</template>
         </el-table-column>
         <el-table-column label="合计" width="70" align="center">
-          <template slot-scope="s">¥{{ (parseFloat(s.row.oRegistrationFee||s.row.oregistrationFee||0) + parseFloat(s.row.ototalPrice||s.row.oTotalPrice||0)).toFixed(2) }}</template>
+          <template slot-scope="s">¥{{ (parseFloat(s.row.oRegistrationFee||s.row.oregistrationFee||0) + parseFloat(s.row.ototalPrice||s.row.oTotalPrice||0) + parseFloat(s.row._checkFee||0)).toFixed(2) }}</template>
         </el-table-column>
         <el-table-column label="缴费" width="100" align="center">
           <template slot-scope="s">
@@ -154,6 +154,20 @@
             <el-table-column label="金额" width="70"><template slot-scope="s">¥{{ (s.row.pdQuantity*s.row.pdPrice).toFixed(2) }}</template></el-table-column>
           </el-table>
         </el-card>
+        <el-card shadow="hover" style="margin-bottom:12px;" v-if="checkItems.length > 0">
+          <div slot="header"><b style="color:#67C23A;">检查项目</b></div>
+          <el-table :data="checkItems" border stripe size="small" style="width:100%">
+            <el-table-column prop="chName" label="检查项目" min-width="120"></el-table-column>
+            <el-table-column label="金额" width="70"><template slot-scope="s">¥{{ (s.row.chPrice||0).toFixed(2) }}</template></el-table-column>
+            <el-table-column label="状态" width="80">
+              <template slot-scope="s">
+                <el-tag :type="s.row.ocStatus===2?'success':s.row.ocStatus===1?'warning':'info'" size="mini">
+                  {{ {0:'未缴费',1:'待检查',2:'已出结果',3:'异常'}[s.row.ocStatus] || '未知' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
       </div>
     </el-dialog>
       <!-- 退费对话框 -->
@@ -188,7 +202,7 @@ export default {
       // 费用明细
       billingVisible: false, billingData: [],
       // 报告单
-      reportVisible: false, reportLoading: false, reportData: {}, emrData: null, prescDetails: []
+      reportVisible: false, reportLoading: false, reportData: {}, emrData: null, prescDetails: [], checkItems: []
     };
   },
   computed: {
@@ -282,6 +296,7 @@ export default {
       this.reportData = row;
       this.emrData = null;
       this.prescDetails = [];
+      this.checkItems = [];
       this.reportVisible = true;
       this.reportLoading = true;
       try {
@@ -291,6 +306,15 @@ export default {
       try {
         const prescRes = await request.get("prescription/findByOrder", { params: { oId: row.oId } });
         if (prescRes.data.status === 200) this.prescDetails = prescRes.data.data || [];
+      } catch(e) {}
+      try {
+        const emrForCheck = this.emrData;
+        if (emrForCheck && emrForCheck.emrId) {
+          const checkRes = await request.get("check/findOrderChecks", { params: { pageNumber: 1, size: 50, emrId: emrForCheck.emrId } });
+          if (checkRes.data.status === 200 && checkRes.data.data && checkRes.data.data.records) {
+            this.checkItems = checkRes.data.data.records;
+          }
+        }
       } catch(e) {}
       this.reportLoading = false;
     },

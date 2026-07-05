@@ -310,6 +310,13 @@ public class OrderServiceImpl implements OrderService {
     public int orderPeopleByDid(String oStart, String dId){
         return this.orderMapper.orderPeopleByDid(oStart, dId);
     }
+
+    @Override
+    public int orderCompletedToday(String oStart){
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Orders> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        wrapper.like("o_start", oStart + "%").eq("o_state", Orders.STATE_COMPLETED);
+        return this.orderMapper.selectCount(wrapper);
+    }
     /**
      * 统计挂号男女人数
      */

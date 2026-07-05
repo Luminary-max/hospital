@@ -149,24 +149,48 @@ public class OrderController {
     }
 
     /**
-     * 获取每日收入统计（药费+检查费+挂号费）
+     * 统计今日完成就诊数量
+     */
+    @RequestMapping("orderCompletedToday")
+    public ResponseData orderCompletedToday(){
+        String oStart = TodayUtil.getTodayYmd();
+        return ResponseData.success("查询成功", this.orderService.orderCompletedToday(oStart));
+    }
+
+    /**
+     * 根据日期范围查询订单
+     */
+    @RequestMapping("findOrdersByDate")
+    public ResponseData findOrdersByDate(@RequestParam String start, @RequestParam String end){
+        return ResponseData.success("查询成功", this.orderService.findOrdersByDate(start, end));
+    }
+
+    /**
+     * 获取每日收入统计（从billing_record表统计，更准确）
      */
     @RequestMapping("orderDailyIncome")
     public ResponseData orderDailyIncome(){
         ArrayList<Double> drugIncome = new ArrayList<>();
         ArrayList<Double> regIncome = new ArrayList<>();
         ArrayList<String> dateLabels = new ArrayList<>();
+        com.bear.hospital.mapper.BillingMapper bm = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.BillingMapper.class);
         for (int i = 20; i > 0; i--) {
             String day = TodayUtil.getPastDate(i);
             dateLabels.add(day.substring(5));
-            double dSum = 0, rSum = 0;
             String dayStart = day + " 00:00";
             String dayEnd = day + " 23:59";
-            // Get orders for this day
-            java.util.List<Orders> dayOrders = this.orderService.findOrdersByDate(dayStart, dayEnd);
-            for (Orders o : dayOrders) {
-                if (o.getOTotalPrice() != null) dSum += o.getOTotalPrice();
-                if (o.getORegistrationFee() != null) rSum += o.getORegistrationFee();
+            double dSum = 0, rSum = 0;
+            java.util.List<com.bear.hospital.pojo.BillingRecord> records = bm.selectList(
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.BillingRecord>()
+                    .ge("br_pay_time", dayStart).le("br_pay_time", dayEnd)
+            );
+            for (com.bear.hospital.pojo.BillingRecord br : records) {
+                String type = br.getBrType();
+                if (type != null && type.contains("挂号费")) {
+                    rSum += br.getBrAmount() != null ? br.getBrAmount() : 0;
+                } else {
+                    dSum += br.getBrAmount() != null ? br.getBrAmount() : 0;
+                }
             }
             drugIncome.add(dSum);
             regIncome.add(rSum);
