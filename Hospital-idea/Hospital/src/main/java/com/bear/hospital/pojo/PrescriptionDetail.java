@@ -5,11 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("prescription_detail")
 public class PrescriptionDetail {
-    @TableId(value = "pd_id")
+    @TableId(value = "pd_id", type = IdType.AUTO)
     @JsonProperty("pdId")
-    private int pdId;
-    @JsonProperty("oId")
-    private int oId;
+    private Integer pdId;
     @JsonProperty("pmId")
     private Integer pmId;
     @JsonProperty("drId")
@@ -45,10 +43,8 @@ public class PrescriptionDetail {
 
     public PrescriptionDetail() {}
 
-    public int getPdId() { return pdId; }
-    public void setPdId(int pdId) { this.pdId = pdId; }
-    public int getOId() { return oId; }
-    public void setOId(int oId) { this.oId = oId; }
+    public Integer getPdId() { return pdId; }
+    public void setPdId(Integer pdId) { this.pdId = pdId; }
     public Integer getPmId() { return pmId; }
     public void setPmId(Integer pmId) { this.pmId = pmId; }
     public String getDrId() { return drId; }

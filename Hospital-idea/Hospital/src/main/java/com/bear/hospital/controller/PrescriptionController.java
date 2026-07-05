@@ -34,16 +34,16 @@ public class PrescriptionController {
     @SuppressWarnings("unchecked")
     @PostMapping("/save")
     public ResponseData save(@RequestBody Map<String, Object> params) {
-        Object oIdObj = params.get("oId");
+        Object emrIdObj = params.get("emrId");
         Object rawListObj = params.get("details");
-        if (oIdObj == null || rawListObj == null) {
+        if (emrIdObj == null || rawListObj == null) {
             return ResponseData.fail("参数不完整");
         }
-        int oId;
+        int emrId;
         try {
-            oId = Integer.parseInt(oIdObj.toString());
+            emrId = Integer.parseInt(emrIdObj.toString());
         } catch (NumberFormatException e) {
-            return ResponseData.fail("oId格式无效");
+            return ResponseData.fail("emrId格式无效");
         }
         List<Map<String, Object>> rawList;
         try {
@@ -76,9 +76,9 @@ public class PrescriptionController {
         // 使用新方法保存处方（含主表+明细+pmId关联）
         if (prescriptionService instanceof com.bear.hospital.service.serviceImpl.PrescriptionServiceImpl) {
             ((com.bear.hospital.service.serviceImpl.PrescriptionServiceImpl) prescriptionService)
-                .savePrescriptions(oId, details, dId, diagnosis);
+                .savePrescriptions(emrId, details, dId, diagnosis);
         } else {
-            prescriptionService.savePrescriptions(oId, details);
+            prescriptionService.savePrescriptions(emrId, details);
         }
         // 自动生成发药记录（关联到处方明细pdId）
         for (int i = 0; i < details.size(); i++) {

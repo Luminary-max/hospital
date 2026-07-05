@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,15 +11,11 @@ public class RefundRequest {
     public static final int STATUS_APPROVED = 1;
     public static final int STATUS_REJECTED = 2;
 
-    @TableId(value = "rf_id")
+    @TableId(value = "rf_id", type = IdType.AUTO)
     @JsonProperty("rfId")
     private Integer rfId;
-    @JsonProperty("oId")
-    private Integer oId;
     @JsonProperty("brId")
     private Integer brId;
-    @JsonProperty("ocId")
-    private Integer ocId;
     @JsonProperty("rfAmount")
     private Double rfAmount;
     @JsonProperty("rfReason")
@@ -40,12 +37,8 @@ public class RefundRequest {
 
     public Integer getRfId() { return rfId; }
     public void setRfId(Integer rfId) { this.rfId = rfId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
     public Integer getBrId() { return brId; }
     public void setBrId(Integer brId) { this.brId = brId; }
-    public Integer getOcId() { return ocId; }
-    public void setOcId(Integer ocId) { this.ocId = ocId; }
     public Double getRfAmount() { return rfAmount; }
     public void setRfAmount(Double rfAmount) { this.rfAmount = rfAmount; }
     public String getRfReason() { return rfReason; }

@@ -9,8 +9,6 @@ public class DeliveryRequest {
     @TableId(value = "dl_id")
     @JsonProperty("dlId")
     private Integer dlId;
-    @JsonProperty("oId")
-    private Integer oId;
     @JsonProperty("pId")
     private Integer pId;
     @JsonProperty("dlAgentName")
@@ -32,8 +30,6 @@ public class DeliveryRequest {
 
     public Integer getDlId() { return dlId; }
     public void setDlId(Integer dlId) { this.dlId = dlId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
     public Integer getPId() { return pId; }
     public void setPId(Integer pId) { this.pId = pId; }
     public String getDlAgentName() { return dlAgentName; }

@@ -5,7 +5,7 @@ import com.bear.hospital.service.DrugService;
 import java.util.HashMap;
 
 public interface PharmacyDispensingService {
-    HashMap<String, Object> findAll(int pageNumber, int size, Integer status);
+    HashMap<String, Object> findAll(int pageNumber, int size, Integer status, String query);
     Boolean dispense(int pdId, String dispenseBy, DrugService drugService);
     Boolean review(int pdId, String reviewer);
     Boolean returnDrug(int pdId, String returnBy);

@@ -27,20 +27,32 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Override
     @Transactional
-    public boolean savePrescriptions(int oId, List<PrescriptionDetail> details) {
-        return savePrescriptions(oId, details, null, null);
+    public boolean savePrescriptions(int emrId, List<PrescriptionDetail> details) {
+        return savePrescriptions(emrId, details, null, null);
     }
 
     @Transactional
-    public boolean savePrescriptions(int oId, List<PrescriptionDetail> details, String dId, String diagnosis) {
-        // 先删除旧处方
-        QueryWrapper<PrescriptionDetail> wrapper = new QueryWrapper<>();
-        wrapper.eq("o_id", oId);
-        prescriptionMapper.delete(wrapper);
+    public boolean savePrescriptions(int emrId, List<PrescriptionDetail> details, String dId, String diagnosis) {
+        // 删除该病历下的旧处方（先删发药记录引用，再删明细，最后删主表）
+        QueryWrapper<PrescriptionMaster> pmWrapper = new QueryWrapper<>();
+        pmWrapper.eq("emr_id", emrId);
+        java.util.List<PrescriptionMaster> oldMasters = prescriptionMasterMapper.selectList(pmWrapper);
+        for (PrescriptionMaster old : oldMasters) {
+            // 先删除关联的发药记录
+            com.bear.hospital.mapper.PharmacyDispensingMapper pdMapper =
+                com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PharmacyDispensingMapper.class);
+            java.util.List<com.bear.hospital.pojo.PrescriptionDetail> oldDetails = prescriptionMapper.selectList(
+                new QueryWrapper<com.bear.hospital.pojo.PrescriptionDetail>().eq("pm_id", old.getPmId()));
+            for (com.bear.hospital.pojo.PrescriptionDetail od : oldDetails) {
+                pdMapper.delete(new QueryWrapper<com.bear.hospital.pojo.PharmacyDispensing>().eq("presc_detail_id", od.getPdId()));
+            }
+            prescriptionMapper.delete(new QueryWrapper<com.bear.hospital.pojo.PrescriptionDetail>().eq("pm_id", old.getPmId()));
+        }
+        prescriptionMasterMapper.delete(pmWrapper);
 
         // 创建处方主表
         PrescriptionMaster master = new PrescriptionMaster();
-        master.setOId(oId);
+        master.setEmrId(emrId);
         master.setDId(dId);
         master.setPmDiagnosis(diagnosis);
         master.setPmType("西药");
@@ -48,9 +60,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         master.setPmCreateTime(TodayUtil.getToday());
         prescriptionMasterMapper.insert(master);
 
-        // 批量插入新处方明细（带pmId）
+        // 批量插入新处方明细
         for (PrescriptionDetail d : details) {
-            d.setOId(oId);
             d.setPmId(master.getPmId());
             prescriptionMapper.insert(d);
         }

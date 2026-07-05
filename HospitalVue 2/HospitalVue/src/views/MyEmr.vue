@@ -132,10 +132,12 @@ export default {
       } catch(e) {}
     },
     async exportSingle(row) {
-      if (row.oId) {
-        window.open("/patient/pdf?oId=" + row.oId, "_blank");
+      if (row.emrId) {
+        window.open("http://localhost:9999/emr/pdf?emrId=" + row.emrId, "_blank");
+      } else if (row.oId) {
+        window.open("http://localhost:9999/patient/pdf?oId=" + row.oId, "_blank");
       } else {
-        this.$message.info("导出功能需要订单号");
+        this.$message.info("导出功能需要病历编号");
       }
     },
     printCurrent() {

@@ -8,8 +8,12 @@
       <el-table-column label="诊断" min-width="160" show-overflow-tooltip>
         <template slot-scope="s">{{ s.row.oRecord || '---' }}</template>
       </el-table-column>
-      <el-table-column prop="oTotalPrice" label="总价(元)" width="80" align="center">
-        <template slot-scope="s"><span v-if="s.row.oTotalPrice">¥{{ s.row.oTotalPrice }}</span><span v-else>---</span></template>
+      <el-table-column label="总价(元)" width="100" align="center">
+        <template slot-scope="s">
+          <span v-if="s.row._drugTotal">¥{{ s.row._drugTotal.toFixed(2) }}</span>
+          <span v-else-if="s.row.oTotalPrice">¥{{ s.row.oTotalPrice }}</span>
+          <span v-else>---</span>
+        </template>
       </el-table-column>
       <el-table-column label="缴费" width="80" align="center">
         <template slot-scope="s">
@@ -84,10 +88,23 @@ export default {
   methods: {
     async loadData() {
       try {
-        const res = await request.get("order/findOrderFinish", { params: { dId: this.dId, pageNumber: this.pageNumber, size: this.size } });
+        const res = await request.get("order/findOrderFinish", { params: { dId: this.dId, pageNumber: this.pageNumber, size: this.size, query: "" } });
         if (res.data.status === 200) {
-          this.prescriptionData = res.data.data.records || [];
-          this.total = res.data.data.total || 0;
+          var records = res.data.data.records || [];
+          // 对每个订单查询处方明细，计算真实总价
+          var self = this;
+          var promises = records.map(function(item) {
+            return request.get("prescription/findByOrder", { params: { oId: item.oId } }).then(function(r) {
+              if (r.data.status === 200 && r.data.data && r.data.data.length > 0) {
+                item._drugTotal = r.data.data.reduce(function(s, d) { return s + d.pdQuantity * (d.pdPrice || 0); }, 0);
+              }
+              return item;
+            }).catch(function() { return item; });
+          });
+          Promise.all(promises).then(function(results) {
+            self.prescriptionData = results;
+            self.total = res.data.data.total || 0;
+          });
         }
       } catch(e) {}
     },

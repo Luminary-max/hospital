@@ -9,7 +9,7 @@
         <result property="pId" column="p_id" />
         <result property="dId" column="d_id" />
         <result property="oStart" column="o_start" />
-        <result property="oState" column="d_state" />
+        <result property="oState" column="o_state" />
         <result property="countGender" column="countGender"/>
         <!--一对一的关系映射，配置封装user的内容 column中指名从表的外键 property="user"指的是单个实体类的引用-->
         <association property="patient" javaType="com.bear.hospital.pojo.Patient">
@@ -92,6 +92,7 @@
             <result property="oStart" column="o_start" />
             <result property="oEnd" column="o_end" />
             <result property="oTotalPrice" column="o_total_price" />
+            <result property="oRegistrationFee" column="o_registration_fee" />
             <result property="oPriceState" column="o_price_state" />
             <result property="oState" column="o_state" />
             <result property="dName" column="dName" />
@@ -107,22 +108,20 @@
             </association>
         </resultMap>
     <select id="findOrderByNull" resultMap="orderPatientDoctorMap">
-        SELECT o.o_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start
+        SELECT o.o_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_registration_fee,o.o_total_price,o.o_price_state,o.o_state
         from orders o JOIN doctor d JOIN patient p
         on o.d_id=#{dId}
         and o.d_id=d.d_id
         and o.p_id=p.p_id
         and o.o_start like #{oStart}"%"
-        and o.o_state=0
+        and o.o_state IN (0,3,4)
         ORDER BY o.o_start
     </select>
     <select id="findOrderByPid" resultMap="orderPatientDoctorMap">
-        SELECT o.o_id,o.d_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_end,o.o_total_price,o.o_price_state,o.o_state
-        from orders o JOIN doctor d JOIN patient p
-        on o.p_id=#{pId}
-        and o.d_id=d.d_id
-        and o.p_id=p.p_id
-        ORDER BY o.o_end DESC
+        SELECT o.o_id,o.d_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_end,o.o_total_price,o.o_price_state,o.o_state,o.o_registration_fee
+        from orders o LEFT JOIN doctor d ON o.d_id=d.d_id LEFT JOIN patient p ON o.p_id=p.p_id
+        WHERE o.p_id=#{pId}
+        ORDER BY o.o_id DESC
     </select>
 
 

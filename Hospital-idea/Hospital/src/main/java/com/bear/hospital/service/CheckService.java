@@ -34,15 +34,15 @@ public interface CheckService {
     /**
      * 分页查询检查开单
      */
-    HashMap<String, Object> findOrderChecks(int pageNumber, int size, Integer oId, Integer status);
+    HashMap<String, Object> findOrderChecks(int pageNumber, int size, Integer emrId, Integer status);
 
     /**
-     * 医生开检查单
+     * 医生开检查单（通过订单号自动查找病历）
      */
     Boolean createOrderCheck(int oId, String chId, String chName, Double chPrice);
 
     /**
-     * 批量开检查单
+     * 批量开检查单（通过订单号自动查找病历）
      */
     Boolean batchCreateOrderChecks(int oId, List<Map<String, Object>> items);
 

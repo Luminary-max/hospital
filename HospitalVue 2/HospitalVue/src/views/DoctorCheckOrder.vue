@@ -11,11 +11,12 @@
     <el-card shadow="hover" style="margin-bottom:16px;">
       <div slot="header"><span style="font-weight:bold;">就诊信息</span></div>
       <el-descriptions :column="4" border size="small">
-        <el-descriptions-item label="患者姓名">{{ patientName }}</el-descriptions-item>
-        <el-descriptions-item label="订单号">{{ orderId }}</el-descriptions-item>
+        <el-descriptions-item label="患者姓名">{{ patientName || '---' }}</el-descriptions-item>
+        <el-descriptions-item label="订单号">{{ orderId || '---' }}</el-descriptions-item>
         <el-descriptions-item label="医生">{{ doctorName }}</el-descriptions-item>
         <el-descriptions-item label="日期">{{ nowDate }}</el-descriptions-item>
       </el-descriptions>
+      <div style="margin-top:10px;color:#909399;font-size:12px;text-align:center;">请从 <b>今日挂号</b> 或 <b>叫号面板</b> 点击「处理」或「接诊」后进入此页面，订单号会自动传入</div>
     </el-card>
 
     <el-row :gutter="20">
@@ -122,28 +123,27 @@ export default {
       var details = this.selectedChecks.map(function(c) {
         return { chId: c.chId, chName: c.chName, chPrice: c.chPrice };
       });
-      request.post("check/batchCreateOrderChecks", null, {
-        params: { oId: this.orderId },
-        data: { oId: this.orderId, dId: this.doctorId, details: details }
-      }).catch(function() {
-        // fallback POST with JSON body
-        return request({
-          method: "post",
-          url: "check/batchCreateOrderChecks",
-          data: { oId: this.orderId, dId: this.doctorId, details: details }
-        }.bind(this));
-      }.bind(this)).then(function(res) {
-        if (res && res.data && res.data.status === 200) {
-          this.$message.success("检查开单成功，共 " + this.selectedChecks.length + " 项");
-          this.selectedChecks = [];
+      var self = this;
+      // axios request.post(url, data) 会以JSON body方式发送
+      // 这里直接用原始axios方式：POST body = details数组, params = {oId}
+      request({
+        method: "post",
+        url: "check/batchCreateOrderChecks",
+        params: { oId: self.orderId },
+        data: details,
+        headers: { "Content-Type": "application/json" }
+      }).then(function(res) {
+        if (res.data.status === 200) {
+          self.$message.success("检查开单成功，共 " + self.selectedChecks.length + " 项");
+          self.selectedChecks = [];
         } else {
-          this.$message.error("开单失败，请重试");
+          self.$message.error(res.data.msg || "开单失败");
         }
-      }.bind(this)).catch(function() {
-        this.$message.error("网络错误");
-      }.bind(this)).finally(function() {
-        this.saving = false;
-      }.bind(this));
+      }).catch(function() {
+        self.$message.error("网络错误");
+      }).finally(function() {
+        self.saving = false;
+      });
     },
     getToday() {
       var d = new Date();

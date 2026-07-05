@@ -40,11 +40,10 @@
       <el-table-column prop="oStart" label="挂号时间" min-width="155"></el-table-column>
       <el-table-column label="费用明细" min-width="180">
         <template slot-scope="s">
-          <div class="fee-row"><span class="fee-label">挂号</span><span class="fee-value">¥{{ s.row.oRegistrationFee || '0' }}</span></div>
-          <div class="fee-row"><span class="fee-label">药品</span><span class="fee-value">¥{{ s.row.oDrugFee || '0' }}</span></div>
-          <div class="fee-row"><span class="fee-label">检查</span><span class="fee-value">¥{{ s.row.oCheckFee || '0' }}</span></div>
+          <div class="fee-row"><span class="fee-label">挂号</span><span class="fee-value">¥{{ s.row.oRegistrationFee || s.row.oregistrationFee || 0 }}</span></div>
+          <div class="fee-row"><span class="fee-label">药品</span><span class="fee-value">¥{{ s.row.oTotalPrice || s.row.ototalPrice || 0 }}</span></div>
           <el-divider style="margin:4px 0;"></el-divider>
-          <div class="fee-row"><span class="fee-label total">合计</span><span class="fee-total">¥{{ s.row.oTotalPrice || '0' }}</span></div>
+          <div class="fee-row"><span class="fee-label total">合计</span><span class="fee-total">¥{{ (parseFloat(s.row.oRegistrationFee||s.row.oregistrationFee||0) + parseFloat(s.row.oTotalPrice||s.row.ototalPrice||0)).toFixed(2) }}</span></div>
         </template>
       </el-table-column>
       <el-table-column label="支付信息" width="140" align="center">
@@ -58,14 +57,14 @@
       </el-table-column>
       <el-table-column label="缴费状态" width="85" align="center">
         <template slot-scope="s">
-          <el-tag v-if="s.row.oPriceState === 1" type="success" size="small">已缴费</el-tag>
+          <el-tag v-if="s.row.oPriceState==1||s.row.opriceState==1" type="success" size="small">已缴费</el-tag>
           <el-tag v-else type="danger" size="small">待缴费</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="130" fixed="right" align="center">
         <template slot-scope="s">
-          <el-button type="primary" size="mini" icon="el-icon-document" circle @click="viewBilling(s.row.oId)" title="收费记录"></el-button>
-          <el-button v-if="s.row.oPriceState === 1" type="warning" size="mini" icon="el-icon-refund" circle @click="refundDialog(s.row)" title="退款"></el-button>
+          <el-button type="primary" size="mini" icon="el-icon-document" circle @click="viewBilling(s.row.oId||s.row.oid)" title="收费记录"></el-button>
+          <el-button v-if="s.row.oPriceState==1||s.row.opriceState==1" type="warning" size="mini" icon="el-icon-refund" circle @click="refundDialog(s.row)" title="退款"></el-button>
           <el-button v-else type="success" size="mini" icon="el-icon-money" circle @click="openPaymentDlg(s.row)" title="收费"></el-button>
         </template>
       </el-table-column>
@@ -251,7 +250,6 @@ export default {
     },
     // 查看收费记录
     viewBilling(oId) {
-      // API: GET billing/findByOrder
       request.get("billing/findByOrder", {params:{oId}}).then(res=>{
         this.billingData = res.data.data || [];
         this.billingDlgVisible = true;
@@ -260,6 +258,7 @@ export default {
     // 退款对话框
     refundDialog(row) {
       this.refundForm = {
+        brId: row.brId || null,
         oId: row.oId,
         total: row.oTotalPrice || 0,
         reason: '',
@@ -270,10 +269,10 @@ export default {
     processRefund() {
       if (!this.refundForm.reason) return this.$message.warning("请填写退款原因");
       if (!this.refundForm.operator) return this.$message.warning("请输入操作人");
-      // API: GET order/refund — 需要后端实现
+      // API: GET order/refund — 改为按缴费记录退费
       request.get("order/refund", {
         params: {
-          oId: this.refundForm.oId,
+          brId: this.refundForm.brId,
           reason: this.refundForm.reason,
           operator: this.refundForm.operator
         }

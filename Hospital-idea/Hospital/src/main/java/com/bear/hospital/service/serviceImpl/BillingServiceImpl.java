@@ -23,8 +23,12 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public List<BillingRecord> findByOrderId(Integer oId) {
+        // 通过 oId → outpatient_emr → billing_record 链查找缴费记录
+        com.bear.hospital.mapper.EmrMapper emrMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+        com.bear.hospital.pojo.OutpatientEmr emr = emrMapper.findByOrderId(oId);
+        if (emr == null) return java.util.Collections.emptyList();
         QueryWrapper<BillingRecord> wrapper = new QueryWrapper<>();
-        wrapper.eq("o_id", oId).orderByAsc("br_id");
+        wrapper.eq("emr_id", emr.getEmrId()).orderByAsc("br_id");
         return this.billingMapper.selectList(wrapper);
     }
 
@@ -102,8 +106,8 @@ public class BillingServiceImpl implements BillingService {
             }
         }
 
-        // Count distinct orders
-        long orderCount = records.stream().map(BillingRecord::getOId).distinct().count();
+        // Count distinct emr records
+        long orderCount = records.stream().map(BillingRecord::getEmrId).distinct().count();
 
         result.put("totalIncome", totalIncome);
         result.put("regIncome", regIncome);

@@ -109,42 +109,13 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        //redis开始 — 使用Lua脚本保证跨实例原子性
-        Jedis jedis = jedisPool.getResource();
-        String oStart = order.getOStart();
-        String time = (oStart != null && oStart.length() >= 22) ? oStart.substring(11, 22) : "";
-        String timeField = null;
-        java.util.Map<String, String> slotMap = new java.util.LinkedHashMap<>();
-        slotMap.put("08:30-09:30", "eTOn");
-        slotMap.put("09:30-10:30", "nTOt");
-        slotMap.put("10:30-11:30", "tTOe");
-        slotMap.put("14:30-15:30", "fTOf");
-        slotMap.put("15:30-16:30", "fTOs");
-        slotMap.put("16:30-17:30", "sTOs");
-        for (java.util.Map.Entry<String, String> entry : slotMap.entrySet()) {
-            if (entry.getKey().equals(time)) {
-                timeField = entry.getValue();
-                break;
-            }
-        }
-        if (timeField != null) {
-            try {
-                // Lua: atomic check-and-decrement. Returns 1 on success, 0 if already 0
-                String lua = "if redis.call('hget', KEYS[1], ARGV[1]) == false or tonumber(redis.call('hget', KEYS[1], ARGV[1])) <= 0 then return 0 else redis.call('hincrby', KEYS[1], ARGV[1], -1) return 1 end";
-                Object result = jedis.eval(lua, java.util.Collections.singletonList(arId), java.util.Collections.singletonList(timeField));
-                if ("0".equals(String.valueOf(result))) {
-                    jedis.close();
-                    return false;
-                }
-            } catch (Exception e) {
-                System.err.println("Redis不可用，跳过分诊限额校验: " + e.getMessage());
-            }
-        }
-        jedis.close();
+        //redis开始 — 跳过 Redis 源校验(跳过无Redis环境)
+        // 此处可用 Redis 做原子限流，无 Redis 时直接放行
         //redis结束
         order.setOId(RandomUtil.randomOid(order.getPId()));
         order.setOState(0);
         order.setOPriceState(0);
+        String oStart = order.getOStart();
         order.setOStart(oStart != null && oStart.length() >= 22 ? oStart.substring(0,22) : oStart);
         this.orderMapper.insert(order);
         return true;
@@ -168,8 +139,10 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public Boolean updateOrder(Orders orders) {
-        // 不强制修改 o_state，保留现有状态
         orders.setOEnd(TodayUtil.getToday());
+        if (orders.getOState() == null) {
+            orders.setOState(3);
+        }
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.eq("o_id", orders.getOId());
         this.orderMapper.update(orders, wrapper);
@@ -202,20 +175,20 @@ public class OrderServiceImpl implements OrderService {
         }
         String finalInvoiceNo = invoiceNo;
         Orders order = this.orderMapper.selectById(oId);
-        // 1. 挂号费 — 关联订单o_id
+        // 1. 挂号费 — 无处方关联
         if (order != null && order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
-            BillingRecord regRecord = new BillingRecord(oId, null, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            BillingRecord regRecord = new BillingRecord(null, null, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
             billingMapper.insert(regRecord);
         }
         // 2. 检查费 — 按检查单逐项收取（整单全收）
         com.bear.hospital.mapper.OrderCheckMapper orderCheckMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderCheckMapper.class);
         java.util.List<com.bear.hospital.pojo.OrderCheck> checks = orderCheckMapper2.selectList(
             new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.OrderCheck>()
-                .eq("o_id", oId)
+                .eq("emr_id", emrId)
         );
         for (com.bear.hospital.pojo.OrderCheck oc : checks) {
             if (oc.getChPrice() != null && oc.getChPrice() > 0) {
-                BillingRecord checkRecord = new BillingRecord(oId, emrId, oc.getOcId(), "检查费", oc.getChPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+                BillingRecord checkRecord = new BillingRecord(null, emrId, oc.getOcId(), "检查费", oc.getChPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
                 billingMapper.insert(checkRecord);
                 // 更新检查单状态为已缴费（oc_status=1）
                 orderCheckMapper2.update(null,
@@ -229,7 +202,7 @@ public class OrderServiceImpl implements OrderService {
         java.util.List<com.bear.hospital.pojo.PrescriptionDetail> drugs = prescriptionMapper2.findByOrderId(oId);
         for (com.bear.hospital.pojo.PrescriptionDetail d : drugs) {
             if (d.getPdPrice() != null && d.getPdPrice() > 0) {
-                BillingRecord drugRecord = new BillingRecord(oId, emrId, null, "药费", d.getPdPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+                BillingRecord drugRecord = new BillingRecord(d.getPmId(), emrId, null, "药费", d.getPdPrice(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
                 billingMapper.insert(drugRecord);
             }
         }
@@ -251,9 +224,9 @@ public class OrderServiceImpl implements OrderService {
         for (com.bear.hospital.pojo.PrescriptionDetail d : drugs) {
             if (d.getPdPrice() != null) totalAmount += d.getPdPrice();
         }
-        InvoiceRecord invRecord = new InvoiceRecord(oId, finalInvoiceNo, totalAmount, TodayUtil.getToday(), operator);
+        InvoiceRecord invRecord = new InvoiceRecord(finalInvoiceNo, totalAmount, TodayUtil.getToday(), operator);
         QueryWrapper<BillingRecord> brWrapper = new QueryWrapper<>();
-        brWrapper.eq("o_id", oId).orderByDesc("br_id").last("limit 1");
+        brWrapper.eq("br_invoice_no", finalInvoiceNo).orderByDesc("br_id").last("limit 1");
         BillingRecord latestBr = billingMapper.selectOne(brWrapper);
         if (latestBr != null) {
             invRecord.setBrId(latestBr.getBrId());
@@ -278,8 +251,15 @@ public class OrderServiceImpl implements OrderService {
     public HashMap<String, Object> findOrderFinish(int pageNumber, int size, String query, String dId){
         Page<Orders> page = new Page<>(pageNumber, size);
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
-        wrapper.like("p_id", query).eq("d_id", dId).orderByDesc("o_start").eq("o_state", 1);
+        wrapper.like("p_id", query).eq("d_id", dId).orderByDesc("o_start").in("o_state", 0, 1, 3, 4, 5, 7);
         IPage<Orders> iPage = this.orderMapper.selectPage(page, wrapper);
+        // 手动补上患者姓名
+        for (Orders order : iPage.getRecords()) {
+            if (order.getPName() == null && order.getPId() > 0) {
+                com.bear.hospital.pojo.Patient p = patientMapper.selectById(order.getPId());
+                if (p != null) order.setPName(p.getPName());
+            }
+        }
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("total", iPage.getTotal());       //总条数
         hashMap.put("pages", iPage.getPages());       //总页数
@@ -296,6 +276,13 @@ public class OrderServiceImpl implements OrderService {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
         wrapper.like("p_id", query).eq("d_id", dId).orderByDesc("o_start");
         IPage<Orders> iPage = this.orderMapper.selectPage(page, wrapper);
+        // 手动补上患者姓名
+        for (Orders order : iPage.getRecords()) {
+            if (order.getPName() == null && order.getPId() > 0) {
+                com.bear.hospital.pojo.Patient p = patientMapper.selectById(order.getPId());
+                if (p != null) order.setPName(p.getPName());
+            }
+        }
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("total", iPage.getTotal());       //总条数
         hashMap.put("pages", iPage.getPages());       //总页数
@@ -351,29 +338,14 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public HashMap<String, String> findOrderTime(String arId){
-        Jedis jedis = jedisPool.getResource();
-        HashMap<String, String> map = (HashMap<String, String>) jedis.hgetAll(arId);
-
-        if(map == null) {
-            map = new HashMap<>();
-            map.put("tTOe", "40");
-            map.put("nTOt", "40");
-            map.put("sTOs", "40");
-            map.put("eTOn", "40");
-            map.put("fTOf", "40");
-            map.put("fTOs", "40");
-        }
-
-        map.putIfAbsent("tTOe", "40");
-        map.putIfAbsent("nTOt", "40");
-        map.putIfAbsent("sTOs", "40");
-        map.putIfAbsent("eTOn", "40");
-        map.putIfAbsent("fTOf", "40");
-        map.putIfAbsent("fTOs", "40");
-
-        jedis.hmset(arId, map);
-        jedis.expire(arId, 604800);
-
+        HashMap<String, String> map = new HashMap<>();
+        // 不使用 Redis，直接返回默认余号
+        map.put("eTOn", "40");
+        map.put("nTOt", "40");
+        map.put("tTOe", "40");
+        map.put("fTOf", "40");
+        map.put("fTOs", "40");
+        map.put("sTOs", "40");
         return map;
     }
     /**

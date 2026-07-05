@@ -32,9 +32,9 @@
                         <el-tag type="info" v-else>状态{{ s.row.oState }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="140" fixed="right">
+                <el-table-column label="操作" width="90" fixed="right">
                     <template slot-scope="s">
-                        <el-button type="warning" icon="iconfont icon-r-paper" style="font-size:14px" @click="dealClick(s.row.oId, s.row.pId)" v-if="s.row.oState === 1 && s.row.oPriceState === 1">追诊</el-button>
+                        <el-button type="text" size="mini" @click="viewDetail(s.row)">查看详情</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -53,7 +53,9 @@ export default {
     name: "DoctorOrder",
     data() { return { userId: 1, orderData: [], pageNumber: 1, size: 8, query: "", total: 3 }; },
     methods: {
-        dealClick(oId, pId) { this.$router.push({ path: "/dealOrderAgain", query: { oId, pId } }); },
+        viewDetail(row) {
+            this.$alert(`患者ID：${row.pId}\n挂号时间：${row.oStart}\n病因：${row.oRecord || '无'}\n药物：${row.oDrug || '无'}\n检查：${row.oCheck || '无'}`, `挂号单 #${row.oId}`, { confirmButtonText: '关闭' });
+        },
         handleSizeChange(size) { this.size = size; this.requestOrders(); },
         handleCurrentChange(num) { this.pageNumber = num; this.requestOrders(); },
         requestOrders() {

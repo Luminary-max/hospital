@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.bear.hospital.mapper.BillingMapper;
 import com.bear.hospital.mapper.OrderCheckMapper;
 import com.bear.hospital.mapper.OrderMapper;
 import com.bear.hospital.mapper.PharmacyDispensingMapper;
 import com.bear.hospital.mapper.RefundRequestMapper;
+import com.bear.hospital.pojo.BillingRecord;
 import com.bear.hospital.pojo.OrderCheck;
 import com.bear.hospital.pojo.Orders;
 import com.bear.hospital.pojo.PharmacyDispensing;
@@ -26,7 +28,7 @@ public class RefundRequestServiceImpl implements RefundRequestService {
     @Resource
     private RefundRequestMapper refundRequestMapper;
     @Resource
-    private OrderMapper orderMapper;
+    private BillingMapper billingMapper;
     @Resource
     private OrderCheckMapper orderCheckMapper;
     @Resource
@@ -61,36 +63,53 @@ public class RefundRequestServiceImpl implements RefundRequestService {
         RefundRequest request = this.refundRequestMapper.selectById(rfId);
         if (request == null) return "退费申请不存在";
 
-        // 验证1: 订单必须已缴费
-        Orders order = orderMapper.selectById(request.getOId());
-        if (order == null) return "关联订单不存在";
-        if (order.getOPriceState() == null || order.getOPriceState() != 1) {
-            return "订单未缴费，无法退费";
+        // 通过 brId 找到缴费记录，再通过缴费记录找到订单
+        BillingRecord br = null;
+        if (request.getBrId() != null) {
+            br = billingMapper.selectById(request.getBrId());
         }
+        if (br == null) return "关联缴费记录不存在";
 
-        // 验证2: 如果有检查项(ocId)，检查状态不能是已完成或异常
-        if (request.getOcId() != null) {
-            OrderCheck oc = orderCheckMapper.selectById(request.getOcId());
-            if (oc != null && (oc.getOcStatus() == 2 || oc.getOcStatus() == 3)) {
-                return "检查已执行完成或处于异常状态，无法退费";
+        // 验证1: 订单必须已缴费 — 通过 emrId → outpatient_emr → o_id 找到订单
+        if (br.getEmrId() != null) {
+            com.bear.hospital.mapper.EmrMapper emrMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+            com.bear.hospital.pojo.OutpatientEmr emr = emrMapper2.selectById(br.getEmrId());
+            if (emr != null) {
+                Orders order = com.bear.hospital.spring.SpringContextHolder.getBean(OrderMapper.class).selectById(emr.getOId());
+                if (order == null) return "关联订单不存在";
+                if (order.getOPriceState() == null || order.getOPriceState() != 1) {
+                    return "订单未缴费，无法退费";
+                }
             }
         }
 
-        // 验证3: 必须确认所有药品已退药后才能退费
-        // 通过处方明细关联查询该订单的所有发药记录
-        com.bear.hospital.mapper.PrescriptionMapper prescMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PrescriptionMapper.class);
-        java.util.List<PrescriptionDetail> details = prescMapper.findByOrderId(request.getOId());
-        for (PrescriptionDetail detail : details) {
-            QueryWrapper<PharmacyDispensing> pdWrapper = new QueryWrapper<>();
-            pdWrapper.eq("presc_detail_id", detail.getPdId());
-            java.util.List<PharmacyDispensing> dispensingList = pharmacyDispensingMapper.selectList(pdWrapper);
-            for (PharmacyDispensing pd : dispensingList) {
-                if (pd.getPdStatus() != null && pd.getPdStatus() == 1) {
-                    return "药品正在复核中，无法退费。请等待复核完成后退药再退费";
+        // 验证2: 药费退费 — 检查发药状态
+        if (br.getPmId() != null) {
+            // 通过 pmId 找到处方明细，检查发药状态
+            com.bear.hospital.mapper.PrescriptionMapper prescMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PrescriptionMapper.class);
+            java.util.List<PrescriptionDetail> details = prescMapper.selectList(
+                new QueryWrapper<PrescriptionDetail>().eq("pm_id", br.getPmId())
+            );
+            for (PrescriptionDetail detail : details) {
+                QueryWrapper<PharmacyDispensing> pdWrapper = new QueryWrapper<>();
+                pdWrapper.eq("presc_detail_id", detail.getPdId());
+                java.util.List<PharmacyDispensing> dispensingList = pharmacyDispensingMapper.selectList(pdWrapper);
+                for (PharmacyDispensing pd : dispensingList) {
+                    if (pd.getPdStatus() != null && pd.getPdStatus() == 1) {
+                        return "药品正在复核中，无法退费。请等待复核完成后退药再退费";
+                    }
+                    if (pd.getPdStatus() != null && pd.getPdStatus() == 2) {
+                        return "药品已发药，必须先退药后才能退费";
+                    }
                 }
-                if (pd.getPdStatus() != null && pd.getPdStatus() == 2) {
-                    return "药品已发药，必须先退药后才能退费";
-                }
+            }
+        }
+
+        // 验证3: 检查费退费 — 检查 ocId 状态
+        if (br.getOcId() != null) {
+            OrderCheck oc = orderCheckMapper.selectById(br.getOcId());
+            if (oc != null && (oc.getOcStatus() == 2 || oc.getOcStatus() == 3)) {
+                return "检查已执行完成或处于异常状态，无法退费";
             }
         }
 

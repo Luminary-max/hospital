@@ -1,18 +1,17 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("invoice_record")
 public class InvoiceRecord {
-    @TableId(value = "inv_id")
+    @TableId(value = "inv_id", type = IdType.AUTO)
     @JsonProperty("invId")
     private Integer invId;
     @JsonProperty("invNo")
     private String invNo;
-    @JsonProperty("oId")
-    private Integer oId;
     @JsonProperty("brId")
     private Integer brId;
     @JsonProperty("invType")
@@ -32,8 +31,8 @@ public class InvoiceRecord {
 
     public InvoiceRecord() {}
 
-    public InvoiceRecord(Integer oId, String invNo, Double invAmount, String invCreateTime, String invOperator) {
-        this.oId = oId; this.invNo = invNo; this.invAmount = invAmount;
+    public InvoiceRecord(String invNo, Double invAmount, String invCreateTime, String invOperator) {
+        this.invNo = invNo; this.invAmount = invAmount;
         this.invCreateTime = invCreateTime; this.invOperator = invOperator;
         this.invType = "电子"; this.invStatus = 0;
     }
@@ -42,8 +41,6 @@ public class InvoiceRecord {
     public void setInvId(Integer invId) { this.invId = invId; }
     public String getInvNo() { return invNo; }
     public void setInvNo(String invNo) { this.invNo = invNo; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
     public Integer getBrId() { return brId; }
     public void setBrId(Integer brId) { this.brId = brId; }
     public String getInvType() { return invType; }

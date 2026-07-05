@@ -66,7 +66,7 @@
 <script>
 import request from "@/utils/request.js";
 import jwtDecode from "jwt-decode";
-import { getToken } from "@/utils/storage.js";
+import { getToken, setToken } from "@/utils/storage.js";
 export default {
   name: "PatientReports",
   data() {
@@ -165,7 +165,9 @@ export default {
         this.$message.info("该记录暂无PDF可下载");
         return;
       }
-      window.open("/emr/pdf?emrId=" + item.emrId, "_blank");
+      var token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      if (!token) { this.$message.warning("请先登录"); return; }
+      window.open("http://localhost:9999/emr/pdf?emrId=" + item.emrId + "&token=" + encodeURIComponent(token), "_blank");
     },
     batchDownload() {
       var emrItems = this.reportList.filter(function(item) { return item.emrId; });

@@ -348,8 +348,8 @@
       </div>
       <el-table v-else :data="emrTemplateList" border stripe size="small" @row-click="applyEmrTemplate" style="width:100%">
         <el-table-column prop="etName" label="模板名称" min-width="130"></el-table-column>
-        <el-table-column prop="chiefComplaint" label="主诉" min-width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="diagnosis" label="诊断" min-width="120" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="etChiefComplaint" label="主诉" min-width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="etDiagnosis" label="诊断" min-width="120" show-overflow-tooltip></el-table-column>
         <el-table-column label="操作" width="80" align="center">
           <template slot-scope="s">
             <el-button type="primary" size="mini" @click="applyEmrTemplate(s.row)">选用</el-button>
@@ -611,12 +611,12 @@ export default {
       });
     },
     applyEmrTemplate(row) {
-      if (row.chiefComplaint) this.emr.chiefComplaint = row.chiefComplaint;
-      if (row.presentIllness) this.emr.presentIllness = row.presentIllness;
-      if (row.pastHistory) this.emr.pastHistory = row.pastHistory;
-      if (row.physicalExam) this.emr.physicalExam = row.physicalExam;
-      if (row.diagnosis) this.emr.diagnosis = row.diagnosis;
-      if (row.treatmentPlan) this.emr.treatmentPlan = row.treatmentPlan;
+      if (row.etChiefComplaint) this.emr.chiefComplaint = row.etChiefComplaint;
+      if (row.etPresentIllness) this.emr.presentIllness = row.etPresentIllness;
+      if (row.etPastHistory) this.emr.pastHistory = row.etPastHistory;
+      if (row.etPhysicalExam) this.emr.physicalExam = row.etPhysicalExam;
+      if (row.etDiagnosis) this.emr.diagnosis = row.etDiagnosis;
+      if (row.etTreatmentPlan) this.emr.treatmentPlan = row.etTreatmentPlan;
       this.emrTemplateDlgVisible = false;
       this.$message.success("已应用病历模板");
     },
@@ -690,18 +690,22 @@ export default {
     async submitClick() {
       this.submitting = true;
       try {
-        // 1. 保存门诊病历
+        let currentEmrId = null;
+        // 1. 保存门诊病历，获取 emrId
         if (this.emr.chiefComplaint || this.emr.diagnosis) {
-          await request.post("emr/save", {
+          const emrRes = await request.post("emr/save", {
             oId: this.oId, pId: this.pId, dId: this.dId,
             chiefComplaint: this.emr.chiefComplaint, presentIllness: this.emr.presentIllness,
             pastHistory: this.emr.pastHistory, physicalExam: this.emr.physicalExam,
             diagnosis: this.emr.diagnosis, treatmentPlan: this.emr.treatmentPlan
           });
+          if (emrRes.data && emrRes.data.data && emrRes.data.data.emrId) {
+            currentEmrId = emrRes.data.data.emrId;
+          }
         }
-        // 2. 保存处方明细
-        if (this.drugBuyData.length > 0) {
-          await request.post("prescription/save", { oId: this.oId, dId: this.dId, pmDiagnosis: this.emr.diagnosis || '', details: this.drugBuyData });
+        // 2. 保存处方明细（按病历关联）
+        if (this.drugBuyData.length > 0 && currentEmrId) {
+          await request.post("prescription/save", { emrId: currentEmrId, dId: this.dId, pmDiagnosis: this.emr.diagnosis || '', details: this.drugBuyData });
         }
         // 3. 更新订单到orders表（兼容已有功能）
         const drugStr = this.drugBuyData.map(d => {
@@ -714,6 +718,7 @@ export default {
         const totalPrice = this.drugTotalPrice + this.checkTotalPrice;
         await request.post("order/updateOrder", {
           oId: this.oId, pId: this.pId, dId: this.dId,
+          oState: 3,
           oRecord: this.emr.chiefComplaint + "；" + this.emr.diagnosis,
           oDrug: drugStr ? `药品：${drugStr} 总价${this.drugTotalPrice.toFixed(2)}元` : "",
           oCheck: checkStr ? `检查：${checkStr} 总价${this.checkTotalPrice.toFixed(2)}元` : "",

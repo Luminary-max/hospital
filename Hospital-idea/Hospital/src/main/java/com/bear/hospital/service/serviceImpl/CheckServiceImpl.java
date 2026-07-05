@@ -86,10 +86,10 @@ public class CheckServiceImpl implements CheckService {
     // ========== Order Check operations ==========
 
     @Override
-    public HashMap<String, Object> findOrderChecks(int pageNumber, int size, Integer oId, Integer status) {
+    public HashMap<String, Object> findOrderChecks(int pageNumber, int size, Integer emrId, Integer status) {
         Page<OrderCheck> page = new Page<>(pageNumber, size);
         QueryWrapper<OrderCheck> wrapper = new QueryWrapper<>();
-        if (oId != null) wrapper.eq("o_id", oId);
+        if (emrId != null) wrapper.eq("emr_id", emrId);
         if (status != null) wrapper.eq("oc_status", status);
         wrapper.orderByDesc("oc_id");
         IPage<OrderCheck> iPage = this.orderCheckMapper.selectPage(page, wrapper);
@@ -102,8 +102,12 @@ public class CheckServiceImpl implements CheckService {
 
     @Override
     public Boolean createOrderCheck(int oId, String chId, String chName, Double chPrice) {
+        // 通过 oId 查病历，拿到 emrId
+        com.bear.hospital.mapper.EmrMapper emrMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+        com.bear.hospital.pojo.OutpatientEmr emr = emrMapper2.findByOrderId(oId);
+        int emrId = (emr != null) ? emr.getEmrId() : oId;
         OrderCheck oc = new OrderCheck();
-        oc.setOId(oId);
+        oc.setEmrId(emrId);
         oc.setChId(chId);
         oc.setChName(chName);
         oc.setChPrice(chPrice);
@@ -115,6 +119,10 @@ public class CheckServiceImpl implements CheckService {
 
     @Override
     public Boolean batchCreateOrderChecks(int oId, List<Map<String, Object>> items) {
+        // 通过 oId 查病历，拿到 emrId
+        com.bear.hospital.mapper.EmrMapper emrMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+        com.bear.hospital.pojo.OutpatientEmr emr = emrMapper2.findByOrderId(oId);
+        int emrId = (emr != null) ? emr.getEmrId() : oId;
         if (items == null || items.isEmpty()) return false;
         boolean allSuccess = true;
         for (Map<String, Object> item : items) {

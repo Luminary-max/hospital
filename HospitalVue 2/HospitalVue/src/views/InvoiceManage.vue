@@ -20,7 +20,7 @@
     <el-table :data="invoiceData"stripe  border style="width:100%">
       <el-table-column label="编号"   prop="invId"   width="70"   align="center" ></el-table-column>
       <el-table-column label="发票号"   prop="invNo"   min-width="160" ></el-table-column>
-      <el-table-column label="关联订单"   prop="oId"   width="80"   align="center" ></el-table-column>
+      <el-table-column label="关联缴费编号"   prop="brId"   width="110"   align="center" ></el-table-column>
       <el-table-column label="发票类型"   prop="invType"   width="90"   align="center" ></el-table-column>
       <el-table-column label="金额"   width="90"   align="center" >
         <template slot-scope="s">¥{{ s.row.invAmount || '0' }}</template>
@@ -70,8 +70,10 @@ export default {
   },
   methods: {
     loadData() {
-      request.get("invoiceRecord/findByDate",{params:{date:""}})
-        .then(r=>{const d=r.data.data;this.invoiceData=Array.isArray(d)?d:(d.records||[]);this.total=Array.isArray(d)?d.length:(d.total||0);});
+      var params = { pageNumber: this.pageNumber, size: this.size };
+      if (this.statusFilter) params.status = parseInt(this.statusFilter);
+      request.get("invoiceRecord/findAll",{params: params})
+        .then(r=>{const d=r.data.data;this.invoiceData=d.records||[];this.total=d.total||0;});
     },
     voidDialog(row) {
       this.voidingId=row.invId;

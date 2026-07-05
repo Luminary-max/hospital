@@ -17,7 +17,7 @@
       </div>
       <el-table :data="refundData" stripe border style="width:100%;">
         <el-table-column label="编号" prop="rfId" width="70" align="center"></el-table-column>
-        <el-table-column label="订单ID" prop="oId" width="75" align="center"></el-table-column>
+        <el-table-column label="缴费记录编号" prop="brId" width="100" align="center"></el-table-column>
         <el-table-column label="退费金额" width="90" align="center">
           <template slot-scope="s">¥{{ s.row.rfAmount || '0' }}</template>
         </el-table-column>

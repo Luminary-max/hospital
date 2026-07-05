@@ -20,7 +20,6 @@
           <el-menu-item index="orderToday" @click="menuClick('orderToday')"><i class="el-icon-date"></i><span>今日挂号</span></el-menu-item>
           <el-menu-item index="doctorOrder" @click="menuClick('doctorOrder')"><i class="el-icon-postcard"></i><span>挂号查询</span></el-menu-item>
           <el-menu-item index="prescriptionList" @click="menuClick('prescriptionList')"><i class="el-icon-document"></i><span>处方管理</span></el-menu-item>
-          <el-menu-item index="doctorCheckOrder" @click="menuClick('doctorCheckOrder')"><i class="el-icon-first-aid-kit"></i><span>检查开单</span></el-menu-item>
           <el-menu-item index="doctorQueue" @click="menuClick('doctorQueue')"><i class="el-icon-s-order"></i><span>叫号面板</span></el-menu-item>
           <el-menu-item index="doctorCard" @click="menuClick('doctorCard')"><i class="el-icon-user"></i><span>个人信息</span></el-menu-item>
         </el-menu>

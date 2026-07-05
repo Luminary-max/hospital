@@ -1,0 +1,40 @@
+SET FOREIGN_KEY_CHECKS=0;
+
+-- 表的注释
+ALTER TABLE admini COMMENT '管理员表';
+ALTER TABLE arrange COMMENT '排班安排表';
+ALTER TABLE arrangement COMMENT '排班时间表';
+ALTER TABLE checks COMMENT '检查项目表';
+ALTER TABLE department COMMENT '科室表';
+ALTER TABLE dispensing_batch_detail COMMENT '发药批次明细表';
+ALTER TABLE doctor COMMENT '医生表';
+ALTER TABLE drug COMMENT '药品表';
+ALTER TABLE drug_batch COMMENT '药品批次表';
+ALTER TABLE drug_category COMMENT '药品分类表';
+ALTER TABLE drug_price_log COMMENT '药品调价记录表';
+ALTER TABLE inventory_transaction COMMENT '库存变动记录表';
+ALTER TABLE invoice_record COMMENT '发票记录表';
+ALTER TABLE issue_check COMMENT '问题检查记录表';
+ALTER TABLE order_check COMMENT '检查开单表';
+ALTER TABLE orders COMMENT '挂号订单表';
+ALTER TABLE outpatient_emr COMMENT '门诊电子病历表';
+ALTER TABLE patient COMMENT '患者表';
+ALTER TABLE pharmacy_dispensing COMMENT '药房发药明细表';
+ALTER TABLE prescribe COMMENT '处方简表(旧)';
+ALTER TABLE prescription_detail COMMENT '处方明细表';
+ALTER TABLE prescription_master COMMENT '处方主表';
+ALTER TABLE prescription_template COMMENT '处方模板表';
+ALTER TABLE queue_number COMMENT '排队叫号表';
+ALTER TABLE refund_request COMMENT '退费申请表';
+ALTER TABLE registrate COMMENT '预约挂号表';
+ALTER TABLE triage_record COMMENT '分诊记录表';
+ALTER TABLE emr_template COMMENT '电子病历模板表';
+ALTER TABLE notification COMMENT '消息通知表';
+ALTER TABLE diagnosis_dict COMMENT '诊断字典表';
+ALTER TABLE drug_batch COMMENT '药品批次表';
+ALTER TABLE drug_category COMMENT '药品分类表';
+ALTER TABLE drug_price_log COMMENT '药品调价记录表';
+ALTER TABLE delivery_request COMMENT '送药申请表';
+ALTER TABLE audit_log COMMENT '操作审计日志表';
+
+SET FOREIGN_KEY_CHECKS=1;

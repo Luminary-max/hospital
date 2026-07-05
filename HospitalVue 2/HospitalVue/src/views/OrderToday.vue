@@ -18,8 +18,9 @@
             </el-table-column>
             <el-table-column label="操作" width="160" align="center">
                 <template slot-scope="s">
-                    <el-button type="warning" size="mini" @click="dealClick(s.row.oId,s.row.pId)"><i class="el-icon-monitor"></i> 处理</el-button>
-                    <el-button type="success" size="mini" @click="dealAgainClick(s.row.oId,s.row.pId)">复诊</el-button>
+                    <el-button type="warning" size="mini" @click="dealClick(s.row.oId,s.row.pId)" v-if="s.row.oState===0"><i class="el-icon-monitor"></i> 接诊</el-button>
+                    <el-button type="primary" size="mini" @click="dealClick(s.row.oId,s.row.pId)" v-if="s.row.oState===3||s.row.oState===4">继续</el-button>
+                    <el-button type="success" size="mini" @click="dealAgainClick(s.row.oId,s.row.pId)" v-if="s.row.oState===3||s.row.oState===4">复诊</el-button>
                 </template>
             </el-table-column>
         </el-table>

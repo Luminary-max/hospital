@@ -81,7 +81,7 @@ export default {
     },
     startConsult() {
       if (this.currentPatient) {
-        this.$router.push("/dealOrder?oId=" + this.currentPatient.o_id + "&pId=" + this.currentPatient.p_id);
+        this.$router.push("/dealOrder?oId=" + this.currentPatient.o_id);
       }
     },
     async skipNumber() {

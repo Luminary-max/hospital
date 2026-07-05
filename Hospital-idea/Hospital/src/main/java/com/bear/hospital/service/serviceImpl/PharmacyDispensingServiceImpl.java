@@ -30,7 +30,7 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
     private InventoryService inventoryService;
 
     @Override
-    public HashMap<String, Object> findAll(int pageNumber, int size, Integer status) {
+    public HashMap<String, Object> findAll(int pageNumber, int size, Integer status, String query) {
         Page<PharmacyDispensing> page = new Page<>(pageNumber, size);
         QueryWrapper<PharmacyDispensing> wrapper = new QueryWrapper<>();
         if (status != null) wrapper.eq("pd_status", status);
@@ -53,13 +53,20 @@ public class PharmacyDispensingServiceImpl implements PharmacyDispensingService 
         PharmacyDispensing pd = this.pharmacyDispensingMapper.selectById(pdId);
         if (pd == null) return false;
         if (pd.getPdStatus() == null || pd.getPdStatus() != 0) return false;
-        // 通过处方明细获取订单ID
+        // 通过处方明细获取用药信息
         PrescriptionDetail detail = getDetailByPrescDetailId(pd.getPrescDetailId());
         if (detail == null) return false;
         // 校验：关联订单必须已缴费
+        com.bear.hospital.mapper.PrescriptionMasterMapper pmMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.PrescriptionMasterMapper.class);
+        com.bear.hospital.pojo.PrescriptionMaster pm = pmMapper2.selectById(detail.getPmId());
+        if (pm == null) return false;
+        com.bear.hospital.mapper.EmrMapper emrMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+        com.bear.hospital.pojo.OutpatientEmr emr = emrMapper2.selectById(pm.getEmrId());
+        if (emr == null) return false;
+        // 通过 oId 查找订单
         com.bear.hospital.mapper.OrderMapper orderMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderMapper.class);
-        com.bear.hospital.pojo.Orders order = orderMapper2.selectById(detail.getOId());
-        if (order == null || order.getOPriceState() == null || order.getOPriceState() != 1) {
+        com.bear.hospital.pojo.Orders order = orderMapper2.selectById(emr.getOId());
+        if (order == null || order.getOPriceState() == null || (order.getOPriceState() != 1 && order.getOPriceState() != 5)) {
             return false;
         }
         Integer batchId = inventoryService.dispenseFefo(detail.getDrId(), pd.getPdQuantity(), dispenseBy,

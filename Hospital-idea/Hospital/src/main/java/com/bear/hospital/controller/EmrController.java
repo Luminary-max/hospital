@@ -53,7 +53,8 @@ public class EmrController {
     @GetMapping("/pdf")
     public void downloadPDF(HttpServletRequest request, HttpServletResponse response,
                             @RequestParam int emrId) throws Exception {
-        OutpatientEmr emr = emrService.findByOrderId(emrId);
+        // emrId 参数就是门诊病历ID，直接用selectById查询
+        OutpatientEmr emr = emrService.findById(emrId);
         if (emr == null) {
             response.sendError(404, "病历不存在");
             return;

@@ -257,12 +257,12 @@ public class OrderController {
     }
 
     /**
-     * 退款处理：创建退费申请（前端 order/refund 兼容入口）
+     * 退款处理：创建退费申请（通过 brId 关联缴费记录）
      */
     @RequestMapping("refund")
-    public ResponseData refund(@RequestParam int oId, @RequestParam String reason, @RequestParam(required = false) String operator) {
+    public ResponseData refund(@RequestParam int brId, @RequestParam String reason, @RequestParam(required = false) String operator) {
         com.bear.hospital.pojo.RefundRequest req = new com.bear.hospital.pojo.RefundRequest();
-        req.setOId(oId);
+        req.setBrId(brId);
         req.setRfReason(reason);
         req.setRfRequester(operator != null ? operator : "收费员");
         req.setRfStatus(com.bear.hospital.pojo.RefundRequest.STATUS_PENDING);

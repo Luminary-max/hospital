@@ -1,16 +1,17 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("billing_record")
 public class BillingRecord {
-    @TableId(value = "br_id")
+    @TableId(value = "br_id", type = IdType.AUTO)
     @JsonProperty("brId")
     private Integer brId;
-    @JsonProperty("oId")
-    private Integer oId;
+    @JsonProperty("pmId")
+    private Integer pmId;
     @JsonProperty("emrId")
     private Integer emrId;
     @JsonProperty("ocId")
@@ -30,8 +31,8 @@ public class BillingRecord {
 
     public BillingRecord() {}
 
-    public BillingRecord(Integer oId, Integer emrId, Integer ocId, String brType, Double brAmount, String brPaymentMethod, String brInvoiceNo, String brPayTime, String brOperator) {
-        this.oId = oId;
+    public BillingRecord(Integer pmId, Integer emrId, Integer ocId, String brType, Double brAmount, String brPaymentMethod, String brInvoiceNo, String brPayTime, String brOperator) {
+        this.pmId = pmId;
         this.emrId = emrId;
         this.ocId = ocId;
         this.brType = brType;
@@ -44,8 +45,8 @@ public class BillingRecord {
 
     public Integer getBrId() { return brId; }
     public void setBrId(Integer brId) { this.brId = brId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
+    public Integer getPmId() { return pmId; }
+    public void setPmId(Integer pmId) { this.pmId = pmId; }
     public Integer getEmrId() { return emrId; }
     public void setEmrId(Integer emrId) { this.emrId = emrId; }
     public Integer getOcId() { return ocId; }
@@ -67,7 +68,7 @@ public class BillingRecord {
     public String toString() {
         return "BillingRecord{" +
                 "brId=" + brId +
-                ", oId=" + oId +
+                ", pmId=" + pmId +
                 ", emrId=" + emrId +
                 ", ocId=" + ocId +
                 ", brType='" + brType + '\'' +

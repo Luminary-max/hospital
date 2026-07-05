@@ -77,10 +77,10 @@
           </p>
         </div>
         <el-divider></el-divider>
-        <div class="guide-section" v-if="guideData.drName">
+        <div class="guide-section" v-if="guideData.drugName">
           <h4>药品信息</h4>
           <el-descriptions :column="2" border size="small">
-            <el-descriptions-item label="药品名称" :span="2">{{ guideData.drName }}</el-descriptions-item>
+            <el-descriptions-item label="药品名称" :span="2">{{ guideData.drugName || guideData.drName || '--' }}</el-descriptions-item>
             <el-descriptions-item label="用法">{{ guideData.pdUsage || '--' }}</el-descriptions-item>
             <el-descriptions-item label="用量">{{ guideData.pdDosage || '--' }}</el-descriptions-item>
             <el-descriptions-item label="频次">{{ guideData.pdFrequency || '--' }}</el-descriptions-item>

@@ -1,0 +1,6 @@
+-- 更新处方模板，填充有实际药品的JSON数据
+UPDATE prescription_template SET pt_content = '[{"drId":"D00002","drName":"阿莫西林胶囊","drPrice":5.75,"pdUsage":"口服","pdDosage":"0.5g","pdFrequency":"每日3次","pdDays":7,"pdQuantity":3,"pdRoute":"口服","pdTiming":"餐后"},{"drId":"D00005","drName":"复方甘草口服液","drPrice":12.30,"pdUsage":"口服","pdDosage":"10ml","pdFrequency":"每日3次","pdDays":7,"pdQuantity":1,"pdRoute":"口服","pdTiming":"餐后"},{"drId":"D00012","drName":"感冒灵颗粒","drPrice":8.50,"pdUsage":"冲服","pdDosage":"1袋","pdFrequency":"每日3次","pdDays":3,"pdQuantity":1,"pdRoute":"冲服","pdTiming":"餐前"}]' WHERE pt_id=1;
+
+UPDATE prescription_template SET pt_content = '[{"drId":"D00001","drName":"对乙酰氨基酚片","drPrice":0.50,"pdUsage":"口服","pdDosage":"0.5g","pdFrequency":"必要时服用","pdDays":3,"pdQuantity":1,"pdRoute":"口服","pdTiming":"发热时"},{"drId":"D00017","drName":"阿司匹林肠溶片","drPrice":6.30,"pdUsage":"口服","pdDosage":"100mg","pdFrequency":"每日1次","pdDays":30,"pdQuantity":2,"pdRoute":"口服","pdTiming":"晨起"}]' WHERE pt_id=2;
+
+UPDATE prescription_template SET pt_content = '[{"drId":"D00007","drName":"胰岛素注射液","drPrice":45.60,"pdUsage":"皮下注射","pdDosage":"6IU","pdFrequency":"每日2次","pdDays":30,"pdQuantity":2,"pdRoute":"皮下注射","pdTiming":"餐前"},{"drId":"D00011","drName":"维生素C片","drPrice":1.20,"pdUsage":"口服","pdDosage":"0.2g","pdFrequency":"每日3次","pdDays":30,"pdQuantity":2,"pdRoute":"口服","pdTiming":"餐后"}]' WHERE pt_id=3;

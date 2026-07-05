@@ -32,8 +32,9 @@ public class PharmacyDispensingController {
 
     @RequestMapping("findAll")
     public ResponseData findAll(@RequestParam int pageNumber, @RequestParam int size,
-        @RequestParam(required = false) Integer status) {
-        return ResponseData.success("查询成功", this.pharmacyDispensingService.findAll(pageNumber, size, status));
+        @RequestParam(required = false) Integer status,
+        @RequestParam(required = false) String query) {
+        return ResponseData.success("查询成功", this.pharmacyDispensingService.findAll(pageNumber, size, status, query));
     }
 
     @RequestMapping("dispense")
@@ -75,7 +76,7 @@ public class PharmacyDispensingController {
         guide.put("contraindications", drug.getDrContraindication());
         guide.put("storage", drug.getDrStorage());
         guide.put("adverseReactions", drug.getDrAdverseReaction());
-        guide.put("oId", detail.getOId());
+        guide.put("prescDetailId", detail.getPdId());
         guide.put("quantity", pd.getPdQuantity());
         return ResponseData.success("查询成功", guide);
     }

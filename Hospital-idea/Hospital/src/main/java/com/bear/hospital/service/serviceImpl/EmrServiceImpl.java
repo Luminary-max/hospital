@@ -45,6 +45,11 @@ public class EmrServiceImpl implements EmrService {
     }
 
     @Override
+    public OutpatientEmr findById(int emrId) {
+        return emrMapper.selectById(emrId);
+    }
+
+    @Override
     public List<OutpatientEmr> findByPatientId(int pId) {
         return emrMapper.findByPatientId(pId);
     }

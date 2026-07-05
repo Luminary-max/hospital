@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface QueueService {
-    String takeNumber(int oId, int pId, String dId);
+    String takeNumber(int oId);
     QueueNumber callNext(String dId, Integer reQueueId);
     boolean skipNumber(int qId);
     List<QueueNumber> listByDoctorToday(String dId);

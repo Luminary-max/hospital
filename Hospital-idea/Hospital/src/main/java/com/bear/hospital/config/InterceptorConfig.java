@@ -16,6 +16,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/**/login")
                 // 放行患者PDF导出（不需要登录即可下载）
                 .excludePathPatterns("/patient/pdf")
+                // 放行EMR PDF导出（token通过query参数传递）
+                .excludePathPatterns("/emr/pdf")
                 // 放行静态资源（前端页面不需要token）
                 .excludePathPatterns("/", "/*.html", "/css/**", "/js/**", "/fonts/**", "/img/**", "/favicon.ico");
     }

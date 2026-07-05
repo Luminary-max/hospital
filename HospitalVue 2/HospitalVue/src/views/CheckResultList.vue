@@ -23,7 +23,7 @@
     </div>
     <el-table :data="checkOrders" border stripe style="width:100%">
       <el-table-column prop="ocId" label="编号" width="65" align="center"></el-table-column>
-      <el-table-column prop="oId" label="订单ID" width="70" align="center"></el-table-column>
+      <el-table-column prop="emrId" label="病历编号" width="75" align="center"></el-table-column>
       <el-table-column prop="chName" label="检查项目" min-width="150"></el-table-column>
       <el-table-column prop="chPrice" label="价格" width="80" align="center">
         <template slot-scope="s">¥{{ s.row.chPrice || '0' }}</template>
@@ -120,7 +120,7 @@ export default {
     loadData() {
       const params = {
         pageNumber:this.pageNumber, size:this.size,
-        oId:this.oIdQuery||null,
+        emrId:this.oIdQuery||null,
         status:this.statusFilter==='-1'?null:parseInt(this.statusFilter)
       };
       request.get("check/findOrderChecks", { params }).then(res=>{

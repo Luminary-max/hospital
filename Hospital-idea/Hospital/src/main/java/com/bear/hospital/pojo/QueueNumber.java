@@ -10,10 +10,6 @@ public class QueueNumber {
     private int qId;
     @JsonProperty("oId")
     private int oId;
-    @JsonProperty("pId")
-    private int pId;
-    @JsonProperty("dId")
-    private String dId;
     @JsonProperty("qState")
     private Integer qState;
     @JsonProperty("qCreateTime")
@@ -42,10 +38,6 @@ public class QueueNumber {
     public void setQId(int qId) { this.qId = qId; }
     public int getOId() { return oId; }
     public void setOId(int oId) { this.oId = oId; }
-    public int getPId() { return pId; }
-    public void setPId(int pId) { this.pId = pId; }
-    public String getDId() { return dId; }
-    public void setDId(String dId) { this.dId = dId; }
     public Integer getQState() { return qState; }
     public void setQState(Integer qState) { this.qState = qState; }
     public String getQCreateTime() { return qCreateTime; }

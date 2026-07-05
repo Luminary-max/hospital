@@ -68,17 +68,17 @@ public class CheckController {
     // ========== Order Check endpoints ==========
 
     /**
-     * 分页查询检查开单
+     * 分页查询检查开单（按病历）
      */
     @RequestMapping("findOrderChecks")
     public ResponseData findOrderChecks(@RequestParam int pageNumber, @RequestParam int size,
-        @RequestParam(required = false) Integer oId,
+        @RequestParam(required = false) Integer emrId,
         @RequestParam(required = false) Integer status) {
-        return ResponseData.success("查询成功", this.checkService.findOrderChecks(pageNumber, size, oId, status));
+        return ResponseData.success("查询成功", this.checkService.findOrderChecks(pageNumber, size, emrId, status));
     }
 
     /**
-     * 医生开检查单
+     * 医生开检查单（按病历）
      */
     @RequestMapping("createOrderCheck")
     @ResponseBody
@@ -90,7 +90,7 @@ public class CheckController {
     }
 
     /**
-     * 批量开检查单
+     * 批量开检查单（按订单）
      */
     @RequestMapping("batchCreateOrderChecks")
     @ResponseBody

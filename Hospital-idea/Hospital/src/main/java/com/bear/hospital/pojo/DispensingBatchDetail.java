@@ -1,11 +1,12 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 @TableName("dispensing_batch_detail")
 public class DispensingBatchDetail {
-    @TableId(value = "dbd_id")
+    @TableId(value = "dbd_id", type = IdType.AUTO)
     private Integer dbdId;
     private String pdReference;
     private String drId;

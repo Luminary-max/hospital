@@ -36,7 +36,23 @@ public class TriageRecordServiceImpl implements TriageRecordService {
         triageRecord.setTCreateTime(TodayUtil.getToday());
         if (triageRecord.getTStatus() == null) triageRecord.setTStatus(0);
         if (triageRecord.getTSource() == null) triageRecord.setTSource("现场");
-        return this.triageRecordMapper.insert(triageRecord) > 0;
+        boolean ok = this.triageRecordMapper.insert(triageRecord) > 0;
+        // 分诊成功后推进该患者最新挂号订单状态到"已分诊"(oState=1)
+        if (ok && triageRecord.getPId() != null) {
+            try {
+                com.bear.hospital.mapper.OrderMapper orderMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.OrderMapper.class);
+                com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.Orders> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+                wrapper.eq("p_id", triageRecord.getPId()).eq("o_state", 0).orderByDesc("o_id").last("LIMIT 1");
+                com.bear.hospital.pojo.Orders order = orderMapper.selectOne(wrapper);
+                if (order != null) {
+                    order.setOState(1);
+                    orderMapper.updateById(order);
+                }
+            } catch(Exception e) {
+                System.err.println("分诊更新订单状态失败: " + e.getMessage());
+            }
+        }
+        return ok;
     }
 
     @Override

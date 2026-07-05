@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -7,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("order_check")
 public class OrderCheck {
-    @TableId(value = "oc_id")
+    @TableId(value = "oc_id", type = IdType.AUTO)
     @JsonProperty("ocId")
     private Integer ocId;
-    @JsonProperty("oId")
-    private Integer oId;
+    @JsonProperty("emrId")
+    private Integer emrId;
     @JsonProperty("chId")
     private String chId;
     @JsonProperty("chName")
@@ -44,8 +45,8 @@ public class OrderCheck {
 
     public Integer getOcId() { return ocId; }
     public void setOcId(Integer ocId) { this.ocId = ocId; }
-    public Integer getOId() { return oId; }
-    public void setOId(Integer oId) { this.oId = oId; }
+    public Integer getEmrId() { return emrId; }
+    public void setEmrId(Integer emrId) { this.emrId = emrId; }
     public String getChId() { return chId; }
     public void setChId(String chId) { this.chId = chId; }
     public String getChName() { return chName; }
