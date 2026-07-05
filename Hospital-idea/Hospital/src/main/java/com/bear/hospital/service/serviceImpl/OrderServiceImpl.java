@@ -175,9 +175,15 @@ public class OrderServiceImpl implements OrderService {
         }
         String finalInvoiceNo = invoiceNo;
         Orders order = this.orderMapper.selectById(oId);
-        // 1. 挂号费 — 无处方关联
+        // 自动获取 emrId（如果没有传）
+        if (emrId == null && order != null) {
+            com.bear.hospital.mapper.EmrMapper emrMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
+            com.bear.hospital.pojo.OutpatientEmr emr = emrMapper2.findByOrderId(oId);
+            if (emr != null) emrId = emr.getEmrId();
+        }
+        // 1. 挂号费
         if (order != null && order.getORegistrationFee() != null && order.getORegistrationFee() > 0) {
-            BillingRecord regRecord = new BillingRecord(null, null, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
+            BillingRecord regRecord = new BillingRecord(null, emrId, null, "挂号费", order.getORegistrationFee(), paymentMethod, finalInvoiceNo, TodayUtil.getToday(), operator);
             billingMapper.insert(regRecord);
         }
         // 2. 检查费 — 按检查单逐项收取（整单全收）
@@ -251,7 +257,7 @@ public class OrderServiceImpl implements OrderService {
     public HashMap<String, Object> findOrderFinish(int pageNumber, int size, String query, String dId){
         Page<Orders> page = new Page<>(pageNumber, size);
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
-        wrapper.like("p_id", query).eq("d_id", dId).orderByDesc("o_start").in("o_state", 0, 1, 3, 4, 5, 7);
+        wrapper.like("o_start", query).eq("d_id", dId).orderByDesc("o_start").in("o_state", 0, 1, 3, 4, 5, 7);
         IPage<Orders> iPage = this.orderMapper.selectPage(page, wrapper);
         // 手动补上患者姓名
         for (Orders order : iPage.getRecords()) {

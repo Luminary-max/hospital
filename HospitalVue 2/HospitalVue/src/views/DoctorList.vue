@@ -27,6 +27,7 @@
       <el-table-column label="邮箱" prop="dEmail" width="160"></el-table-column>
       <el-table-column label="评分" prop="dAvgStar" width="70" align="center"></el-table-column>
       <el-table-column label="挂号费" prop="dPrice" width="70" align="center"></el-table-column>
+      <el-table-column label="日限额" prop="dMaxDaily" width="65" align="center"></el-table-column>
       <el-table-column label="状态" width="65"><template slot-scope="s"><el-tag :type="s.row.dState===1?'success':'danger'" size="mini">{{ s.row.dState===1?'在职':'离职' }}</el-tag></template></el-table-column>
       <el-table-column label="操作" width="95" fixed="right" align="center">
         <template slot-scope="s">

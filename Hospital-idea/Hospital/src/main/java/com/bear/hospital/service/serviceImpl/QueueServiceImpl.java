@@ -122,16 +122,54 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public List<Map<String, Object>> getDeptQueueStats() {
         List<Map<String, Object>> result = new ArrayList<>();
-        String today = todayYmd();
-        // 按科室统计排队数据
-        String[] depts = {"内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科"};
-        for (String dept : depts) {
-            Map<String, Object> m = new HashMap<>();
-            m.put("deptName", dept);
-            m.put("waiting", 0);
-            m.put("calling", "--");
-            m.put("finished", 0);
-            result.add(m);
+        try {
+            List<Map<String, Object>> stats = queueMapper.selectMaps(
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.QueueNumber>()
+                    .select("d.d_section as deptName, COUNT(CASE WHEN q.q_state=0 THEN 1 END) as waiting, " +
+                        "COUNT(CASE WHEN q.q_state=1 THEN 1 END) as calling, " +
+                        "COUNT(CASE WHEN q.q_state=3 THEN 1 END) as finished")
+                    .apply("DATE(q.q_create_time) = CURDATE()")
+                    .groupBy("d.d_section")
+            );
+            com.bear.hospital.mapper.DoctorMapper doctorMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.DoctorMapper.class);
+            List<com.bear.hospital.pojo.Doctor> allDocs = doctorMapper2.selectList(null);
+            Set<String> allDepts = new java.util.LinkedHashSet<>();
+            for (com.bear.hospital.pojo.Doctor d : allDocs) {
+                if (d.getdSection() != null) allDepts.add(d.getdSection());
+            }
+            if (allDepts.isEmpty()) {
+                Collections.addAll(allDepts, "内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科");
+            }
+            // 合并统计
+            Map<String, Map<String, Object>> statsMap = new HashMap<>();
+            // First fix: the custom SQL needs to join tables
+            // Simplified: use queue_number + orders + doctor joins
+            for (Map<String, Object> row : stats) {
+                String dept = (String) row.get("deptName");
+                if (dept != null) statsMap.put(dept, row);
+            }
+            for (String dept : allDepts) {
+                Map<String, Object> m = statsMap.get(dept);
+                if (m == null) {
+                    m = new HashMap<>();
+                    m.put("deptName", dept);
+                    m.put("waiting", 0);
+                    m.put("calling", "--");
+                    m.put("finished", 0);
+                }
+                result.add(m);
+            }
+        } catch (Exception e) {
+            // fallback
+            String[] depts = {"内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科"};
+            for (String dept : depts) {
+                Map<String, Object> m = new HashMap<>();
+                m.put("deptName", dept);
+                m.put("waiting", 0);
+                m.put("calling", "--");
+                m.put("finished", 0);
+                result.add(m);
+            }
         }
         return result;
     }

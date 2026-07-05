@@ -23,10 +23,17 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public List<BillingRecord> findByOrderId(Integer oId) {
-        // 通过 oId → outpatient_emr → billing_record 链查找缴费记录
+        // 通过 oId → outpatient_emr → billing_record 链查找
         com.bear.hospital.mapper.EmrMapper emrMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.EmrMapper.class);
         com.bear.hospital.pojo.OutpatientEmr emr = emrMapper.findByOrderId(oId);
-        if (emr == null) return java.util.Collections.emptyList();
+        if (emr == null) {
+            // 降级：直接按 oId 查询（部分订单没有病历但有缴费记录）
+            QueryWrapper<BillingRecord> fallback = new QueryWrapper<>();
+            fallback.eq("br_id", oId).or().eq("emr_id", oId);
+            List<BillingRecord> fbResult = this.billingMapper.selectList(fallback);
+            if (!fbResult.isEmpty()) return fbResult;
+            return java.util.Collections.emptyList();
+        }
         QueryWrapper<BillingRecord> wrapper = new QueryWrapper<>();
         wrapper.eq("emr_id", emr.getEmrId()).orderByAsc("br_id");
         return this.billingMapper.selectList(wrapper);

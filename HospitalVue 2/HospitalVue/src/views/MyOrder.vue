@@ -6,17 +6,20 @@
         <el-button type="text" style="float:right;" @click="requestOrder"><i class="el-icon-refresh"></i> 刷新</el-button>
       </div>
       <el-table :data="orderData" stripe border style="width:100%">
-        <el-table-column prop="oId" label="单号" width="70" align="center"></el-table-column>
-        <el-table-column prop="pName" label="姓名" width="60" align="center"></el-table-column>
-        <el-table-column prop="dName" label="医生" width="70" align="center"></el-table-column>
-        <el-table-column prop="oStart" label="挂号时间" min-width="160"></el-table-column>
-        <el-table-column label="费用" width="80" align="center">
+        <el-table-column prop="oId" label="单号" width="65" align="center"></el-table-column>
+        <el-table-column prop="pName" label="姓名" width="55" align="center"></el-table-column>
+        <el-table-column prop="dName" label="医生" width="65" align="center"></el-table-column>
+        <el-table-column prop="oStart" label="挂号时间" min-width="155"></el-table-column>
+        <el-table-column label="挂号费" width="65" align="center">
           <template slot-scope="s">¥{{ s.row.oRegistrationFee || s.row.oregistrationFee || 0 }}</template>
+        </el-table-column>
+        <el-table-column label="检查费" width="65" align="center">
+          <template slot-scope="s">¥{{ s.row._checkFee || s.row.checkFee || 0 }}</template>
         </el-table-column>
         <el-table-column label="药品费" width="80" align="center">
           <template slot-scope="s">¥{{ s.row.ototalPrice || s.row.oTotalPrice || 0 }}</template>
         </el-table-column>
-        <el-table-column label="合计" width="80" align="center">
+        <el-table-column label="合计" width="70" align="center">
           <template slot-scope="s">¥{{ (parseFloat(s.row.oRegistrationFee||s.row.oregistrationFee||0) + parseFloat(s.row.ototalPrice||s.row.oTotalPrice||0)).toFixed(2) }}</template>
         </el-table-column>
         <el-table-column label="缴费" width="100" align="center">
@@ -291,9 +294,29 @@ export default {
       } catch(e) {}
       this.reportLoading = false;
     },
-    requestOrder() {
+    async requestOrder() {
       if (!this.userId) return;
-      request.get("patient/findOrderByPid",{params:{pId:this.userId}}).then(r=>{if(r.data.status===200)this.orderData=r.data.data||[];});
+      try {
+        const res = await request.get("patient/findOrderByPid", { params: { pId: this.userId } });
+        if (res.data.status === 200) {
+          var orders = res.data.data || [];
+          // 对每个订单查检查费（通过emr/findByOrder先找出emrId，再查order_check）
+          var self = this;
+          var promises = orders.map(function(item) {
+            // 先通过emr/findByOrder获取emrId，再查检查费
+            return request.get("emr/findByOrder", { params: { oId: item.oId } }).then(function(emrRes) {
+              if (emrRes.data.status === 200 && emrRes.data.data && emrRes.data.data.emrId) {
+                return request.get("check/findOrderChecks", { params: { pageNumber: 1, size: 50, emrId: emrRes.data.data.emrId } }).then(function(cr) {
+                  if (cr.data.status === 200 && cr.data.data && cr.data.data.records) {
+                    item._checkFee = cr.data.data.records.reduce(function(s, c) { return s + parseFloat(c.chPrice || 0); }, 0);
+                  }
+                });
+              }
+            }).catch(function(){});
+          });
+          Promise.all(promises).then(function() { self.orderData = orders; });
+        }
+      } catch(e) {}
     },
     tokenDecode(t) { if(t) return jwtDecode(t); }
   },
