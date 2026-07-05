@@ -9,7 +9,7 @@
       <el-table-column label="编号" prop="nId" width="60" align="center"></el-table-column>
       <el-table-column label="患者ID" prop="pId" width="70" align="center"></el-table-column>
       <el-table-column label="类型" width="70" align="center">
-        <template slot-scope="s"><el-tag :type="s.row.nType==='queue'?'primary':s.row.nType==='payment'?'warning':s.row.nType==='refund'?'danger':'info'" size="mini">{{ {queue:'就诊',payment:'缴费',refund:'退费',reminder:'提醒'}[s.row.nType] || s.row.nType }}</el-tag></template>
+        <template slot-scope="s"><el-tag :type="{'queue':'primary','payment':'warning','refund':'danger','result':'success','pickup':'','missed':'info','reminder':'','followup':'','system':'info'}[s.row.nType] || 'info'" size="mini">{{ {queue:'就诊',payment:'缴费',refund:'退费',result:'检查结果',pickup:'取药',missed:'爽约',followup:'复诊',reminder:'提醒',system:'系统'}[s.row.nType] || s.row.nType }}</el-tag></template>
       </el-table-column>
       <el-table-column label="标题" prop="nTitle" width="150"></el-table-column>
       <el-table-column label="内容" prop="nContent" min-width="300" show-overflow-tooltip></el-table-column>

@@ -41,9 +41,9 @@
       </el-table-column>
       <el-table-column label="支付" width="150" align="center">
         <template slot-scope="s">
-          <div v-if="s.row.opaymentMethod || s.row.oPaymentMethod">
-            <el-tag size="mini" type="info">{{ s.row.opaymentMethod || s.row.oPaymentMethod }}</el-tag>
-            <div style="font-size:11px;color:#909399;margin-top:2px;">医保¥{{ Number(s.row.oinsuranceCovered || s.row.oInsuranceCovered || 0).toFixed(2) }} 自付¥{{ Number(s.row.oselfPay || s.row.oSelfPay || 0).toFixed(2) }}</div>
+          <div v-if="(s.row.oPriceState || s.row.opriceState) === 1">
+            <el-tag size="mini" type="info">{{ s.row.oPaymentMethod || s.row.opaymentMethod || '--' }}</el-tag>
+            <div style="font-size:11px;color:#909399;margin-top:2px;">医保¥{{ Number(s.row.oInsuranceCovered || s.row.oinsuranceCovered || 0).toFixed(2) }} 自付¥{{ Number(s.row.oSelfPay || s.row.oselfPay || 0).toFixed(2) }}</div>
           </div>
           <span v-else class="no-data">---</span>
         </template>
@@ -51,14 +51,13 @@
       <el-table-column label="缴费" width="80" align="center">
         <template slot-scope="s">
           <el-tag v-if="s.row.opriceState === 1 || s.row.oPriceState === 1" type="success" size="small">已缴费</el-tag>
-          <el-button v-else-if="(s.row.ostate || s.row.oState) === 1" type="danger" size="mini" @click="openPaymentDlg(s.row)">去收费</el-button>
-          <span v-else class="no-data">-</span>
+          <el-button v-else type="danger" size="mini" @click="openPaymentDlg(s.row)">去收费</el-button>
         </template>
       </el-table-column>
-      <el-table-column label="状态"   width="75"   align="center" >
+      <el-table-column label="状态"   width="80"   align="center" >
         <template slot-scope="s">
-          <span :class="'status-' + ( ((s.row.ostate||s.row.oState) === 1 && (s.row.opriceState||s.row.oPriceState) === 1) ? 'done' : (s.row.ostate||s.row.oState) === 1 ? 'wait' : 'fail')">
-            {{ ((s.row.ostate||s.row.oState) === 1 && (s.row.opriceState||s.row.oPriceState) === 1) ? '已完成' : (s.row.ostate||s.row.oState) === 1 ? '待缴费' : '未完成' }}
+          <span :class="'status-' + ( ((s.row.ostate||s.row.oState) >= 0) ? 'wait' : 'fail')">
+            {{ {'-1':'已取消','0':'已挂号','1':'已分诊','2':'就诊中','3':'已开处方','4':'待缴费','5':'已缴费','6':'已发药','7':'已完成'}[String(s.row.ostate||s.row.oState)] || '未完成' }}
           </span>
         </template>
       </el-table-column>
@@ -152,7 +151,28 @@ export default {
         this.paymentDlgVisible = false; this.requestOrders(); this.$message.success("收费成功！");
       });
     },
-    viewBilling(oId) { request.get("billing/findByOrder", {params:{oId}}).then(res=>{ this.billingData=res.data.data||[]; this.billingDlgVisible=true; }); },
+    viewBilling(oId) {
+      var self = this;
+      request.get("billing/findByOrder", {params:{oId}}).then(function(res){
+        var data = res.data.data || [];
+        if (data.length === 0) {
+          request.get("emr/findByOrder", {params:{oId: oId}}).then(function(emrRes){
+            if (emrRes.data.status === 200 && emrRes.data.data && emrRes.data.data.emrId) {
+              request.get("billing/findByEmr", {params:{emrId: emrRes.data.data.emrId}}).then(function(brRes){
+                self.billingData = brRes.data.data || [];
+                self.billingDlgVisible = true;
+              });
+            } else {
+              self.billingData = [];
+              self.billingDlgVisible = true;
+            }
+          });
+        } else {
+          self.billingData = data;
+          self.billingDlgVisible = true;
+        }
+      });
+    },
     deleteOrder(id) { request.get("admin/deleteOrder",{params:{oId:id}}).then(()=>this.requestOrders()); },
     deleteDialog(id) {
       this.$confirm("此操作将永久删除该挂号信息, 是否继续?","提示",{confirmButtonText:"确定",cancelButtonText:"取消",type:"warning"})

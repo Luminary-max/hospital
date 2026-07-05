@@ -202,7 +202,8 @@ export default {
     submitForm() {
       this.$refs.form.validate(valid=>{
         if(!valid) return;
-        request.post("triage/create", this.form).then(res=>{
+        var url = this.isEdit ? "triage/update" : "triage/create";
+        request.post(url, this.form).then(res=>{
           if(res.data.status===200){
             this.$message.success(this.isEdit?"更新成功":"新增成功");
             this.dialogVisible=false;

@@ -1,5 +1,6 @@
 package com.bear.hospital.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -7,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @TableName("drug_batch")
 public class DrugBatch {
-    @TableId(value = "db_id")
+    @TableId(value = "db_id", type = IdType.AUTO)
     @JsonProperty("dbId")
     private Integer dbId;
     @JsonProperty("drId")

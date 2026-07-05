@@ -2,7 +2,7 @@
   <div style="padding:16px;">
     <el-card>
       <div slot="header"><i class="el-icon-s-data"></i> 数据统计</div>
-      <el-tabs v-model="activeTab">
+      <el-tabs v-model="activeTab" @tab-click="onTabClick">
         <el-tab-pane label="医院运营统计" name="hospital">
           <div>
             <el-row :gutter="20">
@@ -91,11 +91,21 @@
         <el-tab-pane label="收入分析" name="income">
           <div>
             <el-row :gutter="20">
-              <el-col :span="14"><el-card><div slot="header"><span>每日收入趋势</span><el-radio-group v-model="incomePeriod" @change="loadIncomeAnalysis" size="mini" style="float:right;"><el-radio-button label="7">7天</el-radio-button><el-radio-button label="20">20天</el-radio-button></el-radio-group></div><div id="incomeTrendChart" style="width:100%;height:400px;"></div></el-card></el-col>
-              <el-col :span="10"><el-card style="margin-bottom:16px;"><div slot="header">收入构成</div><div id="incomeBreakdownChart" style="width:100%;height:260px;"></div></el-card>
-                <el-card><div slot="header">收入汇总</div>
-                  <el-row :gutter="10"><el-col :span="12"><div style="font-size:12px;color:#909399;">总收入</div><div style="font-size:20px;font-weight:700;color:#409EFF;">{{ incomeSummary.total }}</div></el-col><el-col :span="12"><div style="font-size:12px;color:#909399;">日均收入</div><div style="font-size:16px;font-weight:600;">{{ incomeSummary.dailyAvg }}</div></el-col></el-row>
-                  <el-row :gutter="10" style="margin-top:8px;"><el-col :span="12"><div style="font-size:12px;color:#909399;">挂号费</div><div style="font-size:16px;font-weight:600;">{{ incomeSummary.registration }}</div></el-col><el-col :span="12"><div style="font-size:12px;color:#909399;">药费+检查费</div><div style="font-size:16px;font-weight:600;">{{ incomeSummary.drugCheck }}</div></el-col></el-row>
+              <el-col :span="24"><el-card><div slot="header"><span>每日收入趋势</span><el-radio-group v-model="incomePeriod" @change="loadIncomeAnalysis" size="mini" style="float:right;"><el-radio-button label="7">7天</el-radio-button><el-radio-button label="20">20天</el-radio-button></el-radio-group></div><div id="incomeTrendChart" style="width:100%;height:500px;"></div></el-card></el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top:16px;">
+              <el-col :span="12"><el-card style="min-height:360px;"><div slot="header">收入构成</div><div id="incomeBreakdownChart" style="width:100%;height:300px;"></div></el-card></el-col>
+              <el-col :span="12"><el-card style="min-height:360px;"><div slot="header">收入汇总</div>
+                  <div style="padding:30px 20px;">
+                  <el-row :gutter="20" style="margin-bottom:16px;">
+                    <el-col :span="12"><div style="background:#f0f5ff;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:12px;color:#909399;">总收入</div><div style="font-size:28px;font-weight:700;color:#409EFF;">{{ incomeSummary.total }}</div></div></el-col>
+                    <el-col :span="12"><div style="background:#f6ffed;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:12px;color:#909399;">日均收入</div><div style="font-size:28px;font-weight:700;color:#67C23A;">{{ incomeSummary.dailyAvg }}</div></div></el-col>
+                  </el-row>
+                  <el-row :gutter="20">
+                    <el-col :span="12"><div style="background:#fff7e6;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:12px;color:#909399;">挂号费</div><div style="font-size:22px;font-weight:700;color:#E6A23C;">{{ incomeSummary.registration }}</div></div></el-col>
+                    <el-col :span="12"><div style="background:#fef0f0;border-radius:8px;padding:20px;text-align:center;"><div style="font-size:12px;color:#909399;">药费+检查费</div><div style="font-size:22px;font-weight:700;color:#F56C6C;">{{ incomeSummary.drugCheck }}</div></div></el-col>
+                  </el-row>
+                  </div>
                 </el-card>
               </el-col>
             </el-row>
@@ -266,7 +276,26 @@ export default {
       request.get("order/orderDailyIncome").then(function(res) {
         if (res.data.status !== 200) return;
         var d = res.data.data || {}; var dates = d.dates || []; var drugInc = d.drugIncome || []; var regInc = d.regIncome || [];
-        var sliceDates = dates.slice(-n); var sliceDrug = drugInc.slice(-n); var sliceReg = regInc.slice(-n);
+        // 过滤掉全为0的数据段(从第一个非零数据开始)，排除demo数据干扰
+        var firstNonZero = -1;
+        for (var zi = 0; zi < dates.length; zi++) {
+          if ((parseFloat(drugInc[zi]||0) + parseFloat(regInc[zi]||0)) > 0) {
+            firstNonZero = zi;
+            break;
+          }
+        }
+        var sliceDates = dates, sliceDrug = drugInc, sliceReg = regInc;
+        if (firstNonZero >= 0 && firstNonZero > 1) {
+          var startIdx = Math.max(0, firstNonZero - 1);
+          sliceDates = dates.slice(startIdx); sliceDrug = drugInc.slice(startIdx); sliceReg = regInc.slice(startIdx);
+        }
+        sliceDates = sliceDates.slice(-n); sliceDrug = sliceDrug.slice(-n); sliceReg = sliceReg.slice(-n);
+        // 如果过滤后数据太少（少于3天），就用最近几天
+        if (sliceDates.length < 3) {
+          sliceDates = dates.slice(-Math.min(n, 7));
+          sliceDrug = drugInc.slice(-Math.min(n, 7));
+          sliceReg = regInc.slice(-Math.min(n, 7));
+        }
         self.incomeDetailList = sliceDates.map(function(date, i) { return { date: date, regFee: parseFloat(sliceReg[i] || 0).toFixed(2), drugFee: parseFloat(sliceDrug[i] || 0).toFixed(2) }; });
         var totalDrug = sliceDrug.reduce(function(s, v) { return s + parseFloat(v || 0); }, 0);
         var totalReg = sliceReg.reduce(function(s, v) { return s + parseFloat(v || 0); }, 0);
@@ -275,10 +304,19 @@ export default {
         self.$nextTick(function() {
           var trendChart = document.getElementById("incomeTrendChart");
           if (trendChart) {
-            var tc = this.$echarts.init(trendChart);
+            trendChart.style.width = "100%";
+            trendChart.style.height = "500px";
+            var old = self.$echarts.getInstanceByDom(trendChart);
+            if (old) old.dispose();
+            var tc = self.$echarts.init(trendChart);
+            // 天数少时显示全部标签，天数多时自动间隔
+            var interval = sliceDates.length <= 10 ? 0 : (sliceDates.length <= 20 ? 1 : 2);
             tc.setOption({
-              tooltip: { trigger: "axis" }, legend: { data: ["总收入", "药费+检查费", "挂号费"], bottom: 0 }, grid: { left: 55, right: 20, bottom: 50, top: 15 },
-              xAxis: { type: "category", data: sliceDates, axisLabel: { rotate: 25, fontSize: 10 } }, yAxis: { type: "value" },
+              tooltip: { trigger: "axis" },
+              legend: { data: ["总收入", "药费+检查费", "挂号费"], bottom: 10 },
+              grid: { left: 80, right: 30, bottom: 65, top: 30 },
+              xAxis: { type: "category", data: sliceDates, axisLabel: { rotate: 35, fontSize: 10, interval: interval } },
+              yAxis: { type: "value", splitLine: { lineStyle: { type: "dashed" } }, name: "金额 (元)" },
               series: [
                 { name: "总收入", type: "line", data: sliceDrug.map(function(v, i) { return parseFloat(v || 0) + parseFloat(sliceReg[i] || 0); }), smooth: true, lineStyle: { color: "#409EFF", width: 2 }, itemStyle: { color: "#409EFF" } },
                 { name: "药费+检查费", type: "bar", data: sliceDrug, itemStyle: { color: "#E6A23C" }, barWidth: "30%" },
@@ -288,10 +326,10 @@ export default {
           }
           var pieChart = document.getElementById("incomeBreakdownChart");
           if (pieChart) {
-            var pc = this.$echarts.init(pieChart);
+            var pc = self.$echarts.init(pieChart);
             pc.setOption({
               tooltip: { trigger: "item", formatter: "{b}: ¥{c} ({d}%)" }, legend: { bottom: 0 },
-              series: [{ type: "pie", radius: ["40%", "65%"], center: ["50%", "45%"], data: [{ value: totalDrug, name: "药费+检查费", itemStyle: { color: "#E6A23C" } }, { value: totalReg, name: "挂号费", itemStyle: { color: "#67C23A" } }], label: { show: true, formatter: "{b}\n¥{c}" } }]
+              series: [{ type: "pie", radius: ["30%", "55%"], center: ["50%", "45%"], data: [{ value: totalDrug, name: "药费+检查费", itemStyle: { color: "#E6A23C" } }, { value: totalReg, name: "挂号费", itemStyle: { color: "#67C23A" } }], label: { show: true, formatter: "{b}: ¥{c}" } }]
             });
           }
         }.bind(self));
@@ -302,6 +340,31 @@ export default {
     },
     downloadCsv: function(content, filename) {
       var bom = "﻿"; var blob = new Blob([bom + content], { type: "text/csv;charset=utf-8" }); var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+    },
+    onTabClick: function(tab) {
+      var self = this;
+      if (tab.name === "income") {
+        self.loadIncomeAnalysis();
+        self.$nextTick(function() {
+          setTimeout(function() {
+            var chart = document.getElementById("incomeTrendChart");
+            if (chart) {
+              var instance = self.$echarts.getInstanceByDom(chart);
+              if (instance) {
+                instance.resize();
+              } else {
+                // 如果实例不存在，重新初始化
+                self.loadIncomeAnalysis();
+              }
+            }
+            var pieChart = document.getElementById("incomeBreakdownChart");
+            if (pieChart) {
+              var pi = self.$echarts.getInstanceByDom(pieChart);
+              if (pi) pi.resize();
+            }
+          }, 300);
+        });
+      }
     }
   },
   created: function() {
@@ -314,4 +377,5 @@ export default {
   }
 };
 </script>
+
 

@@ -88,7 +88,7 @@ export default {
   methods: {
       //科室点击
         sectionClick(section){
-            this.$router.push({path: '/arrangeDoctor?section=' + section});
+            this.$router.push({path: '/arrangeDoctor', query: {section: section}}).catch(function(){});
 
         },
   },

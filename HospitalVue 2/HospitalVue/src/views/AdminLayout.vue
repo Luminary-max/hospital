@@ -72,14 +72,24 @@ export default {
       request.get("order/orderDailyIncome").then(r=>{
         if(r.data.status===200){ var d=r.data.data; this.todayIncome=d.drugIncome?d.drugIncome[d.drugIncome.length-1]||0:0; }
       });
-      request.get("pharmacy/findAll",{params:{pageNumber:1,size:1,status:0}}).then(r=>{if(r.data.status===200)this.pendingDrug=r.data.data.total||0;});
-      // 使用专用计数接口代替加载全部订单
-      request.get("order/pendingPaymentCount").then(r=>{if(r.data.status===200)this.pendingPayment=r.data.data||0;}).catch(()=>{
-        // 降级：通过小数据量查询
-        request.get("admin/findAllOrders",{params:{pageNumber:1,size:100,query:""}}).then(r=>{
-          if(r.data.status===200){ var list=r.data.data.records||[]; this.pendingPayment=list.filter(o=>o.oPriceState===0&&o.oState===1).length; }
-        });
-      }).then(()=>{
+      // 并行请求统计数据，所有都完成后再更新待办事项
+      Promise.all([
+        request.get("pharmacy/findAll",{params:{pageNumber:1,size:1,status:0}}).then(r=>{
+          let total = 0;
+          if(r.data && r.data.status===200) {
+            if(r.data.data && r.data.data.total !== undefined) total = r.data.data.total;
+            else if(Array.isArray(r.data.data)) total = r.data.data.length;
+          }
+          this.pendingDrug = total;
+        }).catch(()=>{this.pendingDrug=0;}),
+        request.get("order/pendingPaymentCount").then(r=>{
+          if(r.data.status===200) this.pendingPayment=r.data.data||0;
+        }).catch(()=>{
+          request.get("admin/findAllOrders",{params:{pageNumber:1,size:100,query:""}}).then(r=>{
+            if(r.data.status===200){ var list=r.data.data.records||[]; this.pendingPayment=list.filter(o=>o.oPriceState===0&&o.oState===1).length; }
+          });
+        })
+      ]).then(()=>{
         this.pendingCount=this.pendingDrug+this.pendingPayment;
         this.todoList=[
           {label:"待发药",count:this.pendingDrug,link:()=>{this.$router.push("/pharmacyDispensingList");}},

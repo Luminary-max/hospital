@@ -13,12 +13,20 @@
             <el-table-column label="患者" prop="pName" width="90" align="center"></el-table-column>
             <el-table-column label="医生" prop="dName" width="90" align="center"></el-table-column>
             <el-table-column label="挂号时间" prop="oStart" min-width="180"></el-table-column>
-            <el-table-column label="状态" width="80" align="center">
-                <template slot-scope="s"><el-tag :type="s.row.oState===0?'warning':'success'" size="mini">{{ s.row.oState===0?'待接诊':'已完成' }}</el-tag></template>
+            <el-table-column label="状态" width="130" align="center">
+                <template slot-scope="s">
+                  <el-tag v-if="s.row.tLevel === 2" type="danger" effect="dark" size="mini" style="font-weight:bold;">急诊</el-tag>
+                  <el-tag v-else-if="s.row.tLevel === 1" type="warning" effect="dark" size="mini" style="font-weight:bold;">优先</el-tag>
+                  <el-tag v-else-if="s.row.oState === 1" type="" size="mini">已分诊</el-tag>
+                  <el-tag v-else-if="s.row.oState === 0" type="warning" size="mini">待接诊</el-tag>
+                  <el-tag v-else-if="s.row.oState === 3" type="primary" size="mini">已开处方</el-tag>
+                  <el-tag v-else-if="s.row.oState === 4" type="warning" size="mini">待缴费</el-tag>
+                  <el-tag v-else type="success" size="mini">已完成</el-tag>
+                </template>
             </el-table-column>
             <el-table-column label="操作" width="160" align="center">
                 <template slot-scope="s">
-                    <el-button type="warning" size="mini" @click="dealClick(s.row.oId,s.row.pId)" v-if="s.row.oState===0"><i class="el-icon-monitor"></i> 接诊</el-button>
+                    <el-button type="warning" size="mini" @click="dealClick(s.row.oId,s.row.pId)" v-if="s.row.oState===0||s.row.oState===1"><i class="el-icon-monitor"></i> 接诊</el-button>
                     <el-button type="primary" size="mini" @click="dealClick(s.row.oId,s.row.pId)" v-if="s.row.oState===3||s.row.oState===4">继续</el-button>
                     <el-button type="success" size="mini" @click="dealAgainClick(s.row.oId,s.row.pId)" v-if="s.row.oState===3||s.row.oState===4">复诊</el-button>
                 </template>
@@ -78,5 +86,7 @@ export default {
     },
 }
 </script>
+
+
 
 

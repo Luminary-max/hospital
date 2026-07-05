@@ -95,6 +95,7 @@
             <result property="oRegistrationFee" column="o_registration_fee" />
             <result property="oPriceState" column="o_price_state" />
             <result property="oState" column="o_state" />
+            <result property="tLevel" column="tLevel" />
             <result property="dName" column="dName" />
             <result property="pName" column="pName" />
             <!--一对一的关系映射，配置封装user的内容 column中指名从表的外键 property="user"指的是单个实体类的引用-->
@@ -108,14 +109,16 @@
             </association>
         </resultMap>
     <select id="findOrderByNull" resultMap="orderPatientDoctorMap">
-        SELECT o.o_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_registration_fee,o.o_total_price,o.o_price_state,o.o_state
-        from orders o JOIN doctor d JOIN patient p
-        on o.d_id=#{dId}
-        and o.d_id=d.d_id
-        and o.p_id=p.p_id
+        SELECT o.o_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_registration_fee,o.o_total_price,o.o_price_state,o.o_state,
+               tr.t_level as tLevel
+        from orders o
+        JOIN doctor d ON o.d_id = d.d_id
+        JOIN patient p ON o.p_id = p.p_id
+        LEFT JOIN triage_record tr ON tr.p_id = o.p_id AND DATE(tr.t_create_time) = CURDATE()
+        WHERE o.d_id = #{dId}
         and o.o_start like #{oStart}"%"
-        and o.o_state IN (0,3,4)
-        ORDER BY o.o_start
+        and o.o_state IN (0,1,3,4)
+        ORDER BY tr.t_level DESC, o.o_start
     </select>
     <select id="findOrderByPid" resultMap="orderPatientDoctorMap">
         SELECT o.o_id,o.d_id,d.d_name as dName,o.p_id,p.p_name as pName,o.o_start,o.o_end,o.o_total_price,o.o_price_state,o.o_state,o.o_registration_fee

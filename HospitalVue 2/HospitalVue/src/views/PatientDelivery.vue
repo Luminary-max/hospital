@@ -19,29 +19,29 @@
     </div>
 
     <el-table v-else :data="deliveryList" border stripe style="width:100%">
-      <el-table-column prop="deliveryId" label="编号" width="65" align="center"></el-table-column>
+      <el-table-column prop="dlId" label="编号" width="65" align="center"></el-table-column>
       <el-table-column prop="oId" label="订单号" width="75" align="center"></el-table-column>
       <el-table-column label="代办人" min-width="100">
-        <template slot-scope="s">{{ s.row.agentName || '--' }}</template>
+        <template slot-scope="s">{{ s.row.dlAgentName || '--' }}</template>
       </el-table-column>
       <el-table-column label="代办人电话" width="120">
-        <template slot-scope="s">{{ s.row.agentPhone || '--' }}</template>
+        <template slot-scope="s">{{ s.row.dlAgentPhone || '--' }}</template>
       </el-table-column>
       <el-table-column label="代办人身份证" width="160">
-        <template slot-scope="s">{{ s.row.agentIdCard || '--' }}</template>
+        <template slot-scope="s">{{ s.row.dlAgentIdCard || '--' }}</template>
       </el-table-column>
-      <el-table-column prop="createTime" label="申请时间" width="155"></el-table-column>
+      <el-table-column prop="dlCreateTime" label="申请时间" width="155"></el-table-column>
       <el-table-column label="状态" width="90" align="center">
         <template slot-scope="s">
-          <el-tag v-if="s.row.status===0" type="warning" size="mini">待取药</el-tag>
-          <el-tag v-else-if="s.row.status===1" type="success" size="mini">已取药</el-tag>
+          <el-tag v-if="s.row.dlStatus===0" type="warning" size="mini">待取药</el-tag>
+          <el-tag v-else-if="s.row.dlStatus===1" type="success" size="mini">已取药</el-tag>
           <el-tag v-else type="info" size="mini">已取消</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="note" label="备注" min-width="120" show-overflow-tooltip></el-table-column>
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="s">
-          <el-button v-if="s.row.status===0" type="danger" size="mini" @click="cancelDelivery(s.row)">
+          <el-button v-if="s.row.dlStatus===0" type="danger" size="mini" @click="cancelDelivery(s.row)">
             取消申请
           </el-button>
           <el-tag v-else type="info" size="mini">--</el-tag>
@@ -124,11 +124,11 @@ export default {
     async loadData() {
       if (!this.pId) { this.loading = false; return; }
       try {
-        const res = await request.get("delivery/findByPatient", { params: { pId: this.pId, pageNumber: this.pageNumber, size: this.size } });
+        const res = await request.get("delivery/findByPatient", { params: { pId: this.pId } });
         if (res.data.status === 200) {
           const d = res.data.data;
-          this.deliveryList = d.records || d || [];
-          this.total = d.total || (Array.isArray(d) ? d.length : 0);
+          this.deliveryList = d || [];
+          this.total = Array.isArray(d) ? d.length : 0;
         }
       } catch(e) {}
       this.loading = false;
@@ -163,9 +163,9 @@ export default {
         const res = await request.post("delivery/create", {
           pId: this.pId,
           oId: this.deliveryForm.oId,
-          agentName: this.deliveryForm.agentName,
-          agentIdCard: this.deliveryForm.agentIdCard,
-          agentPhone: this.deliveryForm.agentPhone,
+          dlAgentName: this.deliveryForm.agentName,
+          dlAgentIdCard: this.deliveryForm.agentIdCard,
+          dlAgentPhone: this.deliveryForm.agentPhone,
           note: this.deliveryForm.note || ""
         });
         if (res.data.status === 200) {
@@ -183,7 +183,7 @@ export default {
     async cancelDelivery(row) {
       this.$confirm("确定取消该送药申请吗？", "取消申请", { type: "warning" }).then(async function() {
         try {
-          const res = await request.post("delivery/cancel", { deliveryId: row.deliveryId });
+          const res = await request.post("delivery/cancel", { dlId: row.dlId });
           if (res.data.status === 200) {
             this.$message.success("已取消");
             this.loadData();

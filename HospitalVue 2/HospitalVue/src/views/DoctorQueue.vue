@@ -34,8 +34,15 @@
       </el-table-column>
       <el-table-column prop="pName" label="患者姓名" width="90" align="center"></el-table-column>
       <el-table-column prop="qCreateTime" label="取号时间" min-width="180"></el-table-column>
-      <el-table-column label="状态" width="90" align="center">
-        <template slot-scope="s"><el-tag :type="s.row.qState===0?'warning':s.row.qState===2?'danger':'success'" size="mini">{{ s.row.qState===0?'等待中':s.row.qState===2?'已过号':'已就诊' }}</el-tag></template>
+      <el-table-column label="状态" width="150" align="center">
+        <template slot-scope="s">
+          <el-tag v-if="s.row.tLevel === 2" type="danger" effect="dark" size="mini" style="font-weight:bold;">急诊</el-tag>
+          <el-tag v-else-if="s.row.tLevel === 1" type="warning" effect="dark" size="mini" style="font-weight:bold;">优先</el-tag>
+          <el-tag v-else-if="s.row.oState === 1" type="" size="mini">已分诊</el-tag>
+          <el-tag v-else-if="s.row.qState===0" type="warning" size="mini">等待中</el-tag>
+          <el-tag v-else-if="s.row.qState===2" type="danger" size="mini">已过号</el-tag>
+          <el-tag v-else size="mini">已就诊</el-tag>
+        </template>
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
         <template slot-scope="s"><el-button v-if="s.row.qState===2" type="primary" size="mini" @click="reQueue(s.row)">重新排入</el-button></template>
@@ -66,7 +73,18 @@ export default {
         if (res.data.status === 200) {
           const data = res.data.data || [];
           this.currentPatient = data.find(p => p.qState === 1) || null;
-          this.waitingList = data.filter(p => p.qState !== 1 && p.qState !== 3);
+          // 去重
+          var seen = {};
+          var unique = [];
+          data.forEach(function(item) {
+            if (item.qState !== 1 && item.qState !== 3) {
+              if (!seen[item.oId]) {
+                seen[item.oId] = true;
+                unique.push(item);
+              }
+            }
+          });
+          this.waitingList = unique;
         }
       } catch(e) {}
     },
@@ -114,6 +132,10 @@ export default {
   }
 };
 </script>
+
+
+
+
 
 
 

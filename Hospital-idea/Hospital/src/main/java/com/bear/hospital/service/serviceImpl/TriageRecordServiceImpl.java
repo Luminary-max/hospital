@@ -34,7 +34,8 @@ public class TriageRecordServiceImpl implements TriageRecordService {
     @Override
     public Boolean createTriage(TriageRecord triageRecord) {
         triageRecord.setTCreateTime(TodayUtil.getToday());
-        if (triageRecord.getTStatus() == null) triageRecord.setTStatus(0);
+        // 新增分诊时默认设为"已分诊"状态
+        triageRecord.setTStatus(1);
         if (triageRecord.getTSource() == null) triageRecord.setTSource("现场");
         boolean ok = this.triageRecordMapper.insert(triageRecord) > 0;
         // 分诊成功后推进该患者最新挂号订单状态到"已分诊"(oState=1)

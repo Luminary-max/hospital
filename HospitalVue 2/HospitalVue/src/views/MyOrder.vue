@@ -44,7 +44,7 @@
         </el-table-column>
         <el-table-column label="报告单" width="90" align="center">
           <template slot-scope="s">
-            <el-button v-if="s.row.oState===1&&s.row.oPriceState===1" type="success" size="mini" @click="seeReport(s.row)">查看</el-button>
+            <el-button v-if="s.row.oPriceState==1||s.row.opriceState==1" type="success" size="mini" @click="seeReport(s.row)">查看</el-button>
             <span v-else style="color:#ccc;">-</span>
           </template>
         </el-table-column>

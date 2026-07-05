@@ -403,7 +403,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public int pendingPaymentCount() {
         QueryWrapper<Orders> wrapper = new QueryWrapper<>();
-        wrapper.eq("o_state", 1).eq("o_price_state", 0);
+        wrapper.eq("o_price_state", 0).in("o_state", 0, 1, 3, 4);
         return this.orderMapper.selectCount(wrapper);
     }
 

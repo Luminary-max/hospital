@@ -68,6 +68,9 @@ public class Orders {
     private String oCancelReason;
     @JsonProperty("oMissed")
     private Integer oMissed;
+    @TableField(exist = false)
+    @JsonProperty("tLevel")
+    private Integer tLevel;
 
     //多表查询用
     @TableField(exist = false)
@@ -162,6 +165,8 @@ public class Orders {
     public void setOCancelReason(String oCancelReason) { this.oCancelReason = oCancelReason; }
     public Integer getOMissed() { return oMissed; }
     public void setOMissed(Integer oMissed) { this.oMissed = oMissed; }
+    public Integer getTLevel() { return tLevel; }
+    public void setTLevel(Integer tLevel) { this.tLevel = tLevel; }
 
     public Doctor getDoctor() { return doctor; }
     public void setDoctor(Doctor doctor) { this.doctor = doctor; }

@@ -96,7 +96,7 @@ public class QueueServiceImpl implements QueueService {
             List<com.bear.hospital.pojo.Orders> pendingOrders = orderMapper2.selectList(
                 new QueryWrapper<com.bear.hospital.pojo.Orders>()
                     .eq("d_id", dId)
-                    .in("o_state", 0, 3, 4)
+                    .in("o_state", 0, 1, 4)
                     .apply("DATE(o_start) = CURDATE()")
                     .orderByAsc("o_id")
             );
@@ -172,14 +172,8 @@ public class QueueServiceImpl implements QueueService {
     public List<Map<String, Object>> getDeptQueueStats() {
         List<Map<String, Object>> result = new ArrayList<>();
         try {
-            List<Map<String, Object>> stats = queueMapper.selectMaps(
-                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.bear.hospital.pojo.QueueNumber>()
-                    .select("d.d_section as deptName, COUNT(CASE WHEN q.q_state=0 THEN 1 END) as waiting, " +
-                        "COUNT(CASE WHEN q.q_state=1 THEN 1 END) as calling, " +
-                        "COUNT(CASE WHEN q.q_state=3 THEN 1 END) as finished")
-                    .apply("DATE(q.q_create_time) = CURDATE()")
-                    .groupBy("d.d_section")
-            );
+            // 直接用自定义SQL（QueryWrapper不支持多表JOIN）
+            List<Map<String, Object>> stats = queueMapper.selectDeptQueueStats();
             com.bear.hospital.mapper.DoctorMapper doctorMapper2 = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.DoctorMapper.class);
             List<com.bear.hospital.pojo.Doctor> allDocs = doctorMapper2.selectList(null);
             Set<String> allDepts = new java.util.LinkedHashSet<>();
@@ -189,10 +183,7 @@ public class QueueServiceImpl implements QueueService {
             if (allDepts.isEmpty()) {
                 Collections.addAll(allDepts, "内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科");
             }
-            // 合并统计
             Map<String, Map<String, Object>> statsMap = new HashMap<>();
-            // First fix: the custom SQL needs to join tables
-            // Simplified: use queue_number + orders + doctor joins
             for (Map<String, Object> row : stats) {
                 String dept = (String) row.get("deptName");
                 if (dept != null) statsMap.put(dept, row);
@@ -209,7 +200,7 @@ public class QueueServiceImpl implements QueueService {
                 result.add(m);
             }
         } catch (Exception e) {
-            // fallback
+            e.printStackTrace();
             String[] depts = {"内科", "外科", "妇产科", "儿科", "五官科", "中医科", "康复医学科", "急诊科"};
             for (String dept : depts) {
                 Map<String, Object> m = new HashMap<>();

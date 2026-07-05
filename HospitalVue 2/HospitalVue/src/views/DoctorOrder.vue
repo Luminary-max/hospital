@@ -21,15 +21,21 @@
                 <el-table-column prop="oPriceState" label="缴费状态" width="100">
                     <template slot-scope="s">
                         <el-tag type="success" v-if="s.row.oPriceState === 1">已缴费</el-tag>
-                        <el-tag type="danger" v-if="s.row.oPriceState === 0 && s.row.oState === 1">未缴费</el-tag>
+                        <el-tag type="danger" v-else>未缴费</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="oState" label="挂号状态" width="100">
+                <el-table-column prop="oState" label="挂号状态" width="120">
                     <template slot-scope="s">
-                        <el-tag type="success" v-if="s.row.oState === 7">已完成</el-tag>
-                        <el-tag type="success" v-else-if="s.row.oState === 1 && s.row.oPriceState === 1">已分诊(可追诊)</el-tag>
-                        <el-tag type="danger" v-else-if="s.row.oPriceState === 0 && s.row.oState === 0">未完成</el-tag>
-                        <el-tag type="info" v-else>状态{{ s.row.oState }}</el-tag>
+                        <el-tag v-if="s.row.oState === -1" type="danger">已取消</el-tag>
+                        <el-tag v-else-if="s.row.oState === 0" type="warning">已挂号</el-tag>
+                        <el-tag v-else-if="s.row.oState === 1" type="primary">已分诊</el-tag>
+                        <el-tag v-else-if="s.row.oState === 2" type="">就诊中</el-tag>
+                        <el-tag v-else-if="s.row.oState === 3" type="success">已开处方</el-tag>
+                        <el-tag v-else-if="s.row.oState === 4" type="warning">待缴费</el-tag>
+                        <el-tag v-else-if="s.row.oState === 5" type="success">已缴费</el-tag>
+                        <el-tag v-else-if="s.row.oState === 6" type="success">已发药</el-tag>
+                        <el-tag v-else-if="s.row.oState === 7" type="success">已完成</el-tag>
+                        <el-tag v-else type="info">状态{{ s.row.oState }}</el-tag>
                     </template>
                 </el-table-column>
                 <el-table-column label="操作" width="90" fixed="right">

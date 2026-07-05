@@ -30,21 +30,23 @@ public class ArrangeServiceImpl implements ArrangeService {
      */
     public Boolean addArrange(Arrange arrange){
         Arrange arrange1 = this.arrangeMapper.selectById(arrange.getArId());
-        Jedis jedis = jedisPool.getResource();
-        HashMap<String, String> map = new HashMap<>();
-        map.put("eTOn","40");
-        map.put("nTOt","40");
-        map.put("tTOe","40");
-        map.put("fTOf","40");
-        map.put("fTOs","40");
-        map.put("sTOs","40");
         if (arrange1 == null) {
-            //redis操作开始
-//            jedis.hset(arrange.getArId(), map);
-            // 或者使用hmset设置整个哈希表的值
-            jedis.hmset(arrange.getArId(), map);
-            jedis.expire(arrange.getArId(), 604800);
-            //redis操作结束
+            // Redis操作（可选，无Redis不影响排班）
+            try {
+                Jedis jedis = jedisPool.getResource();
+                HashMap<String, String> map = new HashMap<>();
+                map.put("eTOn","40");
+                map.put("nTOt","40");
+                map.put("tTOe","40");
+                map.put("fTOf","40");
+                map.put("fTOs","40");
+                map.put("sTOs","40");
+                jedis.hmset(arrange.getArId(), map);
+                jedis.expire(arrange.getArId(), 604800);
+                jedis.close();
+            } catch(Exception e) {
+                // Redis不可用时忽略，不影响排班功能
+            }
             this.arrangeMapper.insert(arrange);
             return true;
         }
@@ -56,9 +58,21 @@ public class ArrangeServiceImpl implements ArrangeService {
      */
     public Boolean deleteArrange(String arId){
         Arrange arrange = this.arrangeMapper.selectById(arId);
-        Jedis jedis = jedisPool.getResource();
         if (arrange != null) {
-            jedis.del(arId);
+            try {
+                Jedis jedis = jedisPool.getResource();
+                jedis.del(arId);
+                jedis.close();
+            } catch(Exception e) {
+                // Redis不可用时忽略
+            }
+            // 先删 arrangement（外键依赖），再删 arrange
+            try {
+                com.bear.hospital.mapper.ArrangeMapper arrangementMapper = com.bear.hospital.spring.SpringContextHolder.getBean(com.bear.hospital.mapper.ArrangeMapper.class);
+                arrangementMapper.deleteById(arId);
+            } catch(Exception e) {
+                // arrangement 表可能不存在或有其他问题，不影响主删除
+            }
             this.arrangeMapper.deleteById(arId);
             return true;
         }

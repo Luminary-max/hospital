@@ -106,9 +106,11 @@ export default {
                 })
                 .then((res) => {
                     if (res.data.status !== 200)
-                        return this.$message.error("已排班");
+                        return this.$message.error(res.data.msg || "已排班");
                     this.$message.success("排班成功！");
                     this.requestDoctors();
+                }).catch(() => {
+                    this.$message.error("排班失败，请稍后重试");
                 });
         },
         deleteArrange(arrangeId) {

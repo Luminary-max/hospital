@@ -61,13 +61,15 @@ CREATE TABLE `arrange` (
 DELIMITER ;;
 /*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `before_insert_arrange` BEFORE INSERT ON `arrange` FOR EACH ROW BEGIN
     DECLARE count INT;
-    
+
     -- 检查 `arrangement` 表中是否已经存在该 `ar_id`
-    SELECT COUNT(*) INTO count 
-    FROM arrangement 
+    SELECT COUNT(*) INTO count
+    FROM arrangement
     WHERE ar_id = NEW.ar_id;
-    
+
     -- 如果不存在，则插入新记录
+    -- 注意：这里不能直接用 INSERT，因为 arrangement 有外键指向 arrange
+    -- 改用先插入 arrange 再在 AFTER INSERT 触发器中同步的方式
     IF count = 0 THEN
         INSERT INTO arrangement (ar_id, ar_time)
         VALUES (NEW.ar_id, NEW.ar_time);

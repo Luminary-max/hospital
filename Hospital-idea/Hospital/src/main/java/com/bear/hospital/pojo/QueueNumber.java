@@ -40,6 +40,14 @@ public class QueueNumber {
     private String dId;  // 医生ID（从orders表联查）
 
     @TableField(exist = false)
+    @JsonProperty("oState")
+    private Integer oState;  // 挂号订单状态（0已挂号/1已分诊/3已开处方）
+
+    @TableField(exist = false)
+    @JsonProperty("tLevel")
+    private Integer tLevel;  // 分诊级别（0普通/1优先/2急诊）
+
+    @TableField(exist = false)
     @JsonProperty("aheadCount")
     private Integer aheadCount;  // 前面等待人数
 
@@ -70,6 +78,12 @@ public class QueueNumber {
 
     public String getDId() { return dId; }
     public void setDId(String dId) { this.dId = dId; }
+
+    public Integer getOState() { return oState; }
+    public void setOState(Integer oState) { this.oState = oState; }
+
+    public Integer getTLevel() { return tLevel; }
+    public void setTLevel(Integer tLevel) { this.tLevel = tLevel; }
 
     public Integer getAheadCount() { return aheadCount; }
     public void setAheadCount(Integer aheadCount) { this.aheadCount = aheadCount; }
