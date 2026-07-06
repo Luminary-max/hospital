@@ -26,6 +26,10 @@
           <el-menu-item index="myNotificationList" @click="menuClick('myNotificationList')"><i class="el-icon-bell"></i><span>消息通知</span></el-menu-item>
           <el-menu-item index="patientDelivery" @click="menuClick('patientDelivery')"><i class="el-icon-truck"></i><span>送药申请</span></el-menu-item>
           <el-menu-item index="patientReports" @click="menuClick('patientReports')"><i class="el-icon-download"></i><span>报告下载</span></el-menu-item>
+          <el-menu-item index="patientSmartHospital" @click="menuClick('patientSmartHospital')"><i class="el-icon-cpu"></i><span>智慧服务</span></el-menu-item>
+          <el-menu-item index="patientReferral" @click="menuClick('patientReferral')"><i class="el-icon-position"></i><span>转诊单</span></el-menu-item>
+          <el-menu-item index="patientInsuranceEstimate" @click="menuClick('patientInsuranceEstimate')"><i class="el-icon-bank-card"></i><span>医保试算</span></el-menu-item>
+          <el-menu-item index="patientAnnouncement" @click="menuClick('patientAnnouncement')"><i class="el-icon-bell"></i><span>医院公告</span></el-menu-item>
         </el-menu>
       </el-aside>
       <el-main class="layout-main"><router-view></router-view></el-main>

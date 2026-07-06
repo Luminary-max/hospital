@@ -18,12 +18,15 @@
               <i slot="prefix" class="el-input__icon el-icon-lock"></i>
             </el-input>
           </el-form-item>
-          <el-form-item class="role-select">
-            <el-radio-group v-model="role" size="small">
-              <el-radio-button label="患者"></el-radio-button>
-              <el-radio-button label="医生"></el-radio-button>
-              <el-radio-button label="管理员"></el-radio-button>
-            </el-radio-group>
+          <el-form-item prop="role">
+            <el-select v-model="loginForm.role" placeholder="请选择登录角色" size="large" class="role-select" clearable>
+              <el-option label="患者" value="患者"></el-option>
+              <el-option label="医生" value="医生"></el-option>
+              <el-option label="管理员" value="管理员"></el-option>
+              <el-option label="护士" value="护士"></el-option>
+              <el-option label="药师" value="药师"></el-option>
+              <el-option label="收费员" value="收费员"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" class="login-btn" size="large" @click="submitLoginForm('ruleForm')">登 录</el-button>
@@ -74,12 +77,12 @@ export default {
       else callback();
     };
     return {
-      loginForm: { id: "202601", password: "123456" },
+      loginForm: { id: "202601", password: "123456", role: "" },
       loginRules: {
         id: [{required:true,message:'请输入账号/姓名',trigger:'blur'}],
-        password: [{required:true,message:'请输入密码',trigger:'blur'}]
+        password: [{required:true,message:'请输入密码',trigger:'blur'}],
+        role: [{required:true,message:'请选择登录角色',trigger:'change'}]
       },
-      role: "患者",
       registerFormVisible: false,
       registerForm: { pGender: "男" },
       registerRules: {
@@ -107,9 +110,16 @@ export default {
       this.$refs[fn].validate(v => {
         if (!v) return;
         var p = new URLSearchParams();
-        if (this.role==='管理员') { p.append('aId',this.loginForm.id); p.append('aPassword',this.loginForm.password);
+        const role = this.loginForm.role;
+        if (role==='管理员') {
+          p.append('aId',this.loginForm.id); p.append('aPassword',this.loginForm.password);
           request.post('admin/login',p).then(r=>{if(r.data.status!=200)return this.$message.error("用户名或密码错误");setToken(r.data.data.token);this.$router.push('/adminLayout');}).catch(()=>this.$message.error("登录失败"));}
-        else if (this.role==='医生') { p.append('dId',this.loginForm.id); p.append('dPassword',this.loginForm.password);
+        else if (role==='护士' || role==='药师' || role==='收费员') {
+          var staffMap = {'护士':'nurse','药师':'pharmacist','收费员':'cashier'};
+          var targetMap = {'护士':'/triageRecordList','药师':'/pharmacyDispensingList','收费员':'/cashierSettlement'};
+          p.append('staffId',this.loginForm.id); p.append('staffPassword',this.loginForm.password); p.append('staffRole',staffMap[role]);
+          request.post('staff/login',p).then(r=>{if(r.data.status!=200)return this.$message.error("用户名或密码错误");setToken(r.data.data.token);this.$router.push(targetMap[role]);}).catch(()=>this.$message.error("登录失败"));}
+        else if (role==='医生') { p.append('dId',this.loginForm.id); p.append('dPassword',this.loginForm.password);
           request.post('doctor/login',p).then(r=>{if(r.data.status!=200)return this.$message.error("用户名或密码错误");setToken(r.data.data.token);this.$router.push('/doctorLayout');}).catch(()=>this.$message.error("登录失败"));}
         else { p.append('pId',this.loginForm.id); p.append('pPassword',this.loginForm.password);
           request.post('patient/login',p).then(r=>{if(r.data.status!=200)return this.$message.error("用户名或密码错误");setToken(r.data.data.token);this.$router.push('/patientLayout');}).catch(()=>this.$message.error("登录失败"));}
@@ -140,7 +150,7 @@ export default {
 .login-title { font-size:24px; font-weight:700; color:#303133; text-align:center; }
 .login-subtitle { font-size:14px; color:#909399; text-align:center; margin-bottom:30px; margin-top:4px; }
 .login-btn { width:100%; }
-.role-select { text-align:center; }
+.role-select { width:100%; }
 .login-register { text-align:center; font-size:13px; color:#909399; margin-top:10px; }
 .login-register .link { color:#409EFF; cursor:pointer; }
 .login-register .link:hover { color:#66b1ff; }

@@ -34,12 +34,16 @@ public class AdminController {
      */
     @PostMapping("/login")
     @ResponseBody
-    public ResponseData login(@RequestParam("aId") String aId, @RequestParam("aPassword") String aPassword) {
+    public ResponseData login(@RequestParam("aId") String aId, @RequestParam("aPassword") String aPassword,
+                              @RequestParam(value = "staffRole", required = false) String staffRole) {
         Admin admin = this.adminService.login(aId, aPassword);
         if (admin != null) {
             Map<String,String> map = new HashMap<>();
             map.put("aName", admin.getAName());
             map.put("aId", String.valueOf(admin.getAId()));
+            if (staffRole != null && !staffRole.trim().isEmpty()) {
+                map.put("staffRole", staffRole.trim());
+            }
             String token = JwtUtil.getToken(map);
             map.put("token", token);
             return ResponseData.success("登录成功", map);

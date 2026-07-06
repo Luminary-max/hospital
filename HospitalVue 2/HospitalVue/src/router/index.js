@@ -66,6 +66,11 @@ import InvoiceManage from "@/views/InvoiceManage.vue";
 import DoctorStatsPanel from "@/views/DoctorStatsPanel.vue";
 import InventoryCenter from "@/views/InventoryCenter.vue";
 import PublicQueueDisplay from "@/views/PublicQueueDisplay.vue";
+import SmartHospital from "@/views/SmartHospital.vue";
+import PermissionManage from "@/views/PermissionManage.vue";
+import ReferralManage from "@/views/ReferralManage.vue";
+import InsuranceEstimate from "@/views/InsuranceEstimate.vue";
+import AnnouncementBoard from "@/views/AnnouncementBoard.vue";
 
 Vue.prototype.$echarts = echarts;//引入echarts
 Vue.use(ElementUI);
@@ -233,6 +238,31 @@ const routes = [
         component: DoctorStatsPanel,
         meta: { requireAuth: true },
       },
+      {
+        path: "/smartHospital",
+        component: SmartHospital,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/permissionManage",
+        component: PermissionManage,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/staffSmartHospital",
+        component: SmartHospital,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/staffAnnouncement",
+        component: AnnouncementBoard,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/staffInsuranceEstimate",
+        component: InsuranceEstimate,
+        meta: { requireAuth: true },
+      },
     ]
   },
   {
@@ -293,6 +323,26 @@ const routes = [
         component: PatientReports,
         meta: { requireAuth: true },
       },
+      {
+        path: "/patientSmartHospital",
+        component: SmartHospital,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/patientReferral",
+        component: ReferralManage,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/patientInsuranceEstimate",
+        component: InsuranceEstimate,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/patientAnnouncement",
+        component: AnnouncementBoard,
+        meta: { requireAuth: true },
+      },
     ]
   },
   {
@@ -340,6 +390,21 @@ const routes = [
       {
         path: "/doctorCheckOrder",
         component: DoctorCheckOrder,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/doctorSmartHospital",
+        component: SmartHospital,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/doctorReferral",
+        component: ReferralManage,
+        meta: { requireAuth: true },
+      },
+      {
+        path: "/doctorAnnouncement",
+        component: AnnouncementBoard,
         meta: { requireAuth: true },
       },
     ],

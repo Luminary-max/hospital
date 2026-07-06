@@ -13,5 +13,10 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
 
+deepseek:
+  base-url: https://api.deepseek.com
+  model: deepseek-chat
+  api-key: ${DEEPSEEK_API_KEY:}
+
 
 
